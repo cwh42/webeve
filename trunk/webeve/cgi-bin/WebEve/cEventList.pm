@@ -186,4 +186,11 @@ sub getDateList
     return @{$self->{'DateList'}};
 }
 
+sub getPageCount
+{
+    my $self = shift;
+
+    return $self->{'Pages'};
+}
+
 1;
