@@ -307,7 +307,7 @@ sub getOrgPref($$)
     return @result;
 }
 
-sub setOrgPref($@)
+sub setOrgPref($$@)
 {
     my $self = shift;
 
@@ -323,10 +323,12 @@ sub setOrgPref($@)
 	my $sql = sprintf("INSERT INTO OrgPrefTypes (TypeName) VALUES (%s)",
 			  $self->{dbh}->quote($PrefType));
 
+	$self->{dbh}->do($sql);
+
 	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM OrgPrefTypes LIMIT 1");
     }
 
-    my @OldValues = $self->getOrgPref($PrefType);
+    my @OldValues = $self->getOrgPref($OrgID, $PrefType);
 
     my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@NewValues, \@OldValues, 1);
 
@@ -342,15 +344,15 @@ sub setOrgPref($@)
     if(@ToAdd)
     {
 	my $sql = "INSERT INTO OrgPrefs (OrgID, PrefType, PrefValue) VALUES ";
-	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, $_)" } @ToAdd );
+	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, ".$self->{dbh}->quote($_).")" } @ToAdd );
 
 	$self->{dbh}->do($sql);
     }
 
     if(@ToDelete)
     {
-	my $sql = "DELETE FROM UserPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeID AND (";
-	$sql .=  join( ' OR ', map { "PrefValue = $_" } @ToDelete );
+	my $sql = "DELETE FROM OrgPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeID AND (";
+	$sql .=  join( ' OR ', map { "PrefValue = ".$self->{dbh}->quote($_) } @ToDelete );
 	$sql .= ")";
 
 	$self->{dbh}->do($sql);
@@ -403,6 +405,8 @@ sub setUserPref($@)
 	my $sql = sprintf("INSERT INTO UserPrefTypes (TypeName) VALUES (%s)",
 			  $self->{dbh}->quote($PrefType));
 
+	$self->{dbh}->do($sql);
+
 	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM UserPrefTypes LIMIT 1");
     }
 
@@ -422,7 +426,7 @@ sub setUserPref($@)
     if(@ToAdd)
     {
 	my $sql = "INSERT INTO UserPrefs (UserID, PrefType, PrefValue) VALUES ";
-	$sql .=  join( ', ', map { "($UserID, $PrefTypeID, $_)" } @ToAdd );
+	$sql .=  join( ', ', map { "($UserID, $PrefTypeID, ".$self->{dbh}->quote($_).")" } @ToAdd );
 
 	$self->{dbh}->do($sql);
     }
@@ -430,7 +434,7 @@ sub setUserPref($@)
     if(@ToDelete)
     {
 	my $sql = "DELETE FROM UserPrefs where UserID = $UserID  AND PrefType = $PrefTypeID AND (";
-	$sql .=  join( ' OR ', map { "PrefValue = $_" } @ToDelete );
+	$sql .=  join( ' OR ', map { "PrefValue = ".$self->{dbh}->quote($_) } @ToDelete );
 	$sql .= ")";
 
 	$self->{dbh}->do($sql);
@@ -939,6 +943,18 @@ sub Passwd
     return $SubTmpl->output();    
 }
 
+sub _OrgName($)
+{
+    my $self = shift;
+    my ($OrgID) = @_;
+
+    my $sql = "SELECT OrgName FROM Organization WHERE OrgID = $OrgID LIMIT 1";
+
+    my $Result = $self->{dbh}->selectrow_array($sql);
+
+    return $Result;
+}
+
 sub Config
 {
     my $self = shift;
@@ -953,7 +969,21 @@ sub Config
 	$SubTmpl = $self->load_tmpl( 'tmpl-upload.tmpl' );
 	my $OrgID = $query->param('OrgID');
 
-	$SubTmpl->param('OrgName' => );
+	$SubTmpl->param('OrgName' => $self->_OrgName($OrgID));
+	$SubTmpl->param('OrgID' => $OrgID);
+
+	if( $query->param('action') )
+	{
+	    $self->setOrgPref( $OrgID, 'bgcolor', $query->param('bgcolor'));
+	    $self->setOrgPref( $OrgID, 'textcolor', $query->param('textcolor'));
+	    $self->setOrgPref( $OrgID, 'linkcolor', $query->param('linkcolor'));
+	    $self->setOrgPref( $OrgID, 'font', $query->param('font'));
+	}
+
+	$SubTmpl->param('bgcolor' => $self->getOrgPref($OrgID, 'bgcolor'));
+	$SubTmpl->param('textcolor' => $self->getOrgPref($OrgID, 'textcolor'));
+	$SubTmpl->param('linkcolor' => $self->getOrgPref($OrgID, 'linkcolor'));
+	$SubTmpl->param('font' => $self->getOrgPref($OrgID, 'font'));
     }
     else
     {
