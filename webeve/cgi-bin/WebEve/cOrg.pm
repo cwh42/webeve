@@ -23,7 +23,17 @@ sub new
     bless( $self, $class );
 
     # Initialize variables
-    $self->_init(@_);
+    my %Params = @_;
+    my @Keys = keys( %Params );
+
+    if( scalar(@Keys) == 1 && exists($Params{OrgID}))
+    {
+	$self->_getFromDB($Params{OrgID});
+    }
+    else
+    {
+#	$self->_init(@_);
+    }
 
     return $self;
 }
@@ -39,9 +49,9 @@ sub _getFromDB
 
     my $sql = "SELECT o.OrgID, o.OrgName, o.eMail, o.Website
                FROM Organization o
-               WHERE o.OrgID = $OrgID";
+               WHERE o.OrgID = $OrgID LIMIT 1";
 
-    my $dbh = WebEve::cMySQL->connect('default');
+    $self->{dbh} = WebEve::cMySQL->connect('default');
 
     my $hrefData = $dbh->selectrow_hashref($sql);
 
@@ -54,13 +64,33 @@ sub _getFromDB
 # --------------------------------------------------------------------------------
 # Public Methods
 # --------------------------------------------------------------------------------
-# Checking Methods
-# --------------------------------------------------------------------------------
 
 
-# --------------------------------------------------------------------------------
-# Getting data
-# --------------------------------------------------------------------------------
+sub getUsers
+{
+    my $self = shift;
+
+    my @SelUserID = @_;
+    $OrgID = $self->{OrgID};
+
+    my $sql = "SELECT u.UserID, u.FullName, u.UserName ".
+	"FROM Org_User ou LEFT JOIN User u ON ou.UserID = u.UserID ".
+	"WHERE ou.OrgID = $OrgID ".
+	"ORDER BY u.UserName";
+
+    my @Data = ();
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $row = $sth->fetchrow_hashref() )
+    {
+	$row->{'selected'} = 1 if grep { $_ == $row->{UserID}} (@SelUserID);
+	push( @Data, $row);
+    }
+
+    return \@Data;
+}
 
 
 1;
