@@ -46,9 +46,8 @@ sub newFromDB
     bless( $self, $class );
 
     # Initialize variables
-    $self->_getFromDB(@_);
-
     $self->{dbh} = WebEve::cMySQL->connect('default');
+    $self->_getFromDB(@_);
 
     $Count++;
     return $self;
@@ -169,7 +168,8 @@ sub _getFromDB
     {
 	my $EntryID = $_[0];
 
-	my $sql = "SELECT d.Date,
+	my $sql = "SELECT d.EntryID,
+                          d.Date,
 	                  d.Time,
                           d.Place,
                           d.Description,
@@ -598,7 +598,7 @@ sub SaveData($)
 
     if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
-	my $sql = sprintf( "UPDATE Dates SET Date = $s, Time = %s, Place = %s, ".
+	my $sql = sprintf( "UPDATE Dates SET Date = %s, Time = %s, Place = %s, ".
 			   "Description = %s, OrgID = %d, UserID = %d, Public = %d ".
 			   "WHERE EntryID = %d",
 			   $DateSQL,
