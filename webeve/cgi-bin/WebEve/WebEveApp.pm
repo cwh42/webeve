@@ -2,7 +2,7 @@ package WebEve::WebEveApp;
 
 use strict;
 
-use base qw( WebEve::cBase WebEve::Application );
+use base qw( WebEve::cBase CGI::Application );
 
 use File::Basename;
 use CGI::Carp;

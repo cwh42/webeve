@@ -17,12 +17,26 @@ main();
 sub main
 {
     my $query = new CGI;
+    my $Org = $query->param('org') || '0';
 
     my $MainTmpl = HTML::Template->new(filename => "$TemplatePath/kalender-plugin.tmpl",
 				       die_on_bad_params => 0);
 
     my $Today = WebEve::cDate->new('today');
-    my $EventList = WebEve::cEventList->new( PublicOnly => 1 );
+
+    my %params;
+
+    if( $Org )
+    {
+	$params{ 'PublicOnly' } = 0;
+	$params{ 'ForOrgID' } = $query->param('org');
+    }
+    else
+    {
+	$params{ 'PublicOnly' } = 1;
+    }
+
+    my $EventList = WebEve::cEventList->new( %params );
     $EventList->readData();
 
     my @TodayDates = ();
@@ -33,8 +47,8 @@ sub main
 	{
 	    my $OrgName = $DateObj->getOrg;
 	    
-	    my $HashRef = { 'Desc' => $DateObj->getDesc,
-			    'Org' => $OrgName };
+	    my $HashRef = { 'Desc' => $DateObj->getDesc };
+	    $HashRef->{ 'Org' } = $OrgName unless( $Org );
 	    
 	    push( @TodayDates, $HashRef );
 	}
