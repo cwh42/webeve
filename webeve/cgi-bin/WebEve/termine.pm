@@ -106,15 +106,15 @@ sub getNavMenu(;$)
 {
     my ($IsAdmin) = @_;
 
-    my @Entries = ( { 'Admin' => 0, 'Title' => 'Login', 'FileName' => 'login.pl' },
-		    { 'Admin' => 0, 'Title' => 'Übersicht', 'FileName' => 'edit-list.pl',
+    my @Entries = ( { 'Admin' => 0, 'Title' => 'Login', 'FileName' => 'webeve.pl?mode=login' },
+		    { 'Admin' => 0, 'Title' => 'Übersicht', 'FileName' => 'webeve.pl?mode=list',
 		      'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'FileName' => 'add.pl' } ] },
 		    { 'Admin' => 0, 'Title' => 'Passwort', 'FileName' => 'user-passwd.pl' },
 		    { 'Admin' => 0, 'Title' => 'Templates', 'FileName' => 'tmpl-upload.pl' },
 		    { 'Admin' => 1, 'Title' => 'Benutzer', 'FileName' => 'user-list.pl',
 		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'FileName' => 'user-add.pl' },
 				      { 'Admin' => 1, 'Title' => 'Neuer Verein', 'FileName' => 'org-add.pl' } ] },
-		    { 'Admin' => 0, 'Title' => 'Logout', 'FileName' => 'login.pl?LogOut=1' }
+		    { 'Admin' => 0, 'Title' => 'Logout', 'FileName' => 'webeve.pl?mode=logout' }
 		    );
 
     my @tmp = _NavMenuCleanup( $IsAdmin, @Entries );
