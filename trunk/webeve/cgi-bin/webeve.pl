@@ -520,6 +520,7 @@ sub EventList
 	my $HashRef = { 'Date' => $DateObj->getDate->getDateStr,
 			'Time' => $DateObj->getTime,
 			'Place' => $DateObj->getPlace,
+			'Title' => $DateObj->getTitle,
 			'Desc' => $DateObj->getDesc,
 			'Org' => $DateObj->getOrg('all'),
 			'EntryID' => $DateObj->getID,
@@ -558,6 +559,7 @@ sub Add
     my $DateStr = $query->param('Date') || '';
     my $TimeStr = $query->param('Time') || '';
     my $Place = $query->param('Place') || '';
+    my $Title = $query->param('Title') || '';
     my $Description = $query->param('Description') || '';
 
     my $Action = $query->param('Action') || '';
@@ -572,10 +574,11 @@ sub Add
 	$Event->setOrgID($OrgID);
 	$Event->setIsPublic($Public);
 	$Event->setPlace($Place);
+	$Event->setDesc($Description);
 
 	$SubTmpl->param('DateError' => 1) unless $Event->setDate($DateStr);
 	$SubTmpl->param('TimeError' => 1) unless $Event->setTime($TimeStr);
-	$SubTmpl->param('DescError' => 1) unless $Event->setDesc($Description);
+	$SubTmpl->param('TitleError' => 1) unless $Event->setTitle($Title);
 
 
 	if( $Event->isValid() )
@@ -588,6 +591,7 @@ sub Add
 		$SubTmpl->param('SvDate' => $Event->getDate->getDateStr());
 		$SubTmpl->param('SvTime' => $Event->getTime());
 		$SubTmpl->param('SvPlace' => $Event->getPlace());
+		$SubTmpl->param('SvTitle' => $Event->getTitle());
 		$SubTmpl->param('SvDescription' => $Event->getDesc());
 		$SubTmpl->param('SvPublic' => $Event->isPublic());
 
@@ -615,6 +619,12 @@ sub Add
 		{
 		    $SubTmpl->param('Place' => $Event->getPlace());
 		    $SubTmpl->param('KeepPlace' => 1);
+		}
+
+		if( $query->param('KeepTitle') )
+		{
+		    $SubTmpl->param('Title' => $Event->getTitle());
+		    $SubTmpl->param('KeepTitle' => 1);
 		}
 
 		if( $query->param('KeepDesc') )
@@ -647,6 +657,7 @@ sub Add
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
+	    $SubTmpl->param('Title' => $query->param('Title'));
 	    $SubTmpl->param('Description' => $query->param('Description'));
 	    $SubTmpl->param('Public' => $Public ? 1 : 0);
 	}
@@ -694,6 +705,7 @@ sub Delete
 	    my $HashRef = { 'Date' => $DateObj->getDate->getDateStr,
 			    'Time' => $DateObj->getTime,
 			    'Place' => $DateObj->getPlace,
+			    'Title' => $DateObj->getTitle,
 			    'Desc' => $DateObj->getDesc,
 			    'Org' => $DateObj->getOrg('all'),
 			    'Public' => $DateObj->isPublic };
@@ -743,6 +755,7 @@ sub Edit
     my $DateStr = $query->param('Date') || '';
     my $TimeStr = $query->param('Time') || '';
     my $Place = $query->param('Place') || '';
+    my $Title = $query->param('Title') || '';
     my $Description = $query->param('Description') || '';
 
     my $Action = $query->param('Action') || '';
@@ -757,10 +770,11 @@ sub Edit
 	$Event->setOrgID($OrgID);
 	$Event->setIsPublic($Public);
 	$Event->setPlace($Place);
+	$Event->setDesc($Description);
 
 	$SubTmpl->param('DateError' => 1) unless $Event->setDate($DateStr);
 	$SubTmpl->param('TimeError' => 1) unless $Event->setTime($TimeStr);
-	$SubTmpl->param('DescError' => 1) unless $Event->setDesc($Description);
+	$SubTmpl->param('TitleError' => 1) unless $Event->setTitle($Title);
 
 	if( $Event->isValid() )
 	{
@@ -786,6 +800,7 @@ sub Edit
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
+	    $SubTmpl->param('Title' => $query->param('Title'));
 	    $SubTmpl->param('Description' => $query->param('Description'));
 	    $SubTmpl->param('Public' => $Public ? 1 : 0);
 
@@ -801,6 +816,7 @@ sub Edit
 	$SubTmpl->param('Date' => $tmpDate);
 	$SubTmpl->param('Time' => $Event->getTime());
 	$SubTmpl->param('Place' => $Event->getPlace());
+	$SubTmpl->param('Title' => $Event->getTitle());
 	$SubTmpl->param('Description' => $Event->getDesc());
 	$SubTmpl->param('Public' => $Event->isPublic());
 

@@ -8,8 +8,8 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <TMPL_IF TimeError>
 <p class="error">Die Zeit ist Fehlerhaft.</p>
 </TMPL_IF>
-<TMPL_IF DescError>
-<p class="error">Die Beschreibung darf nicht leer sein.</p>
+<TMPL_IF TitleError>
+<p class="error">Der Titel darf nicht leer sein.</p>
 </TMPL_IF>
 
 
@@ -98,11 +98,22 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 </tr>
 
 <tr>
-<td colspan="2"><b>Beschreibung</b></td>
+<td colspan="2"><b>Titel</b></td>
+</tr>
+<tr>
+<td><input type="text" name="Title" value="<TMPL_VAR Title>" size="43"></td>
+</tr>
+
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="2"><b>Beschreibung</b> (optional)</td>
 </tr>
 <tr>
 <td>
-<textarea name="Description" rows="6" cols="38" wrap="virtual"><TMPL_VAR Description></textarea>
+<textarea name="Description" rows="6" cols="43" wrap="virtual"><TMPL_VAR Description></textarea>
 <span class="smallfont">
 <br><b>Hinweise:</b><br>
 HTML ist erlaubt, aber bitte <b>KEINE</b> Grafiken oder blinkenden Text!<br>

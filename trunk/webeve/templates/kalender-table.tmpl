@@ -47,8 +47,10 @@ Seite <b><TMPL_VAR CurrentPage></b> von <b><TMPL_VAR PageCount></b><br>
 
 <TMPL_IF NAME=Org><br></TMPL_IF>
 
-
-<span class="beschreibung"><TMPL_VAR NAME=Desc></span>
+<TMPL_VAR NAME=Title>
+<TMPL_IF NAME=Desc>
+<br><span class="beschreibung"><TMPL_VAR NAME=Desc></span>
+</TMPL_IF>
 </td>
 </tr>
 </TMPL_LOOP>

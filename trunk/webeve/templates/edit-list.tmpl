@@ -54,7 +54,7 @@ Nur Termine folgender Vereine anzeigen:
 
 <TMPL_LOOP NAME=List>
 <tr>
-<td rowspan="2">
+<td rowspan="3">
 <B><TMPL_VAR NAME=Date></B><BR>
 <span class="smallfont"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></span><BR>
 <TMPL_IF NAME=Public>
@@ -64,7 +64,7 @@ Nur Termine folgender Vereine anzeigen:
 </TMPL_IF>
 </td>
 <td><B><TMPL_VAR NAME=Org></B></td>
-<td rowspan="2">
+<td rowspan="3">
 
  <table>
   <tr>
@@ -80,6 +80,7 @@ Nur Termine folgender Vereine anzeigen:
 </td>
 </tr>
 
+<tr><td><TMPL_VAR NAME=Title></td></tr>
 <tr><td><TMPL_VAR NAME=Desc></td></tr>
 
 <tr>
