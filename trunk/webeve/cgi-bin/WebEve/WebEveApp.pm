@@ -23,6 +23,21 @@ sub cgiapp_init
     $self->{'Logfile'} = $self->param('Logfile') || './webeve.log';
 
     $self->_getRemoteHost();
+
+    if(exists $ENV{MOD_PERL})
+    { 
+	print STDERR "\n-----------------------------------------\n";
+	print STDERR "-----------------------------------------\n";
+	print STDERR " WARNING:\n";
+	print STDERR " Running under ".$ENV{MOD_PERL}."!\n";
+	print STDERR " This script is not tested with mod_perl!\n";
+	print STDERR "-----------------------------------------\n";
+	print STDERR "-----------------------------------------\n";
+    }
+    else
+    {
+#	print STDERR "\nOK, NOT running under mod-perl.\n";
+    }
 }
 
 sub _getRemoteHost()
