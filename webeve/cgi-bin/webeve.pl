@@ -12,8 +12,6 @@ set_message('<hr><b>Hierbei handelt es sich vermutlich um einen Programmfehler.<
 
 my $app = WebEveX->new();
 
-#my $app = WebEveX->new( PARAMS => {'debug' => 1} );
-
 $app->run();
 
 # -------------------------------------------
@@ -102,6 +100,16 @@ sub _getUsersOrgList
     return \@Data;
 }
 
+sub _trim($)
+{
+    my ($string) = @_;
+
+    $string =~ s/^\s+//s;
+    $string =~ s/\s+$//s;
+
+    return $string;
+}
+
 # ---------------------------------------------------------
 # Run Modes
 # ---------------------------------------------------------
@@ -109,9 +117,11 @@ sub _getUsersOrgList
 sub WrongRM
 {
     my $self = shift;
+    $self->{MenuItem} = '';
 
     $self->logger("Tried non-existing runmode: '".shift()."'");    
 
+    $self->_FillMenu('list');
     return $self->EventList();
 }
 
@@ -204,7 +214,7 @@ sub Login()
 
 	    $self->logger("logged in as $User");
 
-	    $self->_FillMenu();
+	    $self->_FillMenu('list');
 	    return $self->EventList();
 	}
 	else
@@ -405,6 +415,7 @@ sub Delete
 	my $delcount = $EventList->deleteData($self->{UserID});
 	$self->logger( "Deleted $delcount of ".$EventList->getEventCount()." events." );
 
+	$self->_FillMenu('list');
 	$result = $self->EventList();
     }
     else
@@ -430,6 +441,7 @@ sub Delete
 	$QueryString = '&EntryID='.join( '&EntryID=', @EntryIDs ) if @EntryIDs;
 	$SubTmpl->param('EntryIDs' => $QueryString);
 
+	$self->_FillMenu('list');
 	$result = $SubTmpl->output;
     }
 
@@ -448,7 +460,11 @@ sub Edit
 
     my $EntryID = $query->param('EntryID') || '';
 
-    return $self->EventList() unless( $EntryID );
+    unless( $EntryID )
+    {
+	$self->_FillMenu('list');
+	return $self->EventList();
+    }
 
     # -----------------------------------------------------------------------
     my $result = '';
@@ -481,6 +497,7 @@ sub Edit
 	{
 	    if($Event->SaveData($self->{UserID}))
 	    {
+		$self->_FillMenu('list');
 		$result = $self->EventList();
 	    }
 	    else
@@ -488,6 +505,7 @@ sub Edit
 		$SubTmpl->param('Saved' => 0);
 		$SubTmpl->param('Error' => 1);
 
+		$self->_FillMenu('list');
 		$result = $SubTmpl->output();
 	    }
 
@@ -502,6 +520,7 @@ sub Edit
 	    $SubTmpl->param('Description' => $query->param('Description'));
 	    $SubTmpl->param('Public' => $Public ? 1 : 0);
 
+	    $self->_FillMenu('list');
 	    $result = $SubTmpl->output();
 	}
     }
@@ -516,6 +535,7 @@ sub Edit
 	$SubTmpl->param('Description' => $Event->getDesc());
 	$SubTmpl->param('Public' => $Event->isPublic());
 
+	$self->_FillMenu('list');
 	$result = $SubTmpl->output();
     }
     
@@ -625,11 +645,97 @@ sub UserAdd
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Benutzer' );
-    #my $SubTmpl = $self->load_tmpl( '');
+    my $SubTmpl = $self->load_tmpl( 'user-add.tmpl' );
 
     my $query = $self->query();
 
-    return 0;
+    my $Action = $query->param('Action') || '';
+
+    my $LoginName = $query->param('Login') || '';
+    $LoginName = _trim( $LoginName );
+
+    my $FullName = $query->param('FullName') || '';
+    my $eMail = $query->param('eMail') || '';
+    my $Password = 'default';
+    my @Orgs =  $query->param('Orgs');
+
+
+    if($Action eq 'Save')
+    {
+	my $Error = 0;
+
+	if($LoginName eq '')
+	{
+	    $Error = 1;
+	    $SubTmpl->param('LoginError' => 1);
+	}
+	else
+	{
+	    my $sql = "SELECT COUNT(UserID) FROM User WHERE UserName = '$LoginName'";
+
+	    if( $self->{dbh}->selectrow_array($sql) )
+	    {
+		$Error = 1;
+		$SubTmpl->param('UserExists' => 1);
+	    }
+	}
+
+	if($FullName eq '')
+	{
+	    $Error = 1;
+	    $SubTmpl->param('FullNameError' => 1);
+	}
+	
+	if($eMail eq '')
+	{
+	    $Error = 1;
+	    $SubTmpl->param('eMailError' => 1);
+	}
+
+	unless($Error)
+	{
+	    $self->{dbh}->do("INSERT INTO User (FullName, eMail, UserName, Password)
+                   VALUES('$FullName', '$eMail', '$LoginName' , password('$Password'))");
+
+	    my $UserID = $self->{dbh}->selectrow_array("SELECT last_insert_id() FROM User LIMIT 1");
+
+	    if(@Orgs)
+	    {
+		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
+		$sql .=  join( ', ', map { "($_, $UserID)" } @Orgs );
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    $SubTmpl->param('Saved' => $LoginName);
+	    $self->logger( "Created new user: '$LoginName' ($FullName); Orgs: ".join( ', ', @Orgs ) );
+	    @Orgs = ();
+	}
+	else
+	{
+	    $SubTmpl->param('Login' => $query->param('Login'));
+	    $SubTmpl->param('FullName' => $query->param('FullName'));
+	    $SubTmpl->param('eMail' => $query->param('eMail'));
+	}
+    }
+
+    my $OrgList = $self->_getOrgList();
+
+    foreach my $Org ( @$OrgList )
+    {
+	my $selected = '';
+
+	foreach(@Orgs)
+	{
+	    $selected = 'checked' if($_ == $Org->{'OrgID'});
+	}
+
+	$Org->{'Selected'} = $selected;
+    }
+
+    $SubTmpl->param('Orgs' => $OrgList);
+
+    return $SubTmpl->output();
 }
 
 sub UserEdit
