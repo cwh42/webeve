@@ -47,7 +47,7 @@ sub logger($)
     my ($message) = @_;
     my $UserName = $self->{'UserName'} || $self->{'REMOTE_HOST'};
 
-    open( LOG, ">>". $self->{'Logfile'} );
+    open( LOG, ">>". $self->getConfig('LogFile') );
 
     printf( LOG "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n", Today_and_Now(), $UserName, $message );
 
