@@ -1,0 +1,26 @@
+<form action="user-add.pl" method="GET">
+<table align="center" border="0">
+<tr>
+<td>Login-Name:</td><td><input type="TEXT" name="Login" value="<TMPL_VAR NAME=Login>"></td>
+</tr>
+<tr>
+<td>Voller Name:</td><td><input type="TEXT" name="FullName" value="<TMPL_VAR NAME=FullName>"></td>
+</tr>
+<tr>
+<td>eMail:</td><td><input type="TEXT" name="eMail" value="<TMPL_VAR NAME=eMail>"></td>
+</tr>
+<tr>
+<td colspan="2" align="left">
+<br>
+<b>Vereine:</b><br>
+<TMPL_LOOP NAME=Orgs>
+<INPUT TYPE="CHECKBOX" NAME="Orgs" VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<TMPL_VAR NAME=OrgName><br>
+</TMPL_LOOP>
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right"><input type="SUBMIT" name="Action" value="Save"></td>
+</tr>
+</table>
+</form>
+<b><TMPL_VAR NAME=Message></b>

@@ -1,0 +1,51 @@
+#LyX 1.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 220
+\textclass article
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 2
+\papersides 1
+\paperpagestyle default
+
+\layout Paragraph
+
+Januar 2003
+\layout List
+\labelwidthstring 00.00.0000
+
+01.01.03 Verein
+\newline 
+Veranstaltung
+\layout List
+\labelwidthstring 00.00.0000
+
+02.01.03 Verein
+\newline 
+Veranstaltung
+\layout Paragraph
+
+Februar 2003
+\layout List
+\labelwidthstring 00.00.0000
+
+01.02.03 Verein
+\newline 
+Veranstalung
+\the_end

@@ -1,0 +1,47 @@
+<TMPL_IF WrongPasswd>
+<p class="error">Passwort oder Username ist falsch!</p>
+</TMPL_IF>
+
+<TMPL_IF User>
+<p class="warn">Du bist bereits als &quot;<TMPL_VAR NAME=User>&quot; eingeloggt.</p>
+</TMPL_IF>
+
+<table align="center">
+<tr><td align="center">
+
+<TMPL_IF User>
+Du kannst entweder ...
+<ul>
+<li>Dich als jemand anderes einloggen</li>
+<li>direkt weitergehen zur <a href="edit-list.pl">Terminübersicht</a></li>
+<li>Dich <a href="login.pl?LogOut=1">ausloggen</a></li>
+</ul>
+</TMPL_IF>
+
+<TMPL_IF WrongPasswd>
+Probiers nochmal und achte auf eine evtl. aktive FESTSTELLTASTE!
+</TMPL_IF>
+
+<TMPL_UNLESS User>
+<TMPL_UNLESS WrongPasswd>
+<b>Der Browser muß Cookies akzeptieren damit der Login funktioniert!</b>
+</TMPL_UNLESS>
+</TMPL_UNLESS>
+
+</td></tr>
+</table>
+<br>
+
+<form action="login.pl" method="POST">
+<table align="center">
+<tr>
+<td>Username:</td>
+<td><input type="text" name="User" value="" tabindex="1"></td>
+<td></td></tr>
+<tr>
+<td>Passwort:</td>
+<td><input type="password" name="Password" tabindex="2"></td>
+<td><input type="submit" value="Log in" tabindex="3"></td></tr>
+</table>
+</form>
+
