@@ -1,7 +1,7 @@
 <table align="center" style="padding:6px;">
 <TMPL_LOOP NAME=List>
     <tr>
-    <td rowspan="2">
+    <td rowspan="3">
     <B><TMPL_VAR NAME=Date></B><BR>
     <span class="smallfont"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></span><BR>
     <TMPL_IF NAME=Public>
@@ -12,6 +12,7 @@
     </td>
     <td><B><TMPL_VAR NAME=Org></B></td>
     </tr>
+    <tr><td><TMPL_VAR NAME=Title></td></tr>
     <tr><td><TMPL_VAR NAME=Desc></td></tr>
 </TMPL_LOOP>
 <tr>

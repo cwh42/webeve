@@ -14,24 +14,13 @@ use WebEve::cMySQL;
 
 main();
 
-
-sub HTMLFilter($$)
+sub HTMLify($)
 {
-    my ($String, $Type) = @_;
+    my ( $string ) = @_;
 
-    if( $Type eq 'wap' )
-    {
-	$String =~ s/<.*?>//sg;
-    }
-    if( $Type eq 'csv' )
-    {
-	$String =~ s/<br>/ /isg;
-	$String =~ s/\n/ /sg;
-	$String =~ s/\r//sg;
-	$String =~ s/<.*?>//sg;
-    }
+    $string =~ s/\n/<br>/g;
 
-    return $String;
+    return $string;
 }
 
 # -----------------------------------------------------------------------
@@ -149,16 +138,17 @@ sub main
 	my $OrgName = $DateObj->getOrg;
 
 	my $HashRef = { 'Time' => $DateObj->getTime,
-			'Place' => HTMLFilter($DateObj->getPlace, $Template),
-			'Desc' => HTMLFilter($DateObj->getDesc, $Template) }; #,
-#			'eMail' => $OrgList{ $DateObj->getOrgID }->[1],
-#			'Website' => $OrgList{ $DateObj->getOrgID }->[2] };
+			'Place' => $query->escapeHTML($DateObj->getPlace),
+			'Title' => $query->escapeHTML($DateObj->getTitle),
+			'Desc' => HTMLify($query->escapeHTML($DateObj->getDesc)) }; #,
+#			'eMail' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[1]),
+#			'Website' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[2]) };
 
-	$HashRef->{'Org'} = $OrgName unless( $Intern );
+	$HashRef->{'Org'} = $query->escapeHTML($OrgName) unless( $Intern );
 
 	if( $DateObj->getDate ne $LastDate )
 	{
-	    $HashRef->{'Date'} = $DateObj->getDate->getDateStr;
+	    $HashRef->{'Date'} = $query->escapeHTML($DateObj->getDate->getDateStr);
 	    $LastDate = $DateObj->getDate->getDateStr;
 	}
 

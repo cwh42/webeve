@@ -2,7 +2,7 @@
 <p class="ok">Der folgende Termin wurde gespeichert:</p>
     <table align="center">
     <tr>
-    <td rowspan="2">
+    <td rowspan="3">
     <B><TMPL_VAR NAME=SvDate></B><BR>
     <span class="smallfont"><TMPL_VAR NAME=SvTime>&nbsp;<TMPL_VAR NAME=SvPlace></span><BR>
     <TMPL_IF NAME=SvPublic>
@@ -12,7 +12,7 @@
     </TMPL_IF>
     </td>
     <td><B><TMPL_VAR NAME=SvOrgName></B></td>
-    <td rowspan="2">
+    <td rowspan="3">
      <table>
       <tr>
       <td width="20">&nbsp;</td>
@@ -25,6 +25,7 @@
      </table>
     </td>
     </tr>
+    <td><B><TMPL_VAR NAME=SvTitle></B></td>
     <tr><td><TMPL_VAR NAME=SvDescription></td></tr>
     </table>
     <hr size="1" color="#000000" noshade>
@@ -41,8 +42,8 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <TMPL_IF TimeError>
 <p class="error">Die Zeit ist Fehlerhaft.</p>
 </TMPL_IF>
-<TMPL_IF DescError>
-<p class="error">Die Beschreibung darf nicht leer sein.</p>
+<TMPL_IF TitleError>
+<p class="error">Der Titel darf nicht leer sein.</p>
 </TMPL_IF>
 
 
@@ -141,18 +142,25 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 </tr>
 
 <tr>
-<td colspan="3"><b>Beschreibung</b></td>
+<td colspan="3"><b>Titel</b></td>
+</tr>
+<tr>
+<td colspan="2"><input type="text" name="Title" value="<TMPL_VAR Title>" size="43"></td>
+<td><input type="Checkbox" name="KeepTitle" value="1" <TMPL_IF KeepTitle>checked</TMPL_IF>>Beibehalten</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="3"><b>Beschreibung</b> (optional)</td>
 </tr>
 <tr>
 <td colspan="2">
-<textarea name="Description" rows="6" cols="38" wrap="virtual"><TMPL_VAR Description></textarea>
+<textarea name="Description" rows="6" cols="43" wrap="virtual"><TMPL_VAR Description></textarea>
 <span class="smallfont">
-<br><b>Hinweise:</b><br>
-HTML ist erlaubt, aber bitte <b>KEINE</b> Grafiken oder blinkenden Text!<br>
-Wichtige HTML-Tags:<br>
-&lt;b&gt;<b>was hier steht wird fett</b>&lt;/b&gt;<br>
-&lt;br&gt;: damit macht man einen Zeilenum<b>br</b>uch
-</span>
+<br><b>Hinweise:</b><br>HTML ist nicht mehr erlaubt.</span>
 </td>
 <td valign="top"><input type="Checkbox" name="KeepDesc" value="1" <TMPL_IF KeepDesc>checked</TMPL_IF>>Beibehalten</td>
 </tr>
