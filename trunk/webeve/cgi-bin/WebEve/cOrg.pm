@@ -1,9 +1,9 @@
 # $Id$
 # ===============================================================================
-# The Class 'cOrganization'
+# The Class 'cOrg'
 # ===============================================================================
 
-package WebEve::cOrganization;
+package WebEve::cOrg;
 
 use strict;
 use WebEve::cMySQL;
@@ -32,6 +32,7 @@ sub new
     }
     else
     {
+	die('INSUFFICIENT PARAMETERS!');
 #	$self->_init(@_);
     }
 
@@ -53,7 +54,7 @@ sub _getFromDB
 
     $self->{dbh} = WebEve::cMySQL->connect('default');
 
-    my $hrefData = $dbh->selectrow_hashref($sql);
+    my $hrefData = $self->{dbh}->selectrow_hashref($sql);
 
     foreach(keys(%$hrefData))
     {
@@ -71,7 +72,7 @@ sub getUsers
     my $self = shift;
 
     my @SelUserID = @_;
-    $OrgID = $self->{OrgID};
+    my $OrgID = $self->{OrgID};
 
     my $sql = "SELECT u.UserID, u.FullName, u.UserName ".
 	"FROM Org_User ou LEFT JOIN User u ON ou.UserID = u.UserID ".
