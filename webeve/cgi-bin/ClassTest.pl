@@ -1,7 +1,10 @@
 #!/usr/bin/perl -w
 
+# $Id$
+
 use WebEve::cDate;
 use WebEve::cEvent;
+use WebEve::cEventList;
 
 $o = WebEve::cDate->new( '12' );
 
@@ -31,3 +34,20 @@ print "Org:".$Event->getOrg."\n";
 print "isPublic:".$Event->isPublic."\n";
 print $Event->setIsPublic(0)."\n";
 print "isPublic:".$Event->isPublic."\n";
+
+
+$EventList = WebEve::cEventList->new( PublicOnly => 1 );
+print $EventList->readData();
+print "\n";
+
+foreach my $Ev ( $EventList->getDateList() )
+{
+    print " ID:".$Ev->getID."\n";
+    print " Date:".$Ev->getDate->getDateStr."\n";
+    print " ValidDate:".$Ev->getDate->isValid."\n";
+    print " Time:".$Ev->getTime."\n";
+    print " Place:".$Ev->getPlace."\n";
+    print " Desc:".$Ev->getDesc."\n";
+    print " isPublic:".$Ev->isPublic."\n";
+    print "---------------------------------------\n";
+}
