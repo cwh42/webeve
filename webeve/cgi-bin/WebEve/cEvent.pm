@@ -235,24 +235,116 @@ sub getErrorMessage
 sub getTime
 {
     my $self = shift;
+    
+    my $result;
 
-    unless( exists( $self->{'Time'} ) )
+    if( !exists( $self->{Hour} ) || !exists( $self->{Minute} ))
     {
-	$self->{'Time'} = '-01:00:00';
+	if( exists($self->{'Time'}) )
+	{
+	    ($self->{Hour}, $self->{Minute}) = split(/:/, $self->{'Time'});
+	}
     }
 
-    my ($hour, $min) = split(/:/, $self->{'Time'});
-
-    if( $hour >= 0 )
+    if( exists( $self->{Hour} ) && exists( $self->{Minute} ))
     {
-	return sprintf( "%02d:%02d",
-			$hour,
-			$min );
+	if( $self->{Hour} >= 0 )
+	{
+	    $result = sprintf( "%02d:%02d",
+			       $self->{Hour},
+			       $self->{Minute} );
+	}
+	else
+	{
+	    $result = '';
+	}
     }
     else
     {
-	return '';
+	$result = '?';
     }
+
+    return $result;
+}
+
+sub getTimeSQL
+{
+    my $self = shift;
+    
+    my $result;
+
+    if( !exists( $self->{Hour} ) || !exists( $self->{Minute} ))
+    {
+	if( exists($self->{'Time'}) )
+	{
+	    ($self->{Hour}, $self->{Minute}) = split(/:/, $self->{'Time'});
+	}
+    }
+
+    if( exists( $self->{Hour} ) && exists( $self->{Minute} ))
+    {
+	$result = sprintf( "%02d:%02d:00",
+			   $self->{Hour},
+			   $self->{Minute} );
+    }
+    else
+    {
+	$result = '-01:00:00';
+    }
+
+    return $result;
+}
+
+sub setTime($)
+{
+    my $self = shift;
+
+    my $TimeStr = shift;
+    my $result = 0;
+
+    if( defined($TimeStr) && $TimeStr ne '' )
+    {
+	my $Hour = 0;
+	my $Minute = 0;
+
+	$TimeStr =~ s/^\s+//g; 
+	$TimeStr =~ s/\s+$//g; 
+
+	if( $TimeStr =~ /^(\d+)$/ )
+	{
+	    $Hour = $1;
+	    $Minute = 0;
+	}
+	elsif( $TimeStr =~ /^(\d+)\D(\d+).*$/ )
+	{
+	    $Hour = $1;
+	    $Minute = $2;
+	}
+
+	if( $Hour < 0 || $Hour > 23 || $Minute < 0 || $Minute > 59 )
+	{
+	    $result = 0;
+	}
+	else
+	{
+	    $self->{Hour} = $Hour;
+	    $self->{Minute} = $Minute;
+
+	    $result = 1;
+	    $self->{changed} = 1;
+	}
+
+    }
+    else
+    {
+	$self->{Hour} = -1;
+	$self->{Minute} = 0;
+
+	$result = 1;
+	$self->{changed} = 1;
+    }
+
+    return $result;
 }
 
 # -------------------------------------------------------------------------------
@@ -261,7 +353,7 @@ sub getPlace
 {
     my $self = shift;
 
-    return $self->{'Place'};
+    return $self->{'Place'} || '';
 }
 
 sub setPlace($)
@@ -307,6 +399,8 @@ sub getOrgID
 sub setOrgID($)
 {
     my $self = shift;
+
+    _fillOrgCache();
 
     if( exists($HashRefOrgs->{ $_[0] }) )
     {
@@ -359,6 +453,24 @@ sub getDate
     return $self->{DateObj};
 }
 
+sub setDate()
+{
+    my $self = shift;
+    
+    my $DateStr = shift;
+
+    unless( ref($self->{DateObj}) )
+    {
+	$self->{DateObj} = WebEve::cDate->new( $DateStr );
+    }
+    else
+    {
+	$self->{DateObj}->setDate(@_);
+    }
+
+    return $self->{DateObj}->isValid;
+}
+
 # -------------------------------------------------------------------------------
 
 sub getTmplParams($)
@@ -384,7 +496,7 @@ sub isPublic
 {
     my $self = shift;
 
-    return $self->{'Public'};
+    return $self->{'Public'} ? 1 : 0;
 }
 
 sub setIsPublic($)
@@ -392,39 +504,106 @@ sub setIsPublic($)
     my $self = shift;
 
     $self->{Public} = $_[0] > 0;
+
     $self->{changed} = 1;
 
     return 1;
 }
 
 # -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
+# Date!, Time?, Place?, Description!, OrgID!, UserID!, Public!
 
-sub SaveData()
+sub isValid
 {
     my $self = shift;
 
+#	( defined($self->getUserID) && $self->getUserID != 0 ) &&
 
-# Funzt noch garnet!!
-    if( exists( $self->{'EntryID'} ) )
+
+    if( $self->getDate->isValid &&
+	( exists($self->{Hour}) && exists($self->{Minute}) ) &&
+	( defined($self->getDesc ) && $self->getDesc ne '' ) &&
+	( defined($self->getOrgID) && $self->getOrgID ) &&
+        ( defined($self->isPublic) ) )
     {
+	return 1;
     }
     else
     {
-	my $sql = sprintf("INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public)
-                          VALUES( '%d-%02d-%02d', '%02d:%02d:00', %s, %s, %d, %d, %d)",
-			  $self->{'Year'}, $self->{'Month'}, $self->{'Day'},
-			  $self->{'Hour'}, $self->{'Min'},
-			  sqlQuote($self->{'Place'}),
-			  sqlQuote($self->{'Description'}),
-			  $self->{'OrgID'},
-			  $self->{'UserID'},
-			  $self->{'Public'} );
-	
-	$self->{'EntryID'} = FetchOneColumn(SendSQL("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1"));
+	return 0;
     }
-    $self->{changed} = 0;
-    return 1;
+}
+
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+sub _CheckPermission($)
+{
+    my $self = shift;
+
+    my $UserID = shift;
+    my $OrgID = $self->getOrgID;
+
+    my $sql = "SELECT count(*) FROM Org_User ".
+	"WHERE OrgID = $OrgID AND UserID = $UserID LIMIT 1";
+
+    my $dbh = WebEve::cMySQL->connect('default');
+    return $dbh->selectrow_array($sql);
+}
+
+sub SaveData($)
+{
+    my $self = shift;
+
+    my ($UserID) = shift;
+    my $result = 0;
+
+    unless( defined($UserID) )
+    {
+	print STDERR "No UserID\n";
+	return 0;
+    }
+
+    my $dbh = WebEve::cMySQL->connect('default');
+
+    unless( $self->_CheckPermission($UserID) )
+    {
+	print STDERR "No permission\n";
+	return 0;
+    }
+
+    if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
+    {
+	print STDERR "EntryID exists:".$self->{'EntryID'}."\n";
+
+	return 0;
+    }
+    else
+    {
+	my $DateSQL = $dbh->quote($self->{DateObj}->getDateStrSQL());
+	my $TimeSQL = $dbh->quote($self->getTimeSQL);
+
+	my $PlaceSQL = $dbh->quote($self->getPlace);
+	my $DescriptionSQL = $dbh->quote($self->getDesc);
+
+	my $sql = sprintf( "INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public) ".
+			   "VALUES(%s, %s, %s, %s, %d, %d, %d)",
+			   $DateSQL,
+			   $TimeSQL,
+			   $PlaceSQL,
+			   $DescriptionSQL,
+			   $self->getOrgID,
+			   $UserID,
+			   $self->isPublic );
+
+	$dbh->do($sql);
+
+	$self->{EntryID} = $dbh->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
+
+	$self->{changed} = 0;
+
+	return 1;
+    }
 }
 
 
