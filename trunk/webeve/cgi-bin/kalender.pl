@@ -10,6 +10,7 @@ use CGI;
 use HTML::Template;
 use WebEve::Config;
 use WebEve::cEventList;
+use WebEve::cMySQL;
 
 main();
 
@@ -60,9 +61,9 @@ sub PageSwitch(%)
 
     $Result{'Pages'} = \@Switch if $Pages > 1;
     $Result{'NextPage'} = $Page + 1 if $Page < $Pages;
-    $Result{'NextPageURL'} = sprintf($Format, $Page + 1) if $Page < $Pages;
+    $Result{'NextPageURL'} = sprintf($Format, $Page + 1, $Param{Org}) if $Page < $Pages;
     $Result{'PrevPage'} = $Page - 1 if $Page > 1;
-    $Result{'PrevPageURL'} = sprintf($Format, $Page - 1) if $Page > 1;
+    $Result{'PrevPageURL'} = sprintf($Format, $Page - 1, $Param{Org}) if $Page > 1;
     $Result{'PageCount'} = $Pages;
     $Result{'CurrentPage'} = $Page;
 
@@ -77,10 +78,11 @@ sub main
 
     my $query = new CGI;
 
-    my $Intern = $query->param('Intern') || 0; 
     my $Template = $query->param('Ansicht') || ''; 
     my $Organization = $query->param('Verein'); 
-    $Organization = $query->param('Org') || '1' if ! $Organization; 
+    my $Intern = $query->param('Intern') || 0; 
+    $Intern = 0 if ! $Organization; 
+
     my $Page = $query->param('Seite') || '1'; 
     
     my $tmp = sprintf("custom/template-%02d-simple.tmpl", $Organization);
@@ -99,7 +101,7 @@ sub main
 
     my $SubTmpl = HTML::Template->new(filename => "$TemplatePath/$SubTmplName",
 				      die_on_bad_params => 0,
-				       loop_context_vars => 1);
+				      loop_context_vars => 1);
 
     # -----------------------------------------------------------------------
 
@@ -183,7 +185,57 @@ sub main
     $MainTmpl->param( 'VereinsID' => $Organization ) if $Intern;
     $MainTmpl->param( 'Terminliste' => $SubTmpl->output );
 
-# Ausgabe
+    $MainTmpl->param('bgcolor' => getOrgPref($Organization, 'bgcolor'));
+    $MainTmpl->param('bgimage' => getOrgPref($Organization, 'bgimage'));
+    $MainTmpl->param('textcolor' => getOrgPref($Organization, 'textcolor'));
+    $MainTmpl->param('linkcolor' => getOrgPref($Organization, 'linkcolor'));
+    $MainTmpl->param('font' => getOrgPref($Organization, 'font'));
+    $MainTmpl->param('tl-bgcolor' => getOrgPref($Organization, 'tl-bgcolor'));
+    $MainTmpl->param('tl-textcolor' => getOrgPref($Organization, 'tl-textcolor'));
+
+    # Ausgabe
     print "Content-type: text/html\n\n";
     print $MainTmpl->output;
+}
+
+
+# Temporäre Behelfsfunktionen. Müssen durch eine Org-Objetzt erschlagen werden.
+
+sub getOrgPref($$)
+{
+    my ($OrgID, $PrefType) = @_;
+
+    my $dbh = WebEve::cMySQL->connect('default');
+    my $sql = sprintf("SELECT PrefValue FROM OrgPrefs up ".
+		      "LEFT JOIN OrgPrefTypes pt ON up.PrefType = pt.TypeID ".
+		      "WHERE OrgID = %d AND TypeName = %s",
+		      $OrgID,
+		      $dbh->quote($PrefType));
+
+    my $sth = $dbh->prepare($sql);
+    $sth->execute();
+
+    my @result = ();
+
+    while( my $row = $sth->fetchrow_arrayref() )
+    {
+	push( @result, $row->[0] );
+    }
+
+    return @result;
+}
+
+sub getOrgName($)
+{
+    my ( $OrgID ) = @_;
+
+    my $dbh = WebEve::cMySQL->connect('default');
+
+    my $sql = "SELECT o.OrgName
+                       FROM Organization o
+                       WHERE o.OrgID = $OrgID";
+
+    my ($OrgName) = $dbh->selectrow_array($sql);
+
+    return $OrgName;
 }
