@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 #########################################################################
 # $Id$
@@ -82,12 +82,21 @@ sub main
     my $query = new CGI;
 
     my $Template = $query->param('Ansicht') || ''; 
-    my $Organization = $query->param('Verein') || $query->param('Org'); 
+    my $Organization = $query->param('Verein') || $query->param('Org') || 0; 
     my $Intern = $query->param('Intern') || 0; 
     $Intern = 0 if ! $Organization; 
 
     my $Page = $query->param('Seite') || '1'; 
-    
+
+    my $Embedded = $query->param('Embed') || '0';
+    my $Url = $Intern ? (getOrgPref($Organization, 'script-url-int'))[0] || '' : (getOrgPref($Organization, 'script-url'))[0] || '';
+
+    # if( $Url && !$Embedded)
+    # {
+    # 	print $query->redirect($Url);
+    # 	exit(0);
+    # }
+     
     my $tmp = sprintf("custom/template-%02d-simple.tmpl", $Organization);
     $MainTmplName = $tmp if( -f "$TemplatePath/$tmp" );
 
@@ -113,9 +122,9 @@ sub main
 					     'PublicOnly' => !$Intern,
 					     'ForOrgID' => $Intern ? $Organization : 0 );
     $EventList->readData();
-    
+
     $SubTmpl->param( PageSwitch( Org => $Organization,
-				 ScriptURL => getOrgPref($Organization, 'script-url'),
+				 ScriptURL => $Url,
 				 Page => $Page,
 				 Pages => $EventList->getPageCount(),
 				 Internal => $Intern ) );
@@ -213,7 +222,7 @@ sub getOrgPref($$)
     my $sql = sprintf("SELECT PrefValue FROM OrgPrefs up ".
 		      "LEFT JOIN OrgPrefTypes pt ON up.PrefType = pt.TypeID ".
 		      "WHERE OrgID = %d AND TypeName = %s",
-		      $OrgID,
+		      $OrgID || 0,
 		      $dbh->quote($PrefType));
 
     my $sth = $dbh->prepare($sql);
