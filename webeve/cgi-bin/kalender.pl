@@ -84,20 +84,20 @@ sub main
     my $Page = $query->param('Seite') || '1'; 
     
     my $tmp = sprintf("custom/template-%02d-simple.tmpl", $Organization);
-    $MainTmplName = $tmp if( -f "$BasePath/$tmp" );
+    $MainTmplName = $tmp if( -f "$TemplatePath/$tmp" );
 
     $tmp = sprintf("custom/template-%02d-advanced.tmpl", $Organization);
-    $SubTmplName = $tmp if( -f "$BasePath/$tmp" );
+    $SubTmplName = $tmp if( -f "$TemplatePath/$tmp" );
 
     if( lc($Template) eq 'druck')
     {
 	$MainTmplName = "print.tmpl";
     }
 
-    my $MainTmpl = HTML::Template->new(filename => "$BasePath/$MainTmplName",
+    my $MainTmpl = HTML::Template->new(filename => "$TemplatePath/$MainTmplName",
 				       die_on_bad_params => 0);
 
-    my $SubTmpl = HTML::Template->new(filename => "$BasePath/$SubTmplName",
+    my $SubTmpl = HTML::Template->new(filename => "$TemplatePath/$SubTmplName",
 				      die_on_bad_params => 0,
 				       loop_context_vars => 1);
 
