@@ -49,6 +49,11 @@ sub _init
 
     my %Params = @_;
 
+    if( exists( $Params{'ForUserID'} ) && $Params{'ForUserID'} )
+    {
+	$self->{'ForUserID'} = $Params{'ForUserID'};
+    }
+
     # ------------------------------------------
 
     foreach( 'BeforeToday', 'PublicOnly' )
@@ -71,11 +76,11 @@ sub _init
 	{
 	    if( ref( $Params{$_} ) eq 'ARRAY' )
 	    {
-		$self->{$_} = $Params{'$_'};
+		$self->{$_} = $Params{$_};
 	    }
 	    else
 	    {
-		$self->{$_} = [ $Params{'$_'} ];
+		$self->{$_} = [ $Params{$_} ];
 	    }
 	}
     }
@@ -91,6 +96,7 @@ sub readData
 {
     my $self = shift;
 
+    my $join;
     my $where;
     my @where = ();
 
@@ -109,9 +115,18 @@ sub readData
 
     if( $self->{'ForOrgID'} )
     {
-	my $tmp = join( ' OR ', map { "OrgID = $_" } @{$self->{ForOrgID}} );
+	my $tmp = join( ' OR ', map { "d.OrgID = $_" } @{$self->{ForOrgID}} );
 	
 	push( @where, "( $tmp )" ) unless( $self->{ForOrgID}->[0] == 0 && @{$self->{ForOrgID}} == 1);
+    }
+
+    if( $self->{'ForUserID'} )
+    {
+	$join = "LEFT JOIN Org_User ou ON d.OrgID = ou.OrgID";
+
+	my $tmp = "ou.UserID = ".$self->{'ForUserID'};
+	
+	push( @where, "( $tmp )" );
     }
 
     if( $self->{'ID'} )
@@ -128,7 +143,8 @@ sub readData
     # ------------------------------------------------------------------------
 
     my $dbh = WebEve::cMySQL->connect('default');
-    my $Count = @{$dbh->selectcol_arrayref("select count(*) from Dates $where")}[0];
+    
+    my $Count = @{$dbh->selectcol_arrayref("select count(*) from Dates d $join $where")}[0];
 
     $self->{Pages} = 1;
     my $limit = '';
@@ -151,19 +167,21 @@ sub readData
 	$limit = "LIMIT $From, $Len";
     }
 
-    my $sql = "SELECT EntryID,
-                      Date,
-	              Time,
-                      Place,
-	              Description,
-	              UserID,
-	              OrgID,
-	              Public,
-	              LastChange
-	       FROM Dates
+    my $sql = "SELECT d.EntryID,
+                      d.Date,
+	              d.Time,
+                      d.Place,
+	              d.Description,
+	              d.UserID,
+	              d.OrgID,
+	              d.Public,
+	              d.LastChange
+               FROM Dates d $join
 	       $where
-	       ORDER by Dates.Date, Dates.Time
+	       ORDER by d.Date, d.Time
                $limit";
+
+#    print STDERR "\n-------------\n$sql\n----------------\n";
 
     my @Dates = ();
     
