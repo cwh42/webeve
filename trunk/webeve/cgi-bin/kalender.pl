@@ -79,7 +79,7 @@ sub main
     my $query = new CGI;
 
     my $Template = $query->param('Ansicht') || ''; 
-    my $Organization = $query->param('Verein'); 
+    my $Organization = $query->param('Verein') || $query->param('Org'); 
     my $Intern = $query->param('Intern') || 0; 
     $Intern = 0 if ! $Organization; 
 
