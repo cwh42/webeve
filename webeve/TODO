@@ -1,5 +1,5 @@
 ToDo-Liste für Online-Terminkalender:
-(Last Updated: 2002-11-29 )
+(Last Updated: 2004-05-13 )
 --------------------------------------------------------------
 Zeichenerklärung:
 ! = bald
@@ -8,24 +8,21 @@ Zeichenerklärung:
 ? = vielleicht
 --------------------------------------------------------------
 
+! Terminkategorien (Party, Wettbewerb, Sport ...)
 !! Sicherheit: Löschen, bearbeiten & hinzufügen
-! Templates runderladbar machen
 ! Zugriffs-Counter und Browser-Log pro Verein und allgemein
-? Massen-Terminhinzufügen per File-Upload
-* Link zu den verschiedenen vereinsinterenen Terminseiten
+* Titel für Vereinsansicht veränderbar
 * Kalender-Infoseite mit Hilfe und diesem ToDo
-* Login/Logout: IP abfragen; Logout-Zeit anzeigen.
-* Vereinsnamen für Admin editierbar
 * Öffentliche Termine anderer Vereine in Interne übernehmen (mit Kommentar)
-? Benutzerrechte (passwort ändern, template raufladen)
-* Terminkategorien (Party, Wettbewerb, Sport ...)
+? Wieder eigene Templates?
+? Templates runderladbar machen
 ? Templates online editierbar machen
+? Link zu den verschiedenen vereinsinterenen Terminseiten
+? Login/Logout: IP abfragen; Logout-Zeit anzeigen.
+? Vereinsnamen für Admin editierbar
+? Benutzerrechte (passwort ändern, template raufladen)
 
 - Termine hinzufügen:
-  ! Zuletzt gespeicherten Termin vollständig anzeigen und mit
-    Edit-Button versehen
-  ! Datumsfeld: intelligent vorbelegen.
-  ! Verein und evtl. Ort mit zuletzt Verwendetem vorbelegen
   * Regelmäßig wiederkehrende Termine erzeugen
 
 - Termine anzeigen:
@@ -42,7 +39,18 @@ Zeichenerklärung:
 Erledigt:
 --------------------------------------------------------------
 
-2002-29-11:
+2004-05:
+-----------
+- Zugriffsrechte verbessert (Admin)
+
+2003-04:
+-----------
+- Zuletzt gespeicherten Termin vollständig anzeigen und mit
+  Edit-Button versehen
+- Datumsfeld: intelligent vorbelegen.
+- Verein und evtl. Ort mit zuletzt Verwendetem vorbelegen
+
+2002-11-29:
 -----------
 - Es gibt jetzt Termine, die für einen ganzen Monat gelten.
 
