@@ -590,19 +590,32 @@ sub SaveData($)
 	return 0;
     }
 
+    my $DateSQL = $self->{dbh}->quote($self->{DateObj}->getDateStrSQL());
+    my $TimeSQL = $self->{dbh}->quote($self->getTimeSQL);
+    
+    my $PlaceSQL = $self->{dbh}->quote($self->getPlace);
+    my $DescriptionSQL = $self->{dbh}->quote($self->getDesc);
+
     if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
-#	logger("SaveData failed: UPDATE not yet implemented");
-	return 0;
+	my $sql = sprintf( "UPDATE Dates SET Date = $s, Time = %s, Place = %s, ".
+			   "Description = %s, OrgID = %d, UserID = %d, Public = %d ".
+			   "WHERE EntryID = %d",
+			   $DateSQL,
+			   $TimeSQL,
+			   $PlaceSQL,
+			   $DescriptionSQL,
+			   $self->getOrgID,
+			   $UserID,
+			   $self->isPublic,
+			   $self->{'EntryID'} );
+
+#	logger("SaveData: UPDATE for EntryID ".$self->{'EntryID'});
+
+	$result = $self->{dbh}->do($sql) ? $self->{EntryID} : 0;
     }
     else
     {
-	my $DateSQL = $self->{dbh}->quote($self->{DateObj}->getDateStrSQL());
-	my $TimeSQL = $self->{dbh}->quote($self->getTimeSQL);
-
-	my $PlaceSQL = $self->{dbh}->quote($self->getPlace);
-	my $DescriptionSQL = $self->{dbh}->quote($self->getDesc);
-
 	my $sql = sprintf( "INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public) ".
 			   "VALUES(%s, %s, %s, %s, %d, %d, %d)",
 			   $DateSQL,
@@ -617,12 +630,14 @@ sub SaveData($)
 
 	$self->{EntryID} = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
 
-	$self->{changed} = 0;
+#	logger("SaveData: INSERT for new date: ".$self->{EntryID});
 
-#	logger("SaveData: Added new date: ".$self->{EntryID});
-
-	return $self->{EntryID};
+	$result = $self->{EntryID};
     }
+
+    $self->{changed} = 0;
+
+    return $result;
 }
 
 sub DeleteData($)
