@@ -12,10 +12,10 @@ set_message('<hr><b>Hierbei handelt es sich vermutlich um einen Programmfehler.<
 
 # my $app = TTForm->new( PARAMS => {'MainTmpl' => 'main-2.tmpl'} ); # Alternative main template
 
-my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates' );
+#my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates' );
 
-# my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates',
-#  			PARAMS => {'debug' => 1} );
+my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates',
+  			PARAMS => {'debug' => 1} );
 
 # my $app = WebEveX->new( TMPL_PATH => '/home/cwh/web/webeve/templates' );
 
@@ -49,6 +49,8 @@ sub setup
 		      'logout' => 'Logout',
 		      'list' => 'EventList',
 		      'add' => 'Add', 
+		      'delete' => 'Delete', 
+		      'edit' => 'Edit', 
 		      'passwd' => 'Passwd',
 		      'config' => 'Config',
 		      'userlist' => 'UserList',
@@ -249,34 +251,6 @@ sub logger($)
     close( LOG );
 }
 
-# -----------------------------------------------------------------------------
-
-sub _ParseTime($)
-{
-    my ($TimeStr) = @_;
-
-    my $Hour = 0;
-    my $Minute = 0;
-
-    $TimeStr =~ s/^\s+//g; 
-    $TimeStr =~ s/\s+$//g; 
-
-    if( $TimeStr =~ /^(\d+)$/ )
-    {
-	$Hour = $1;
-	$Minute = 0;
-    }
-    elsif( $TimeStr =~ /^(\d+)\D(\d+).*$/ )
-    {
-	$Hour = $1;
-	$Minute = $2;
-    }
-
-    return 0 if( $Hour < 0 || $Hour > 23 || $Minute < 0 || $Minute > 59 );
-
-    return $Hour, $Minute;
-}
-
 sub _getOrgList
 {
     my $self = shift;
@@ -449,7 +423,7 @@ sub EventList
 			'Time' => $DateObj->getTime,
 			'Place' => $DateObj->getPlace,
 			'Desc' => $DateObj->getDesc,
-			'Org' => $DateObj->getOrg,
+			'Org' => $DateObj->getOrg('all'),
 			'EntryID' => $DateObj->getID,
 			'Public' => $DateObj->isPublic,
 			'IsOver' => $DateObj->getDate->isOver };
@@ -496,95 +470,150 @@ sub Add
     {
 	my $Event = WebEve::cEvent->new();
 	
-	my @result = ();
+	$Event->setOrgID($OrgID);
+	$Event->setIsPublic($Public);
+	$Event->setPlace($Place);
 
-	push(@result, $Event->setOrgID($OrgID));
-	push(@result, $Event->setIsPublic($Public));
-	push(@result, $Event->setDate($DateStr));
-	push(@result, $Event->setTime($TimeStr));
-	push(@result, $Event->setPlace($Place));
-	push(@result, $Event->setDesc($Description));
+	$SubTmpl->param('DateError' => 1) unless $Event->setDate($DateStr);
+	$SubTmpl->param('TimeError' => 1) unless $Event->setTime($TimeStr);
+	$SubTmpl->param('DescError' => 1) unless $Event->setDesc($Description);
 
-	push(@result, $Event->isValid );
 
-	push(@result, $Event->SaveData($self->{UserID}));
+	if( $Event->isValid() )
+	{
+	    if($Event->SaveData($self->{UserID}))
+	    {
+		$SubTmpl->param('Saved' => 1);
+		$SubTmpl->param('SvOrgName' => $Event->getOrg('all'));
+		$SubTmpl->param('SvEntryID' => $Event->getID());
+		$SubTmpl->param('SvDate' => $Event->getDate->getDateStr());
+		$SubTmpl->param('SvTime' => $Event->getTime());
+		$SubTmpl->param('SvPlace' => $Event->getPlace());
+		$SubTmpl->param('SvDescription' => $Event->getDesc());
+		$SubTmpl->param('SvPublic' => $Event->isPublic());
 
-	return join(', ', @result);
+		if( $query->param('KeepOrg') )
+		{
+		    $SubTmpl->param('Orgs' => $self->_getOrgList($Event->getOrgID()));
+		    $SubTmpl->param('KeepOrg' => 1);
+		}
 
-#	my $Date = WebEve::cDate->new( $DateStr );	
-#	my @Time = ParseTime($TimeStr);
-#	$Description =~ s/^\s+//g; 
-#	$Description =~ s/\s+$//g; 
-#
-#	$SubTmpl->param('DateError' => 1) unless $Date->isValid;
-#	$SubTmpl->param('TimeError' => 1) if @Time == 1;
-#	$SubTmpl->param('DescError' => 1) if $Description eq '';
-#
-#	if( $Date->isValid && @Time > 1 && $Description ne '' )
-#	{
-#	    my $DateSQL = $Date->getDateStrSQL();
-#	    my $TimeSQL = "'".join('-', @Time).":00'";
-#
-#	    my $PlaceSQL = sqlQuote($Place);
-#	    my $DescriptionSQL = sqlQuote($Description);
-#
-#	    my $sql = sprintf("INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public) ".
-#			      "VALUES(%s, %s, %s, %s, %d, %d, %d)",
-#			      $DateSQL,
-#			      $TimeSQL,
-#			      $PlaceSQL,
-#			      $DescriptionSQL,
-#			      $OrgID,
-#			      $self->{UserID},
-#			      $Public);
-#
-#	    $self->{dbh}->do($sql);
-#
-#	    my ($LastID) = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
-#
-#	    if($LastID)
-#	    {
-#		logger("Added date: $LastID");
-#
-#		$SubTmpl->param('Saved' => 1);
-#		$SubTmpl->param('SvOrgName' => 'XXX');
-#		$SubTmpl->param('SvEntryID' => $LastID);
-#		$SubTmpl->param('SvDate' => $Date->getDateStr());
-#
-#		if( @Time == 1 || ($Time[0] == 0 && $Time[1]) )
-#		{
-#		    $TimeStr = '';
-#		}
-#		else
-#		{
-#		    $TimeStr = sprintf("%02d:%02d", @Time);
-#		}
-#
-#		$SubTmpl->param('SvTime' => $TimeStr);
-#		$SubTmpl->param('SvPlace' => $query->param('Place'));
-#		$SubTmpl->param('SvDescription' => $query->param('Description'));
-#		$SubTmpl->param('SvPublic' => $Public ? 1 : 0);
-#	    }
-#	    else
-#	    {
-#		$SubTmpl->param('Saved' => 0);
-#		$SubTmpl->param('Error' => 1);
-#		logger("ERROR: Could not insert date!");
-#	    }
-#
-#	}
-#	else
-#	{
-#	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
-#	    $SubTmpl->param('Date' => $query->param('Date'));
-#	    $SubTmpl->param('Time' => $query->param('Time'));
-#	    $SubTmpl->param('Place' => $query->param('Place'));
-#	    $SubTmpl->param('Description' => $query->param('Description'));
-#	    $SubTmpl->param('Public' => $Public ? 1 : 0);
-#	}
+		if( $query->param('IncDate') )
+		{
+		    $Event->getDate->incr();
+		    my $tmpDate = join('-', reverse($Event->getDate->getDate()));
+		    $SubTmpl->param('Date' => $tmpDate);
+		    $SubTmpl->param('IncDate' => 1);
+		}
+
+		if( $query->param('KeepTime') )
+		{
+		    $SubTmpl->param('Time' => $Event->getTime());
+		    $SubTmpl->param('KeepTime' => 1);
+		}
+
+		if( $query->param('KeepPlace') )
+		{
+		    $SubTmpl->param('Place' => $Event->getPlace());
+		    $SubTmpl->param('KeepPlace' => 1);
+		}
+
+		if( $query->param('KeepDesc') )
+		{
+		    $SubTmpl->param('Description' => $Event->getDesc());
+		    $SubTmpl->param('KeepDesc' => 1);
+		}
+
+		if( $query->param('KeepPublic') )
+		{
+		    $SubTmpl->param('Public' => $Event->isPublic());
+		    $SubTmpl->param('KeepPublic' => 1);
+		}
+	    }
+	    else
+	    {
+		$SubTmpl->param('Saved' => 0);
+		$SubTmpl->param('Error' => 1);
+	    }
+
+	}
+	else
+	{
+	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
+	    $SubTmpl->param('Date' => $query->param('Date'));
+	    $SubTmpl->param('Time' => $query->param('Time'));
+	    $SubTmpl->param('Place' => $query->param('Place'));
+	    $SubTmpl->param('Description' => $query->param('Description'));
+	    $SubTmpl->param('Public' => $Public ? 1 : 0);
+	}
+    }
+    
+    return $SubTmpl->output;
+}
+
+sub Delete
+{
+    my $self = shift;
+    my $result = '';
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Termin(e) löschen' );
+    my $SubTmpl = $self->load_tmpl( 'delete.tmpl');
+
+    my $query = $self->query();
+
+    my @EntryIDs = $query->param('EntryID');
+    my $Confirm = $query->param('Confirm') ? 1 : 0;
+
+    my %params = ( 'ForUserID' => $self->{UserID},
+		   'BeforeToday' => 1 );
+
+    $params{'ID'} = \@EntryIDs if( scalar(@EntryIDs) > 0 );
+
+    my $EventList = WebEve::cEventList->new( %params );
+
+    if( $Confirm )
+    {
+	my $delcount = $EventList->deleteData($self->{UserID});
+	$self->logger( "Deleted $delcount of ".$EventList->getEventCount()." events." );
+
+	$result = $self->EventList();
+    }
+    else
+    {
+	my @Dates = ();
+
+	foreach my $DateObj ( $EventList->getDateList() )
+	{
+	    my $HashRef = { 'Date' => $DateObj->getDate->getDateStr,
+			    'Time' => $DateObj->getTime,
+			    'Place' => $DateObj->getPlace,
+			    'Desc' => $DateObj->getDesc,
+			    'Org' => $DateObj->getOrg('all'),
+			    'Public' => $DateObj->isPublic };
+
+	    push( @Dates, $HashRef );	
+	}
+
+	$SubTmpl->param('List' => \@Dates);
+
+	@EntryIDs = $EventList->getIDs();
+	my $QueryString = '';
+	$QueryString = '&EntryID='.join( '&EntryID=', @EntryIDs ) if @EntryIDs;
+	$SubTmpl->param('EntryIDs' => $QueryString);
+
+	$result = $SubTmpl->output;
     }
 
-    return $SubTmpl->output;
+    return $result;
+}
+
+sub Edit
+{
+    my $self = shift;
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Termin bearbeiten' );
+
+    return 0;
 }
 
 sub Passwd
