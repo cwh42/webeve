@@ -306,6 +306,15 @@ sub getDate
     }
 }
 
+sub setDate()
+{
+    my $self = shift;
+
+    $self->_init(@_);
+
+    return $self->{isValid};
+}
+
 # --------------------------------------------------------------------------------
 
 sub getDateStr
@@ -333,5 +342,28 @@ sub getDateStr
 }
 
 # --------------------------------------------------------------------------------
+
+sub getDateStrSQL
+{
+    my $self = shift;
+
+    return '' unless $self->{isValid};
+
+    Language(3);
+
+    if( $self->{isFullDate} )
+    {
+	return sprintf( "%04d-%02d-%02d",
+			$self->{Year},
+			$self->{Month},
+			$self->{Day} );
+    }
+    else
+    {
+	return sprintf( "%04d-%02d-00",
+			$self->{Year},
+			$self->{Month} );
+    }
+}
 
 1;
