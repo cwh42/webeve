@@ -52,23 +52,6 @@ sub newFromDB
     return $self;
 }
 
-sub newForEventList
-{
-    my $class = shift;
-
-    die "Constructor has to be used as instance method!" if ref($class);
-
-    my $self = {};
-
-    bless( $self, $class );
-
-    # Initialize variables
-    $self->_fillValues(@_);
-
-    $Count++;
-    return $self;
-}
-
 sub DESTROY
 {
     my $self = shift;
@@ -98,6 +81,7 @@ sub _init
 	foreach( 'Date',
 		 'Time',
 		 'Place',
+		 'Title',
 		 'Description',
 		 'UserID',
 		 'OrgID',
@@ -119,44 +103,6 @@ sub _init
 
 # -------------------------------------------------------------------------------
 
-sub _fillValues
-{
-    my $self = shift;
-    my $Param = shift;
-
-    if( exists( $Param->{'EntryID'} ) )
-    {
-	foreach( 'EntryID',
-		 'Date',
-		 'Time',
-		 'Place',
-		 'Description',
-		 'UserID',
-		 'OrgID',
-		 'Public',
-		 'LastChange' )
-	{
-	    if( exists($Param->{$_}) )
-	    {
-		$self->{$_} = $Param->{$_};
-	    }
-	    else
-	    {
-		$self->{$_} = '';
-	    }
-	}
-
-	return 1;
-    }
-    else
-    {
-	$self->{Error} = "EntryID is missing.";
-	return 0;
-    }
-}    
-
-# -------------------------------------------------------------------------------
-
 sub _getFromDB
 {
     my $self = shift;
@@ -169,25 +115,32 @@ sub _getFromDB
                           d.Date,
 	                  d.Time,
                           d.Place,
+                          d.Title,
                           d.Description,
       	                  d.UserID,
       	                  d.OrgID,
       	                  d.Public,
       	                  d.LastChange
       	           FROM Dates d
-      	           WHERE EntryID = $EntryID
+      	           WHERE EntryID = ?
       	           ORDER by d.Date, d.Time";
-      
-	my $hrefData = 	$self->getDBH()->selectrow_hashref($sql);
 
-	if( scalar( keys( %{$hrefData} ) ) == 0 )
+	my $sth = $self->getDBH()->prepare_cached($sql);
+	
+	$sth->execute($EntryID);
+
+	my $hrefData = $sth->fetchrow_hashref();
+
+	$sth->finish();
+
+	if( scalar( keys( %$hrefData ) ) == 0 )
 	{
 	    $self->{Error} = "No data from DB for ID:$EntryID";
 	    return 0;
 	}
 	else
 	{
-	    foreach my $Key ( keys( %{$hrefData} ) )
+	    foreach my $Key ( keys( %$hrefData ) )
 	    {
 		$self->{$Key} = $hrefData->{$Key};
 	    }
@@ -211,7 +164,7 @@ sub _fillOrgCache
     {
 	my $sql = "SELECT OrgID, OrgName FROM Organization";
 
-	# HashRefOrgs is a Class-Values
+	# HashRefOrgs is a Class-Value
 	$HashRefOrgs = $self->getDBH()->selectall_hashref($sql, 'OrgID');
     }
 }
@@ -371,6 +324,30 @@ sub setPlace($)
 }
 
 # -------------------------------------------------------------------------------
+# Title
+
+sub getTitle
+{
+    my $self = shift;
+
+    return $self->{'Title'};
+}
+
+sub setTitle($)
+{
+    my $self = shift;
+
+    $self->{'Title'} = $_[0];
+
+    $self->{'Title'} =~ s/^\s+//g; 
+    $self->{'Title'} =~ s/\s+$//g; 
+
+    $self->{changed} = 1;
+
+    return ( defined($self->getTitle) && $self->getTitle ne '') ? 1 : 0;
+}
+
+# -------------------------------------------------------------------------------
 # Description
 
 sub getDesc
@@ -493,6 +470,7 @@ sub getTmplParams($)
     return { $Prefix.'Date' => $self->getDate->getDateStr,
 	     $Prefix.'Time' => $self->getTime,
 	     $Prefix.'Place' => $self->getPlace,
+	     $Prefix.'Title' => $self->getTitle,
 	     $Prefix.'Desc' => $self->getDesc,
 	     $Prefix.'EntryID' => $self->getID,
 	     $Prefix.'Org' => $self->getOrg,
@@ -534,7 +512,7 @@ sub isValid
 
     if( $self->getDate->isValid &&
 	( exists($self->{Hour}) && exists($self->{Minute}) ) &&
-	( defined($self->getDesc ) && $self->getDesc ne '' ) &&
+	( defined($self->getTitle ) && $self->getTitle ne '' ) &&
 	( defined($self->getOrgID) && $self->getOrgID ) &&
         ( defined($self->isPublic) ) )
     {
@@ -591,16 +569,18 @@ sub SaveData($)
     my $TimeSQL = $self->getDBH()->quote($self->getTimeSQL);
     
     my $PlaceSQL = $self->getDBH()->quote($self->getPlace);
+    my $TitleSQL = $self->getDBH()->quote($self->getTitle);
     my $DescriptionSQL = $self->getDBH()->quote($self->getDesc);
 
     if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
 	my $sql = sprintf( "UPDATE Dates SET Date = %s, Time = %s, Place = %s, ".
-			   "Description = %s, OrgID = %d, UserID = %d, Public = %d ".
+			   "Title = %s, Description = %s, OrgID = %d, UserID = %d, Public = %d ".
 			   "WHERE EntryID = %d",
 			   $DateSQL,
 			   $TimeSQL,
 			   $PlaceSQL,
+			   $TitleSQL,
 			   $DescriptionSQL,
 			   $self->getOrgID,
 			   $UserID,
@@ -613,11 +593,12 @@ sub SaveData($)
     }
     else
     {
-	my $sql = sprintf( "INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public) ".
-			   "VALUES(%s, %s, %s, %s, %d, %d, %d)",
+	my $sql = sprintf( "INSERT INTO Dates (Date, Time, Place, Title, Description, OrgID, UserID, Public) ".
+			   "VALUES(%s, %s, %s, %s, %s, %d, %d, %d)",
 			   $DateSQL,
 			   $TimeSQL,
 			   $PlaceSQL,
+			   $TitleSQL,
 			   $DescriptionSQL,
 			   $self->getOrgID,
 			   $UserID,

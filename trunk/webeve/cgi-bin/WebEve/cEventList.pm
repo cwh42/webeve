@@ -10,6 +10,7 @@ use vars qw( );
 use POSIX qw( ceil );
 use WebEve::cEvent;
 use WebEve::cMySQL;
+use base 'WebEve::cBase';
 
 # -------------------------------------------------------------------------------
 # The Constructor
@@ -163,10 +164,10 @@ sub readData
 {
     my $self = shift;
 
-    my $join = $self->_mkJoin();;
+    my $join = $self->_mkJoin();
     my $where = $self->_mkWhere();
 
-    my $Count = @{$self->{dbh}->selectcol_arrayref("select count(*) from Dates d $join $where")}[0];
+    my $Count = @{$self->getDBH()->selectcol_arrayref("select count(*) from Dates d $join $where")}[0];
 
     $self->{Pages} = 1;
     my $limit = '';
@@ -189,15 +190,7 @@ sub readData
 	$limit = "LIMIT $From, $Len";
     }
 
-    my $sql = "SELECT d.EntryID,
-                      d.Date,
-	              d.Time,
-                      d.Place,
-	              d.Description,
-	              d.UserID,
-	              d.OrgID,
-	              d.Public,
-	              d.LastChange
+    my $sql = "SELECT d.EntryID
                FROM Dates d $join
 	       $where
 	       ORDER by d.Date, d.Time
@@ -205,13 +198,13 @@ sub readData
 
 #    print STDERR "\n-------------\n$sql\n----------------\n";
 
+    my $EntryIDs  = $self->getDBH()->selectcol_arrayref($sql);
+
     my @Dates = ();
-    
-    my $sth = $self->{dbh}->prepare($sql);
-    $sth->execute();
-    while( my $hrefData = $sth->fetchrow_hashref() )
+
+    foreach my $EntryID ( @$EntryIDs )
     {
-	push( @Dates, WebEve::cEvent->newForEventList( $hrefData ) );
+	push( @Dates, WebEve::cEvent->newFromDB( $EntryID ) );
     }
     
     $self->{'DateList'} = \@Dates;
