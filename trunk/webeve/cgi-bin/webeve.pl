@@ -20,8 +20,7 @@ $app->run();
 package WebEveX;
 
 use strict;
-use base qw( WebEve WebEve::WebEveApp );
-use WebEve::cMySQL;
+use base qw( WebEve::WebEveApp );
 use WebEve::cEventList;
 use WebEve::cEvent;
 use WebEve::cDate;
@@ -80,7 +79,7 @@ sub _getUsersOrgList
 
     my %Params = @_;
 
-    my $UserID = $Params{'UserID'} ? $Params{'UserID'} : $self->{UserID};
+    my $UserID = $Params{'UserID'} ? $Params{'UserID'} : $self->getUser()->{UserID};
     my @SelOrgID = @{$Params{'Selected'}} if exists( $Params{'Selected'} );
 
     my $sql = "SELECT o.OrgID, o.OrgName ".
@@ -90,7 +89,7 @@ sub _getUsersOrgList
 
     my @Data = ();
 
-    my $sth = $self->{dbh}->prepare($sql);
+    my $sth = $self->getDBH()->prepare($sql);
     $sth->execute();
 
     while( my $row = $sth->fetchrow_hashref() )
@@ -113,7 +112,7 @@ sub _getUserList
 
     my @Data = ();
 
-    my $sth = $self->{dbh}->prepare($sql);
+    my $sth = $self->getDBH()->prepare($sql);
     $sth->execute();
 
     while( my $row = $sth->fetchrow_hashref() )
@@ -135,7 +134,7 @@ sub _getOrgList
 
     my @Data = ();
 
-    my $sth = $self->{dbh}->prepare($sql);
+    my $sth = $self->getDBH()->prepare($sql);
     $sth->execute();
 
     while( my $row = $sth->fetchrow_hashref() )
@@ -160,9 +159,9 @@ sub getOrgPref($$)
 		      "LEFT JOIN OrgPrefTypes pt ON up.PrefType = pt.TypeID ".
 		      "WHERE OrgID = %d AND TypeName = %s",
 		      $OrgID,
-		      $self->{dbh}->quote($PrefType));
+		      $self->getDBH()->quote($PrefType));
 
-    my $sth = $self->{dbh}->prepare($sql);
+    my $sth = $self->getDBH()->prepare($sql);
     $sth->execute();
 
     my @result = ();
@@ -182,18 +181,18 @@ sub setOrgPref($$@)
     my ( $OrgID, $PrefType, @NewValues ) = @_;
 
     my $sql = sprintf("SELECT TypeID FROM OrgPrefTypes WHERE TypeName = %s LIMIT 1",
-		      $self->{dbh}->quote($PrefType));
+		      $self->getDBH()->quote($PrefType));
 
-    my $PrefTypeID = $self->{dbh}->selectrow_array($sql);
+    my $PrefTypeID = $self->getDBH()->selectrow_array($sql);
 
     unless( $PrefTypeID )
     {
 	my $sql = sprintf("INSERT INTO OrgPrefTypes (TypeName) VALUES (%s)",
-			  $self->{dbh}->quote($PrefType));
+			  $self->getDBH()->quote($PrefType));
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
 
-	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM OrgPrefTypes LIMIT 1");
+	$PrefTypeID = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM OrgPrefTypes LIMIT 1");
     }
 
     my @OldValues = $self->getOrgPref($OrgID, $PrefType);
@@ -212,18 +211,18 @@ sub setOrgPref($$@)
     if(@ToAdd)
     {
 	my $sql = "INSERT INTO OrgPrefs (OrgID, PrefType, PrefValue) VALUES ";
-	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, ".$self->{dbh}->quote($_).")" } @ToAdd );
+	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, ".$self->getDBH()->quote($_).")" } @ToAdd );
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
     }
 
     if(@ToDelete)
     {
 	my $sql = "DELETE FROM OrgPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeID AND (";
-	$sql .=  join( ' OR ', map { "PrefValue = ".$self->{dbh}->quote($_) } @ToDelete );
+	$sql .=  join( ' OR ', map { "PrefValue = ".$self->getDBH()->quote($_) } @ToDelete );
 	$sql .= ")";
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
     }
 
     return 1;
@@ -240,10 +239,10 @@ sub getUserPref($)
     my $sql = sprintf("SELECT PrefValue FROM UserPrefs up ".
 		      "LEFT JOIN UserPrefTypes pt ON up.PrefType = pt.TypeID ".
 		      "WHERE UserID = %d AND TypeName = %s",
-		      $self->{UserID},
-		      $self->{dbh}->quote($PrefType));
+		      $self->getUser()->{UserID},
+		      $self->getDBH()->quote($PrefType));
 
-    my $sth = $self->{dbh}->prepare($sql);
+    my $sth = $self->getDBH()->prepare($sql);
     $sth->execute();
 
     my @result = ();
@@ -261,21 +260,21 @@ sub setUserPref($@)
     my $self = shift;
 
     my ( $PrefType, @NewValues ) = @_;
-    my $UserID = $self->{UserID};
+    my $UserID = $self->getUser()->{UserID};
 
     my $sql = sprintf("SELECT TypeID FROM UserPrefTypes WHERE TypeName = %s LIMIT 1",
-		      $self->{dbh}->quote($PrefType));
+		      $self->getDBH()->quote($PrefType));
 
-    my $PrefTypeID = $self->{dbh}->selectrow_array($sql);
+    my $PrefTypeID = $self->getDBH()->selectrow_array($sql);
 
     unless( $PrefTypeID )
     {
 	my $sql = sprintf("INSERT INTO UserPrefTypes (TypeName) VALUES (%s)",
-			  $self->{dbh}->quote($PrefType));
+			  $self->getDBH()->quote($PrefType));
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
 
-	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM UserPrefTypes LIMIT 1");
+	$PrefTypeID = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM UserPrefTypes LIMIT 1");
     }
 
     my @OldValues = $self->getUserPref($PrefType);
@@ -294,18 +293,18 @@ sub setUserPref($@)
     if(@ToAdd)
     {
 	my $sql = "INSERT INTO UserPrefs (UserID, PrefType, PrefValue) VALUES ";
-	$sql .=  join( ', ', map { "($UserID, $PrefTypeID, ".$self->{dbh}->quote($_).")" } @ToAdd );
+	$sql .=  join( ', ', map { "($UserID, $PrefTypeID, ".$self->getDBH()->quote($_).")" } @ToAdd );
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
     }
 
     if(@ToDelete)
     {
 	my $sql = "DELETE FROM UserPrefs where UserID = $UserID  AND PrefType = $PrefTypeID AND (";
-	$sql .=  join( ' OR ', map { "PrefValue = ".$self->{dbh}->quote($_) } @ToDelete );
+	$sql .=  join( ' OR ', map { "PrefValue = ".$self->getDBH()->quote($_) } @ToDelete );
 	$sql .= ")";
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
     }
 
     return 1;
@@ -336,7 +335,7 @@ sub Logout()
     $self->{'MainTmpl'}->param( 'TITLE' => 'Logout' );
 
     my $SessionID = $self->query->cookie('sessionID');
-    $self->{dbh}->do("DELETE FROM Logins WHERE SessionID = '$SessionID'");
+    $self->getDBH()->do("DELETE FROM Logins WHERE SessionID = '$SessionID'");
 
     $self->logger("Logged out");
 
@@ -364,14 +363,14 @@ sub Login()
 
     # This query removes expired loginmarks from database.
     # (User should be ticked off for not logging out properly!)
-    $self->{dbh}->do('DELETE FROM Logins WHERE Expires < now()');
+    $self->getDBH()->do('DELETE FROM Logins WHERE Expires < now()');
 
     # User calls this page without any parameters
     if($User eq '' && $Password eq '')
     {
-	if( $self->{UserID} )
+	if( $self->getUser()->{UserID} )
 	{
-	    $SubTmpl->param( 'User' => $self->{UserName} );
+	    $SubTmpl->param( 'User' => $self->getUser()->{UserName} );
 	}
 	my $Cookie = $query->cookie(-name=>'WebEveCookieTest',
 				    -value=>'Cookies_enabled');
@@ -385,7 +384,7 @@ sub Login()
     if($User ne '' || $Password ne '')
     {
 	my $CookieTest = $query->cookie('WebEveCookieTest');
-	my $Relogin = $self->{'UserID'} ? 1 : 0;
+	my $Relogin = $self->getUser()->{'UserID'} ? 1 : 0;
 
 	unless( $CookieTest )
 	{
@@ -400,11 +399,11 @@ sub Login()
 	    {
 		$self->logger("Deleting old session.");
 
-		my $OldSessionID = $self->{dbh}->quote($self->query->cookie('sessionID'));
-		$self->{dbh}->do("DELETE FROM Logins WHERE SessionID = $OldSessionID");
+		my $OldSessionID = $self->getDBH()->quote($self->query->cookie('sessionID'));
+		$self->getDBH()->do("DELETE FROM Logins WHERE SessionID = $OldSessionID");
 	    }
 
-	    $self->{dbh}->do("UPDATE User SET LastLogin = now() where UserID = ".$self->{UserID});
+	    $self->getDBH()->do("UPDATE User SET LastLogin = now() where UserID = ".$self->getUser()->{UserID});
 
 	    my $SessionID = $self->_MakeSessionID($User);
 
@@ -413,8 +412,8 @@ sub Login()
 
 	    $self->header_props(-cookie=>$Cookie);
 
-	    $self->{dbh}->do("INSERT INTO Logins (SessionID, UserID, Expires) ".
-			     "VALUES('$SessionID', ".$self->{UserID}.", ADDDATE(now(), INTERVAL 8 HOUR))");
+	    $self->getDBH()->do("INSERT INTO Logins (SessionID, UserID, Expires) ".
+			     "VALUES('$SessionID', ".$self->getUser()->{UserID}.", ADDDATE(now(), INTERVAL 8 HOUR))");
 
 	    $self->logger("logged in as $User");
 
@@ -443,7 +442,7 @@ sub EventList
 
     # -----------------------------------------------------------------------
 
-    my %params = ( 'ForUserID' => $self->{UserID},
+    my %params = ( 'ForUserID' => $self->getUser()->{UserID},
 		   'BeforeToday' => 1 );
 
     my @ShowOrg = ();
@@ -483,9 +482,9 @@ sub EventList
 
     $SubTmpl->param('List' => \@Dates);
 
-    $SubTmpl->param('FullName' => $self->{FullName});
-    $SubTmpl->param('User' => $self->{UserName});
-    $SubTmpl->param('Admin' => $self->{isAdmin});
+    $SubTmpl->param('FullName' => $self->getUser()->{FullName});
+    $SubTmpl->param('User' => $self->getUser()->{UserName});
+    $SubTmpl->param('Admin' => $self->getUser()->{isAdmin});
 
     $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => \@ShowOrg ));
 
@@ -530,7 +529,7 @@ sub Add
 
 	if( $Event->isValid() )
 	{
-	    if($Event->SaveData($self->{UserID}))
+	    if($Event->SaveData($self->getUser()->{UserID}))
 	    {
 		$SubTmpl->param('Saved' => 1);
 		$SubTmpl->param('SvOrgName' => $Event->getOrg('all'));
@@ -618,7 +617,7 @@ sub Delete
     my @EntryIDs = $query->param('EntryID');
     my $Confirm = $query->param('Confirm') ? 1 : 0;
 
-    my %params = ( 'ForUserID' => $self->{UserID},
+    my %params = ( 'ForUserID' => $self->getUser()->{UserID},
 		   'BeforeToday' => 1 );
 
     $params{'ID'} = \@EntryIDs if( scalar(@EntryIDs) > 0 );
@@ -627,7 +626,7 @@ sub Delete
 
     if( $Confirm )
     {
-	my $delcount = $EventList->deleteData($self->{UserID});
+	my $delcount = $EventList->deleteData($self->getUser()->{UserID});
 	$self->logger( "Deleted $delcount of ".$EventList->getEventCount()." events." );
 
 	$self->_FillMenu('list');
@@ -710,7 +709,7 @@ sub Edit
 
 	if( $Event->isValid() )
 	{
-	    if($Event->SaveData($self->{UserID}))
+	    if($Event->SaveData($self->getUser()->{UserID}))
 	    {
 		$self->_FillMenu('list');
 		$result = $self->EventList();
@@ -771,7 +770,7 @@ sub Passwd
     my $NewPass1 = $query->param('NewPass1') || '';
     my $NewPass2 = $query->param('NewPass2') || '';
 
-    my $UserID = $self->{UserID};
+    my $UserID = $self->getUser()->{UserID};
 
     if($Action eq 'save')
     {
@@ -782,21 +781,21 @@ sub Passwd
 	else
 	{
 	    my $sql = sprintf( "SELECT password(%s) = User.Password FROM User WHERE User.UserID = %d LIMIT 1",
-			       $self->{dbh}->quote($OldPass),
+			       $self->getDBH()->quote($OldPass),
 			       $UserID );
 	    
-	    my $Result = $self->{dbh}->selectrow_array($sql);
+	    my $Result = $self->getDBH()->selectrow_array($sql);
 
 	    if( $Result == 1 )
 	    {
 		$sql = sprintf("UPDATE User SET Password=password(%s)
                                 WHERE password(%s) = User.Password
                                 AND User.UserID = %d",
-			       $self->{dbh}->quote($NewPass1),
-			       $self->{dbh}->quote($OldPass),
+			       $self->getDBH()->quote($NewPass1),
+			       $self->getDBH()->quote($OldPass),
 			       $UserID );
 	    
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 
 		$self->logger("Changed password");
 		$SubTmpl->param('OK' => 1);
@@ -804,6 +803,7 @@ sub Passwd
 	    else
 	    {
 		$SubTmpl->param('OldPWError' => 1);
+		$self->logger("password change failed");
 	    }
 	}
     }
@@ -818,7 +818,7 @@ sub _OrgName($)
 
     my $sql = "SELECT OrgName FROM Organization WHERE OrgID = $OrgID LIMIT 1";
 
-    my $Result = $self->{dbh}->selectrow_array($sql);
+    my $Result = $self->getDBH()->selectrow_array($sql);
 
     return $Result;
 }
@@ -908,7 +908,7 @@ sub UserAdd
 	{
 	    my $sql = "SELECT COUNT(UserID) FROM User WHERE UserName = '$LoginName'";
 
-	    if( $self->{dbh}->selectrow_array($sql) )
+	    if( $self->getDBH()->selectrow_array($sql) )
 	    {
 		$Error = 1;
 		$SubTmpl->param('UserExists' => 1);
@@ -929,17 +929,17 @@ sub UserAdd
 
 	unless($Error)
 	{
-	    $self->{dbh}->do("INSERT INTO User (FullName, eMail, UserName, Password)
+	    $self->getDBH()->do("INSERT INTO User (FullName, eMail, UserName, Password)
                    VALUES('$FullName', '$eMail', '$LoginName' , password('$Password'))");
 
-	    my $UserID = $self->{dbh}->selectrow_array("SELECT last_insert_id() FROM User LIMIT 1");
+	    my $UserID = $self->getDBH()->selectrow_array("SELECT last_insert_id() FROM User LIMIT 1");
 
 	    if(@Orgs)
 	    {
 		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
 		$sql .=  join( ', ', map { "($_, $UserID)" } @Orgs );
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
 
 	    $SubTmpl->param('Saved' => $LoginName);
@@ -951,6 +951,7 @@ sub UserAdd
 	    $SubTmpl->param('Login' => $query->param('Login'));
 	    $SubTmpl->param('FullName' => $query->param('FullName'));
 	    $SubTmpl->param('eMail' => $query->param('eMail'));
+	    $self->logger( "creating new user failed" );
 	}
     }
 
@@ -1005,10 +1006,10 @@ sub UserEdit
 	
 	unless( $Error )
 	{
-	    my $FullNameSQL = $self->{dbh}->quote($FullName);
-	    my $eMailSQL = $self->{dbh}->quote($eMail);
+	    my $FullNameSQL = $self->getDBH()->quote($FullName);
+	    my $eMailSQL = $self->getDBH()->quote($eMail);
 
-	    $self->{dbh}->do("UPDATE User
+	    $self->getDBH()->do("UPDATE User
                                SET FullName = $FullNameSQL,
                                eMail = $eMailSQL,
                                isAdmin = $isAdmin
@@ -1033,7 +1034,7 @@ sub UserEdit
 		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
 		$sql .=  join( ', ', map { "($_, $UserID)" } @ToAdd );
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
 
 	    if(@ToDelete)
@@ -1042,10 +1043,11 @@ sub UserEdit
 		$sql .=  join( ' OR ', map { "OrgID = $_" } @ToDelete );
 		$sql .= ")";
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
 
-	    $self->logger("Modified user ID: '$UserID'");
+	    $self->logger( "Modified user: '$FullName' ($UserID); Admin: $isAdmin; ".
+			   "Add Orgs: ".join( ', ', @ToAdd )."; Remove Orgs: ".join( ', ', @ToDelete ) );
 
 	    $self->_FillMenu('userlist');
 	    return $self->UserList();
@@ -1066,7 +1068,7 @@ sub UserEdit
 	    "FROM User u ".
 	    "WHERE u.UserID = $UserID";
 
-	my $UserData = $self->{dbh}->selectrow_hashref($sql);
+	my $UserData = $self->getDBH()->selectrow_hashref($sql);
 
 	$SubTmpl->param('UserID' => $UserData->{UserID});
 	$SubTmpl->param('UserName' => $UserData->{UserName});
@@ -1131,26 +1133,26 @@ sub OrgAdd
 
 	unless( $Error )
 	{
-	    my $NameSQL = $self->{dbh}->quote($Name);
-	    my $eMailSQL = $self->{dbh}->quote($eMail);
-	    my $WebsiteSQL = $self->{dbh}->quote($Website);
+	    my $NameSQL = $self->getDBH()->quote($Name);
+	    my $eMailSQL = $self->getDBH()->quote($eMail);
+	    my $WebsiteSQL = $self->getDBH()->quote($Website);
 
-	    $self->{dbh}->do("INSERT INTO Organization
+	    $self->getDBH()->do("INSERT INTO Organization
                    (OrgName, eMail, Website)
                    VALUES ($NameSQL, $eMailSQL, $WebsiteSQL)");
 	    
 	    # Update relations Orgs->Users
-	    my $OrgID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Organization LIMIT 1");
+	    my $OrgID = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM Organization LIMIT 1");
 
 	    if(@Users)
 	    {
 		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
 		$sql .=  join( ', ', map { "($OrgID, $_)" } @Users );
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
 
-	    $self->logger("Added Organization: '$Name'; Users: ".join( ', ', @Users ));
+	    $self->logger("Added Organization: '$Name' ($OrgID); Users: ".join( ', ', @Users ));
 
 	    $self->_FillMenu('orglist');
 	    return $self->OrgList();
@@ -1205,10 +1207,10 @@ sub OrgEdit
 
 	unless( $Error )
 	{
-	    my $eMailSQL = $self->{dbh}->quote($eMail);
-	    my $WebsiteSQL = $self->{dbh}->quote($Website);
+	    my $eMailSQL = $self->getDBH()->quote($eMail);
+	    my $WebsiteSQL = $self->getDBH()->quote($Website);
 
-	    $self->{dbh}->do("UPDATE Organization
+	    $self->getDBH()->do("UPDATE Organization
                                SET eMail = $eMailSQL, Website = $WebsiteSQL
                                WHERE OrgID = $OrgID");
 	    
@@ -1234,7 +1236,7 @@ sub OrgEdit
 		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
 		$sql .=  join( ', ', map { "($OrgID, $_)" } @ToAdd );
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
 
 	    if(@ToDelete)
@@ -1243,8 +1245,11 @@ sub OrgEdit
 		$sql .=  join( ' OR ', map { "UserID = $_" } @ToDelete );
 		$sql .= ")";
 
-		$self->{dbh}->do($sql);
+		$self->getDBH()->do($sql);
 	    }
+
+	    $self->logger("Modified Organization: '$OrgID'; Add Users: ".join( ', ', @ToAdd ).
+			  "; Remove Users: ".join( ', ', @ToDelete ));
 
 	    $self->_FillMenu('orglist');
 	    return $self->OrgList();
@@ -1264,7 +1269,7 @@ sub OrgEdit
 	    "FROM Organization o ".
 	    "WHERE o.OrgID = $OrgID";
 
-	my $OrgData = $self->{dbh}->selectrow_hashref($sql);
+	my $OrgData = $self->getDBH()->selectrow_hashref($sql);
 
 	$SubTmpl->param('OrgID' => $OrgData->{OrgID});
 	$SubTmpl->param('OrgName' => $OrgData->{OrgName});
