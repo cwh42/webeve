@@ -1,9 +1,26 @@
-<form action="user-edit.pl" method="GET">
+<TMPL_IF LoginError>
+<p class="error">
+Login-Name muﬂ angegeben werden.
+</p>
+</TMPL_IF>
+
+<TMPL_IF FullNameError>
+<p class="error">
+Voller Name muﬂ angegeben werden.
+</p>
+</TMPL_IF>
+
+<TMPL_IF eMailError>
+<p class="error">
+eMail muﬂ angegeben werden.
+</p>
+</TMPL_IF>
+
+<form action="webeve.pl" method="POST">
 <input type="HIDDEN" name="UserID" value="<TMPL_VAR NAME=UserID>">
-<input type="HIDDEN" name="Login" value="<TMPL_VAR NAME=Login>">
 <table align="center" border="0">
 <tr>
-<td>Login Name:</td><td><b><TMPL_VAR NAME=Login></b> <input type="checkbox" name="isAdmin" <TMPL_VAR NAME=isAdmin>>&nbsp;Administrator</td>
+<td>Login Name:</td><td><b><TMPL_VAR NAME=UserName></b> <input type="checkbox" name="isAdmin" <TMPL_VAR NAME=isAdmin>>&nbsp;Administrator</td>
 </tr>
 <tr>
 <td>Voller Name:</td><td><input type="TEXT" name="FullName" value="<TMPL_VAR NAME=FullName>"></td>
@@ -19,13 +36,15 @@
 <br>
 <b>Vereine:</b><br>
 <TMPL_LOOP NAME=Orgs>
-<INPUT TYPE="CHECKBOX" NAME="Orgs" VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<TMPL_VAR NAME=OrgName><br>
+<INPUT TYPE="CHECKBOX" NAME="Orgs" VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<TMPL_VAR NAME=OrgName><!-- <TMPL_VAR eMail> <TMPL_VAR Website> --><br>
 </TMPL_LOOP>
 </td>
 </tr>
 <tr>
-<td colspan="2" align="right"><input type="SUBMIT" name="Action" value="Save"></td>
+<td colspan="2" align="right">
+<input type="HIDDEN" name="mode" value="useredit">
+<input type="HIDDEN" name="Action" value="Save">
+<input type="SUBMIT" value="Speichern"></td>
 </tr>
 </table>
 </form>
-<b><TMPL_VAR NAME=Message></b>
