@@ -36,7 +36,7 @@ print $Event->setIsPublic(0)."\n";
 print "isPublic:".$Event->isPublic."\n";
 
 
-$EventList = WebEve::cEventList->new( PublicOnly => 1 );
+$EventList = WebEve::cEventList->new( PublicOnly => 1, PerPage => 20, Page => 3 );
 print $EventList->readData();
 print "\n";
 
