@@ -30,7 +30,8 @@ Nur Termine folgender Vereine anzeigen:
 
 <br>
 
-<form action="delete.pl" method="POST">
+<form action="webeve.pl" method="POST">
+<input type="hidden" name="mode" value="delete">
 <table align="center">
  <colgroup>
    <col width="150">
@@ -68,7 +69,7 @@ Nur Termine folgender Vereine anzeigen:
  <table>
   <tr>
   <td width="20">&nbsp;</td>
-  <td><a href="edit.pl?EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
+  <td><a href="webeve.pl?mode=edit&EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
   </tr>
   <tr>
   <td><input type="checkbox" name="EntryID" value="<TMPL_VAR NAME=EntryID>"<TMPL_IF NAME=IsOver> checked</TMPL_IF>></td>
