@@ -23,12 +23,12 @@ sub connect
 
     my $connectTo = shift || 'default';
 
-    my $db_type = ${$DB{ $connectTo }}{'type'};
-    my $db_name = ${$DB{ $connectTo }}{'name'};
-    my $db_host = ${$DB{ $connectTo }}{'host'};
-    my $db_port = ${$DB{ $connectTo }}{'port'};
-    my $db_user = ${$DB{ $connectTo }}{'user'};
-    my $db_pass = ${$DB{ $connectTo }}{'pass'};
+    my $db_type = $DB{$connectTo}->{'type'};
+    my $db_name = $DB{$connectTo}->{'name'};
+    my $db_host = $DB{$connectTo}->{'host'};
+    my $db_port = $DB{$connectTo}->{'port'};
+    my $db_user = $DB{$connectTo}->{'user'};
+    my $db_pass = $DB{$connectTo}->{'pass'};
     
     unless( defined $db_name )
     {
