@@ -1,3 +1,4 @@
+# $Id$
 # ===============================================================================
 # The Class 'cEvent'
 # ===============================================================================
@@ -49,7 +50,7 @@ sub newFromDB
     return $self;
 }
 
-sub newForEventlist
+sub newForEventList
 {
     my $class = shift;
 
@@ -117,9 +118,9 @@ sub _init
 sub _fillValues
 {
     my $self = shift;
-    my %Param = @_;
+    my $Param = shift;
 
-    if( exists( $Param{'EntryID'} ) )
+    if( exists( $Param->{'EntryID'} ) )
     {
 	foreach( 'EntryID',
 		 'Date',
@@ -131,9 +132,9 @@ sub _fillValues
 		 'Public',
 		 'LastChange' )
 	{
-	    if( exists($Param{$_}) )
+	    if( exists($Param->{$_}) )
 	    {
-		$self->{$_} = $Param{$_};
+		$self->{$_} = $Param->{$_};
 	    }
 	    else
 	    {
