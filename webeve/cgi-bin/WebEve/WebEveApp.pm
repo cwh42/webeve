@@ -2,8 +2,7 @@ package WebEve::WebEveApp;
 
 use strict;
 
-use base 'CGI::Application';
-use base 'WebEve::cBase';
+use base qw( WebEve::cBase CGI::Application );
 
 use File::Basename;
 use CGI::Carp;
@@ -43,8 +42,6 @@ sub cgiapp_init
     {
 #	print STDERR "\nOK, NOT running under mod-perl.\n";
     }
-
-    $self->{dbh} = WebEve::cMySQL->connect('default');
 }
 
 # -----------------------------------------------------------------------------
@@ -71,7 +68,7 @@ sub cgiapp_prerun
 
     # Check whether user is logged in
     # --------------------------------
-    if( $self->_CheckLogin() )
+    if( $self->CheckLogin() )
     {
 	$self->_FillMenu();
     }
@@ -88,37 +85,7 @@ sub teardown
 {
     my $self = shift;
 
-    $self->{dbh}->disconnect;    
-}
-
-# -----------------------------------------------------------------------------
-
-sub _CheckLogin()
-{
-    my $self = shift;
-    my $query = $self->query();
-    my $SessionID = $self->{dbh}->quote($query->cookie('sessionID')||'');
-    
-    my $sql = "SELECT u.UserID, u.FullName, u.eMail, u.isAdmin, u.LastLogin, u.UserName ".
-	"FROM Logins l LEFT JOIN User u ON u.UserID = l.UserID ".
-	"WHERE SessionID = $SessionID ".
-	"AND Expires > now()";
-
-    my $UserData = $self->{dbh}->selectrow_hashref($sql);
-
-    if( defined($UserData) )
-    {
-	foreach(keys(%$UserData))
-	{
-	    $self->{$_} = $UserData->{$_};
-	}
-
-	return 1;
-    }
-    else
-    {
-	return 0;
-    }
+    $self->getDBH()->disconnect;    
 }
 
 # -----------------------------------------------------------------------------
@@ -127,22 +94,19 @@ sub _CheckUser($$)
 {
     my $self = shift;
 
-    my $User_sql = $self->{dbh}->quote($_[0]);
-    my $Password_sql = $self->{dbh}->quote($_[1]);
+    my $User_sql = $self->getDBH()->quote($_[0]);
+    my $Password_sql = $self->getDBH()->quote($_[1]);
 
     my $sql = "SELECT UserID, FullName, eMail, isAdmin, LastLogin, UserName ".
 	"FROM User ".
 	"WHERE UserName = $User_sql ".
 	"AND Password = password($Password_sql)";
 
-    my $UserData = $self->{dbh}->selectrow_hashref($sql);
+    my $UserData = $self->getDBH()->selectrow_hashref($sql);
 
     if( defined($UserData) )
     {
-	foreach(keys(%$UserData))
-	{
-	    $self->{$_} = $UserData->{$_};
-	}
+	$self->{USER_DATA} = $UserData;
 
 	return 1;
     }
@@ -178,7 +142,7 @@ sub _FillMenu(;$)
     $self->{'RunMode'} = shift;
     
     $self->{MainTmpl}->param('NavMenu' =>
-			     $self->_getNavMenu( $self->{IsAdmin} ) ) if $self->{UserID};
+			     $self->_getNavMenu( $self->getUser()->{IsAdmin} ) ) if $self->getUser()->{UserID};
 
     return 1;
 }
@@ -199,7 +163,7 @@ sub _NavMenuCleanup(@)
     {
 	my $Admin = delete( $Entry->{'Admin'} );
 
-	if( !( $Admin ) || $self->{isAdmin} )
+	if( !( $Admin ) || $self->getUser()->{isAdmin} )
 	{
 	    if( exists( $Entry->{'SubLevel'} ) ) 
 	    {
