@@ -1,38 +1,26 @@
 # Check the syntax of this file with 'perl -cw Config.pm'.
 
-package LIB::Config;
+package WebEve::Config;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION
-	    %DB $BasePath $Logfile $BaseURL);
+	    %DB $BasePath $LogFile $BaseURL $LogPath $TemplatePath);
 use Exporter;
 
 @ISA     = qw(Exporter);
-@EXPORT  = qw( %DB $BasePath $Logfile $BaseURL);
+@EXPORT  = qw( %DB $BasePath $LogFile $BaseURL $LogPath $TemplatePath);
 
 @EXPORT_OK = qw();
 
 #--[ Global Options ]----------------------------------------------------------
 
-#$BasePath = "/usr/local/httpd/cgi-bin";
-#$BaseURL = "http://localhost/cgi-bin";
+$BaseURL = "http://boltzmann.suse.de/webeve/cgi-bin/";
 
-#$BasePath = "/home/users/11/tr1138/templates";
-#$BaseURL = "http://www.bnbt.de/~tr1138/cgi-bin";
+$BasePath = "/space/webeve/";
 
-#$BasePath = "/suse/cwh/web/bnbt.de/templates";
-#$Logfile = "/suse/cwh/web/bnbt.de/logs/kalender.log";
-#$BaseURL = "http://boltzmann.suse.de/cgi-bin";
+$TemplatePath = $BasePath."templates/";
+$LogPath = $BasePath."log/";
 
-$BasePath = "/suse/cwh/web/kalender/templates";
-$Logfile = "/suse/cwh/web/kalender/public_html/kalender.log";
-$BaseURL = "http://boltzmann.suse.de/kalender/cgi-bin";
-
-#$BasePath = "/home/cwh/web/kalender/templates";
-#$Logfile = "/home/cwh/web/kalender/public_html/kalender.log";
-#$BaseURL = "http://athlon.cwh/cgi-bin";
-
-#$BasePath = "/space/httproot/templates";
-#$BaseURL = "http://linux/cgi-bin";
+$LogFile = $LogPath."webeve.log";
 
 
 #--[ Database Parameters ]-----------------------------------------------------
