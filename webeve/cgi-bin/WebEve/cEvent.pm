@@ -323,13 +323,17 @@ sub setOrgID($)
 
 # -------------------------------------------------------------------------------
 
-sub getOrg
+sub getOrg(;$)
 {
     my $self = shift;
+    my $Mode = shift || 'clean';
 
     _fillOrgCache();
 
-    return $HashRefOrgs->{ $self->{'OrgID'} }->{'OrgName'};
+    my $OrgName = $HashRefOrgs->{ $self->{'OrgID'} }->{'OrgName'};
+    $OrgName = '' if( $OrgName eq '-unbekannt-' && $Mode eq 'clean');
+
+    return $OrgName;
 }
 
 # -------------------------------------------------------------------------------
@@ -347,7 +351,11 @@ sub getDate
 {
     my $self = shift;
 
-    $self->{DateObj} = WebEve::cDate->newSQL( $self->{Date} );
+    unless( ref($self->{DateObj}) )
+    {
+	$self->{DateObj} = WebEve::cDate->newSQL( $self->{Date} );
+    }
+
     return $self->{DateObj};
 }
 
@@ -418,5 +426,6 @@ sub SaveData()
     $self->{changed} = 0;
     return 1;
 }
+
 
 1;
