@@ -14,8 +14,8 @@ my $app = WebEveX->new();
 
 $app->run();
 
-# -------------------------------------------
-# -------------------------------------------
+# ---------------------------------------------------------
+# ---------------------------------------------------------
 
 package WebEveX;
 
@@ -25,6 +25,7 @@ use WebEve::cEventList;
 use WebEve::cEvent;
 use WebEve::cDate;
 use WebEve::cOrg;
+use Mail::Mailer;
 
 sub setup
 {
@@ -37,38 +38,81 @@ sub setup
 		      'logout' => 'Logout',
 		      'list' => 'EventList',
 		      'add' => 'Add', 
-		      'delete' => 'Delete', 
+		      'delete' => 'Delete',
 		      'edit' => 'Edit', 
 		      'passwd' => 'Passwd',
 		      'config' => 'Config',
 		      'userlist' => 'UserList',
 		      'useradd' => 'UserAdd',
 		      'useredit' => 'UserEdit',
+		      'sendpasswd' => 'SendPassword',
 		      'orglist' => 'OrgList',
 		      'orgadd' => 'OrgAdd',
 		      'orgedit' => 'OrgEdit' );
+
+    my @Menu = ( { 'Admin' => 0, 'Title' => 'Login', 'RunMode' => 'login' },
+		 { 'Admin' => 0, 'Title' => 'Übersicht', 'RunMode' => 'list',
+		   'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'RunMode' => 'add' } ] },
+		 { 'Admin' => 0, 'Title' => 'Passwort', 'RunMode' => 'passwd' },
+		 { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
+		 { 'Admin' => 1, 'Title' => 'Benutzer', 'RunMode' => 'userlist',
+		   'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
+		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
+		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
+		 { 'Admin' => 0, 'Title' => 'Logout', 'RunMode' => 'logout' }
+		 );
+    
+    $self->{ALL_MENU_ENTRIES} = \@Menu;
 }
 
 # -----------------------------------------------------------------------------
 
-sub _getNavMenu
+sub mkpasswd()
 {
-    my $self = shift;
+    my $i;
+    my $Passwd = '';
+    my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+    
+    for($i = 1; $i <= 8; $i++)
+    {
+	$Passwd .= $Chars[int(rand(@Chars))];
+    }
+    
+    return $Passwd;
+}
 
-    my @Entries = ( { 'Admin' => 0, 'Title' => 'Login', 'RunMode' => 'login' },
-		    { 'Admin' => 0, 'Title' => 'Übersicht', 'RunMode' => 'list',
-		      'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'RunMode' => 'add' } ] },
-		    { 'Admin' => 0, 'Title' => 'Passwort', 'RunMode' => 'passwd' },
-		    { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
-		    { 'Admin' => 1, 'Title' => 'Benutzer', 'RunMode' => 'userlist',
-		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
-		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
-		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
-		    { 'Admin' => 0, 'Title' => 'Logout', 'RunMode' => 'logout' }
-		    );
+# -----------------------------------------------------------------------------
+# sendMail()
+# -----------------------------------------------------------------------------
+# Simple function for sending email messages
+# Parameters:
+# 1. Subject 
+# 2. Message Body
+# 3. Array: To
+# 4. Opt. Array: Cc
+# 5. Opt.  Array: Bcc
+# 6. Opt.  Array: Reply-To
+# -----------------------------------------------------------------------------
 
-    my @tmp = $self->_NavMenuCleanup( @Entries );
-    return \@tmp;
+sub sendMail($$$;$$$ )
+{
+    my ( $subject, $text, $to, $cc, $bcc, $reply ) = @_;
+    my $charset = 'iso-8859-15';
+    my $MailHeader = { 'From' => 'Christopher Hofmann <ch@goessenreuth.de>',
+                       'To' => $to,
+                       'Cc' => $cc,
+                       'Bcc' => $bcc,
+		       'Reply-to' => $reply,
+                       'Content-Type' => "text/plain;\ncharset=\"$charset\"",
+                       'Subject' => $subject};
+
+    my $Mailer = Mail::Mailer->new();
+    
+    $Mailer->open( $MailHeader );
+
+    print $Mailer $text;
+    
+    $Mailer->close();
 }
 
 # -----------------------------------------------------------------------------
@@ -147,7 +191,7 @@ sub _getOrgList
 
 }
 
-# ---------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 sub getOrgPref($$)
 {
@@ -328,6 +372,8 @@ sub WrongRM
     return $self->EventList();
 }
 
+# ---------------------------------------------------------
+
 sub Logout()
 {
     my $self = shift;
@@ -345,6 +391,7 @@ sub Logout()
     return '<center>Please wait ...</center>';
 }
 
+# ---------------------------------------------------------
 
 sub Login()
 {
@@ -403,7 +450,7 @@ sub Login()
 		$self->getDBH()->do("DELETE FROM Logins WHERE SessionID = $OldSessionID");
 	    }
 
-	    $self->getDBH()->do("UPDATE User SET LastLogin = now() where UserID = ".$self->getUser()->{UserID});
+	    $self->getDBH()->do("UPDATE User SET LoginCount = LoginCount + 1, LastLogin = now() where UserID = ".$self->getUser()->{UserID});
 
 	    my $SessionID = $self->_MakeSessionID($User);
 
@@ -430,6 +477,8 @@ sub Login()
 	}
     }
 }
+
+# ---------------------------------------------------------
 
 sub EventList
 {
@@ -490,6 +539,8 @@ sub EventList
 
     return $SubTmpl->output;
 }
+
+# ---------------------------------------------------------
 
 sub Add
 {
@@ -604,6 +655,8 @@ sub Add
     return $SubTmpl->output;
 }
 
+# ---------------------------------------------------------
+
 sub Delete
 {
     my $self = shift;
@@ -661,6 +714,8 @@ sub Delete
 
     return $result;
 }
+
+# ---------------------------------------------------------
 
 sub Edit
 {
@@ -756,6 +811,8 @@ sub Edit
     return $result;
 }
 
+# ---------------------------------------------------------
+
 sub Passwd
 {
     my $self = shift;
@@ -811,6 +868,8 @@ sub Passwd
     return $SubTmpl->output();    
 }
 
+# ---------------------------------------------------------
+
 sub _OrgName($)
 {
     my $self = shift;
@@ -822,6 +881,8 @@ sub _OrgName($)
 
     return $Result;
 }
+
+# ---------------------------------------------------------
 
 sub Config
 {
@@ -869,6 +930,8 @@ sub Config
     return $SubTmpl->output();    
 }
 
+# ---------------------------------------------------------
+
 sub UserList
 {
     my $self = shift;
@@ -880,6 +943,72 @@ sub UserList
 
     return $SubTmpl->output();
 }
+
+# ---------------------------------------------------------
+
+sub SendPassword
+{
+    my $self = shift;
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Passwort zusenden' );
+    my $SubTmpl = $self->load_tmpl( 'user-send-password.tmpl' );
+
+    my $query = $self->query();
+
+    my $UserID = $query->param('UserID') || '';
+    my $Confirm = $query->param('Confirm') || '0';
+
+    if( $UserID )
+    {
+	my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail ".
+	    "FROM User u ".
+	    "WHERE u.UserID = $UserID";
+	
+	my $UserData = $self->getDBH()->selectrow_hashref($sql);
+
+	if( $Confirm )
+	{
+	    my $NewPass = mkpasswd();
+
+	    $sql = sprintf("UPDATE User SET Password=password(%s)
+                            WHERE User.UserID = %d",
+			   $self->getDBH()->quote($NewPass),
+			   $UserID );
+	    
+	    $self->getDBH()->do($sql);
+	    
+	    $self->logger("Changed password for UID <$UserID>");
+
+	    # Send Mail with password to new user
+	    my $MailTmpl = $self->load_tmpl( 'mail-new-user.tmpl' );
+	    
+	    $MailTmpl->param( name => $UserData->{FullName},
+			      login => $UserData->{UserName},
+			      password => $NewPass );
+
+	    sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
+		      $MailTmpl->output(),
+		      [ $UserData->{eMail} ],
+		      [],
+		      [ 'cwh@suse.de' ] );
+
+
+
+	    $SubTmpl->param('Sent' => 1);
+	}
+	else
+	{
+	    $SubTmpl->param('UserID' => $UserData->{UserID},
+			    'UserName' => $UserData->{UserName},
+			    'FullName' => $UserData->{FullName},
+			    'eMail' => $UserData->{eMail});
+	}
+    }
+
+    return $SubTmpl->output();
+}
+
+# ---------------------------------------------------------
 
 sub UserAdd
 {
@@ -897,7 +1026,6 @@ sub UserAdd
 
     my $FullName = $query->param('FullName') || '';
     my $eMail = $query->param('eMail') || '';
-    my $Password = 'default';
     my @Orgs =  $query->param('Orgs');
 
 
@@ -935,6 +1063,8 @@ sub UserAdd
 
 	unless($Error)
 	{
+	    my $Password = mkpasswd();
+
 	    $self->getDBH()->do("INSERT INTO User (FullName, eMail, UserName, Password)
                    VALUES('$FullName', '$eMail', '$LoginName' , password('$Password'))");
 
@@ -951,6 +1081,19 @@ sub UserAdd
 	    $SubTmpl->param('Saved' => $LoginName);
 	    $self->logger( "Created new user: '$LoginName' ($FullName); Orgs: ".join( ', ', @Orgs ) );
 	    @Orgs = ();
+
+	    # Send Mail with password to new user
+	    my $MailTmpl = $self->load_tmpl( 'mail-new-user.tmpl' );
+
+	    $MailTmpl->param( name => $FullName,
+			      login => $LoginName,
+			      password => $Password );
+
+	    sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
+		      $MailTmpl->output(),
+		      [ $eMail ],
+		      [],
+		      [ 'cwh@suse.de' ] );
 	}
 	else
 	{
@@ -965,6 +1108,8 @@ sub UserAdd
 
     return $SubTmpl->output();
 }
+
+# ---------------------------------------------------------
 
 sub UserEdit
 {
@@ -1060,7 +1205,7 @@ sub UserEdit
 	}
 	else
 	{
-	    $SubTmpl->param('UserID' => $query->param('UserID'));
+ 	    $SubTmpl->param('UserID' => $query->param('UserID'));
 	    $SubTmpl->param('Login' => $query->param('Login'));
 	    $SubTmpl->param('FullName' => $query->param('FullName'));
 	    $SubTmpl->param('eMail' => $query->param('eMail'));
@@ -1093,6 +1238,8 @@ sub UserEdit
     return $SubTmpl->output();
 }
 
+# ---------------------------------------------------------
+
 sub OrgList
 {
     my $self = shift;
@@ -1104,6 +1251,8 @@ sub OrgList
 
     return $SubTmpl->output();
 }
+
+# ---------------------------------------------------------
 
 sub OrgAdd
 {
@@ -1178,6 +1327,8 @@ sub OrgAdd
 
     return $SubTmpl->output();
 }
+
+# ---------------------------------------------------------
 
 sub OrgEdit
 {
