@@ -7,6 +7,7 @@ package WebEve::cEventList;
 
 use strict;
 use vars qw( );
+use POSIX qw( ceil );
 use WebEve::cEvent;
 use WebEve::cMySQL;
 
@@ -164,7 +165,7 @@ sub readData
 	       ORDER by Dates.Date, Dates.Time
                $limit";
 
-    my @Dates;
+    my @Dates = ();
     
     my $sth = $dbh->prepare($sql);
     $sth->execute();
@@ -175,7 +176,7 @@ sub readData
     
     $self->{'DateList'} = \@Dates;
 
-    return WebEve::cEvent->Count;
+    return scalar(@Dates);
 }
 
 sub getDateList
