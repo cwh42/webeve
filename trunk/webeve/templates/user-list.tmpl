@@ -25,9 +25,9 @@
 <td><a href="mailto:<TMPL_VAR NAME=eMail>"><b><TMPL_VAR NAME=FullName></b></a></td>
 <td><TMPL_VAR NAME=LastLogin></td>
 <td>
-	<ul>
+	<ul style="white-space:nowrap;">
         <li><a href="webeve.pl?mode=useredit&UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></li>
-<!--        <li><a href="user-delete.pl?UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">L&ouml;schen</font></a></li> -->
+        <li><a href="webeve.pl?mode=sendpasswd&UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">Passwort senden</font></a></li>
 	</ul>
 </td>
 </tr>
