@@ -29,6 +29,8 @@ sub new
     # Initialize variables
     $self->_init(@_);
 
+    $self->{dbh} = WebEve::cMySQL->connect('default');
+
     $Count++;
     return $self;
 }
@@ -45,6 +47,8 @@ sub newFromDB
 
     # Initialize variables
     $self->_getFromDB(@_);
+
+    $self->{dbh} = WebEve::cMySQL->connect('default');
 
     $Count++;
     return $self;
@@ -63,12 +67,16 @@ sub newForEventList
     # Initialize variables
     $self->_fillValues(@_);
 
+    $self->{dbh} = WebEve::cMySQL->connect('default');
+
     $Count++;
     return $self;
 }
 
 sub DESTROY
 {
+    my $self = shift;
+
     --$Count;
 }
 
@@ -173,9 +181,7 @@ sub _getFromDB
       	           WHERE EntryID = $EntryID
       	           ORDER by d.Date, d.Time";
       
-	my $dbh = WebEve::cMySQL->connect('default');
-
-	my $hrefData = $dbh->selectrow_hashref($sql);
+	my $hrefData = 	$self->{dbh}->selectrow_hashref($sql);
 
 	if( scalar( keys( %{$hrefData} ) ) == 0 )
 	{
@@ -202,13 +208,14 @@ sub _getFromDB
 
 sub _fillOrgCache
 {
+    my $self = shift;
+
     unless( ref($HashRefOrgs) )
     {
-	my $dbh = WebEve::cMySQL->connect_cached();
 	my $sql = "SELECT OrgID, OrgName FROM Organization";
 
 	# HashRefOrgs is a Class-Values
-	$HashRefOrgs = $dbh->selectall_hashref($sql, 'OrgID');
+	$HashRefOrgs = $self->{dbh}->selectall_hashref($sql, 'OrgID');
     }
 }
    
@@ -381,9 +388,13 @@ sub setDesc($)
     my $self = shift;
 
     $self->{Description} = $_[0];
+
+    $self->{'Description'} =~ s/^\s+//g; 
+    $self->{'Description'} =~ s/\s+$//g; 
+
     $self->{changed} = 1;
 
-    return 1;
+    return ( defined($self->getDesc) && $self->getDesc ne '') ? 1 : 0;
 }
 
 # -------------------------------------------------------------------------------
@@ -400,19 +411,23 @@ sub setOrgID($)
 {
     my $self = shift;
 
-    _fillOrgCache();
+    my $result = 0;
+
+    $self->_fillOrgCache();
 
     if( exists($HashRefOrgs->{ $_[0] }) )
     {
 	$self->{OrgID} = $_[0];
 	$self->{changed} = 1;
-	return 1;
+	$result = 1;
     }
     else
     {
 	$self->{Error} = "OrgID is invalid";
-	return 0;
+	$result = 0;
     }
+
+    return $result;
 }
 
 # -------------------------------------------------------------------------------
@@ -422,7 +437,7 @@ sub getOrg(;$)
     my $self = shift;
     my $Mode = shift || 'clean';
 
-    _fillOrgCache();
+    $self->_fillOrgCache();
 
     my $OrgName = $HashRefOrgs->{ $self->{'OrgID'} }->{'OrgName'};
     $OrgName = '' if( $OrgName eq '-unbekannt-' && $Mode eq 'clean');
@@ -547,8 +562,7 @@ sub _CheckPermission($)
     my $sql = "SELECT count(*) FROM Org_User ".
 	"WHERE OrgID = $OrgID AND UserID = $UserID LIMIT 1";
 
-    my $dbh = WebEve::cMySQL->connect('default');
-    return $dbh->selectrow_array($sql);
+    return $self->{dbh}->selectrow_array($sql);
 }
 
 sub SaveData($)
@@ -560,31 +574,34 @@ sub SaveData($)
 
     unless( defined($UserID) )
     {
-	print STDERR "No UserID\n";
+#	logger("ERROR: SaveData failed: no UserID");
 	return 0;
     }
 
-    my $dbh = WebEve::cMySQL->connect('default');
+    unless( $self->isValid )
+    {
+#	logger("SaveData failed: not valid");
+	return 0;
+    }
 
     unless( $self->_CheckPermission($UserID) )
     {
-	print STDERR "No permission\n";
+#	logger("ERROR: SaveData failed: User not permitted");
 	return 0;
     }
 
     if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
-	print STDERR "EntryID exists:".$self->{'EntryID'}."\n";
-
+#	logger("SaveData failed: UPDATE not yet implemented");
 	return 0;
     }
     else
     {
-	my $DateSQL = $dbh->quote($self->{DateObj}->getDateStrSQL());
-	my $TimeSQL = $dbh->quote($self->getTimeSQL);
+	my $DateSQL = $self->{dbh}->quote($self->{DateObj}->getDateStrSQL());
+	my $TimeSQL = $self->{dbh}->quote($self->getTimeSQL);
 
-	my $PlaceSQL = $dbh->quote($self->getPlace);
-	my $DescriptionSQL = $dbh->quote($self->getDesc);
+	my $PlaceSQL = $self->{dbh}->quote($self->getPlace);
+	my $DescriptionSQL = $self->{dbh}->quote($self->getDesc);
 
 	my $sql = sprintf( "INSERT INTO Dates (Date, Time, Place, Description, OrgID, UserID, Public) ".
 			   "VALUES(%s, %s, %s, %s, %d, %d, %d)",
@@ -596,15 +613,47 @@ sub SaveData($)
 			   $UserID,
 			   $self->isPublic );
 
-	$dbh->do($sql);
+	$self->{dbh}->do($sql);
 
-	$self->{EntryID} = $dbh->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
+	$self->{EntryID} = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
 
 	$self->{changed} = 0;
 
-	return 1;
+#	logger("SaveData: Added new date: ".$self->{EntryID});
+
+	return $self->{EntryID};
     }
 }
 
+sub DeleteData($)
+{
+    my $self = shift;
+    my ($UserID) = shift;
+    my $result = 0;
+
+    unless( defined($UserID) )
+    {
+#	logger("ERROR: DeleteData failed: no UserID");
+	$result = 0;
+    }
+    elsif( ! $self->_CheckPermission($UserID) )
+    {
+#	logger("ERROR: DeleteData failed: User not permitted");
+	$result = 0;
+    }
+    elsif( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
+    {
+#	logger("DeleteData: Deleted Event:".$self->getID());
+	$result = $self->{dbh}->do("DELETE FROM Dates WHERE EntryID = ".$self->getID());
+	$self->{EntryID} = undef if $result;
+    }
+    else
+    {
+#	logger("ERROR: DeleteData failed: EntryID missing");
+	$result = 0;
+    }
+
+    return $result;
+}
 
 1;
