@@ -3,11 +3,14 @@ package WebEve::WebEveApp;
 use strict;
 
 use base 'CGI::Application';
+use base 'WebEve::cBase';
+
+use File::Basename;
 use CGI::Carp;
 use Socket;
 
 # -------------------------------------------------------------------------
-# The official init-Method
+# The init-Method
 #
 sub cgiapp_init
 {
@@ -15,12 +18,14 @@ sub cgiapp_init
 
     # Prepare some stuff
     # --------------------------------
+    $self->tmpl_path( $self->getConfig('TemplatePath') );
+
     my $MainTmpl = $self->param('MainTmpl');
     $self->{MainTmpl} = $self->load_tmpl( $MainTmpl ? $MainTmpl : 'main.tmpl' );    
 
     print STDERR $self->dump() if $self->param('debug');
 
-    $self->{'Logfile'} = $self->param('Logfile') || './webeve.log';
+    $self->{'Logfile'} = $self->param('Logfile') || $self->getConfig( 'LogFile' );
 
     $self->_getRemoteHost();
 
@@ -38,7 +43,11 @@ sub cgiapp_init
     {
 #	print STDERR "\nOK, NOT running under mod-perl.\n";
     }
+
+    $self->{dbh} = WebEve::cMySQL->connect('default');
 }
+
+# -----------------------------------------------------------------------------
 
 sub _getRemoteHost()
 {
@@ -52,6 +61,161 @@ sub _getRemoteHost()
     $self->{'REMOTE_HOST'} = $? ? $ENV{'REMOTE_ADDR'} : $HostName;
 
     return 1;
+}
+
+# -----------------------------------------------------------------------------
+
+sub cgiapp_prerun
+{
+    my $self = shift;
+
+    # Check whether user is logged in
+    # --------------------------------
+    if( $self->_CheckLogin() )
+    {
+	$self->_FillMenu();
+    }
+    else
+    {
+	$self->logger('User not logged in.');
+	$self->prerun_mode('login');
+    }
+}
+
+# -----------------------------------------------------------------------------
+
+sub teardown
+{
+    my $self = shift;
+
+    $self->{dbh}->disconnect;    
+}
+
+# -----------------------------------------------------------------------------
+
+sub _CheckLogin()
+{
+    my $self = shift;
+    my $query = $self->query();
+    my $SessionID = $self->{dbh}->quote($query->cookie('sessionID')||'');
+    
+    my $sql = "SELECT u.UserID, u.FullName, u.eMail, u.isAdmin, u.LastLogin, u.UserName ".
+	"FROM Logins l LEFT JOIN User u ON u.UserID = l.UserID ".
+	"WHERE SessionID = $SessionID ".
+	"AND Expires > now()";
+
+    my $UserData = $self->{dbh}->selectrow_hashref($sql);
+
+    if( defined($UserData) )
+    {
+	foreach(keys(%$UserData))
+	{
+	    $self->{$_} = $UserData->{$_};
+	}
+
+	return 1;
+    }
+    else
+    {
+	return 0;
+    }
+}
+
+# -----------------------------------------------------------------------------
+
+sub _CheckUser($$)
+{
+    my $self = shift;
+
+    my $User_sql = $self->{dbh}->quote($_[0]);
+    my $Password_sql = $self->{dbh}->quote($_[1]);
+
+    my $sql = "SELECT UserID, FullName, eMail, isAdmin, LastLogin, UserName ".
+	"FROM User ".
+	"WHERE UserName = $User_sql ".
+	"AND Password = password($Password_sql)";
+
+    my $UserData = $self->{dbh}->selectrow_hashref($sql);
+
+    if( defined($UserData) )
+    {
+	foreach(keys(%$UserData))
+	{
+	    $self->{$_} = $UserData->{$_};
+	}
+
+	return 1;
+    }
+    else
+    {
+	return 0;
+    }
+}
+
+# -----------------------------------------------------------------------------
+
+sub _MakeSessionID($)
+{
+        my $i;
+        my $SID = crypt($_[0], 'SI');
+        my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890');
+
+        for($i = 0; $i < 37; $i++)
+        {
+                $SID .= @Chars[rand(@Chars)];
+        }
+
+        return $SID;
+}
+
+# -----------------------------------------------------------------------------
+
+sub _FillMenu
+{
+    my $self = shift;
+    
+    $self->{MainTmpl}->param('NavMenu' =>
+			     $self->_getNavMenu( $self->{IsAdmin}  ) ) if $self->{UserID};
+
+    return 1;
+}
+
+# -----------------------------------------------------------------------------
+
+sub _NavMenuCleanup(@)
+{
+    my $self = shift;
+
+    my @Entries = @_;
+    my @Result = ();
+
+    my $FileName = basename( $0 );    
+    my $rm = $self->get_current_runmode();
+
+    foreach my $Entry (@Entries)
+    {
+	my $Admin = delete( $Entry->{'Admin'} );
+
+	if( !( $Admin ) || $self->{isAdmin} )
+	{
+	    if( exists( $Entry->{'SubLevel'} ) ) 
+	    {
+		my @tmp = $self->_NavMenuCleanup( @{$Entry->{'SubLevel'}} );
+		$Entry->{'SubLevel'} = \@tmp;
+	    }
+
+	    if( $Entry->{'RunMode'} eq $rm )
+	    {
+		$Entry->{'Current'} = 1;
+	    }
+
+	    $Entry->{'FileName'} = "$FileName?mode=".$Entry->{'RunMode'};
+
+	    push( @Result, $Entry );
+	}
+    }
+
+    return @Result;
 }
 
 # -------------------------------------------------------------------------
