@@ -10,17 +10,9 @@ set_message('<hr><b>Hierbei handelt es sich vermutlich um einen Programmfehler.<
 	    'Bitte schicke die Meldung oberhalb der Linie an mich (<a href="mailto:ch@goessenreuth.de">'.
 	    'ch@goessenreuth.de</a>), damit ich den Fehler beheben kann.</b>');
 
-# my $app = TTForm->new( PARAMS => {'MainTmpl' => 'main-2.tmpl'} ); # Alternative main template
+my $app = WebEveX->new();
 
-#my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates' );
-
-my $app = WebEveX->new( TMPL_PATH => '/space/webeve/templates',
-  			PARAMS => {'debug' => 1} );
-
-# my $app = WebEveX->new( TMPL_PATH => '/home/cwh/web/webeve/templates' );
-
-# my $app = WebEveX->new( TMPL_PATH => '/home/cwh/web/webeve/templates',
-# 			PARAMS => {'debug' => 1} );
+#my $app = WebEveX->new( PARAMS => {'debug' => 1} );
 
 $app->run();
 
@@ -31,8 +23,6 @@ package WebEveX;
 
 use strict;
 use base 'WebEve::WebEveApp';
-use File::Basename;
-use Date::Calc qw( Today_and_Now );
 use WebEve::cMySQL;
 use WebEve::cEventList;
 use WebEve::cEvent;
@@ -56,147 +46,6 @@ sub setup
 		      'userlist' => 'UserList',
 		      'useradd' => 'UserAdd',
 		      'orgadd' => 'OrgAdd' );
-
-    $self->{dbh} = WebEve::cMySQL->connect('default');
-}
-
-# -----------------------------------------------------------------------------
-
-sub cgiapp_prerun
-{
-    my $self = shift;
-
-    # Check whether user is logged in
-    # --------------------------------
-    if( $self->_CheckLogin() )
-    {
-	$self->_FillMenu();
-    }
-    else
-    {
-	$self->logger('User not logged in.');
-	$self->prerun_mode('login');
-    }
-}
-
-# -----------------------------------------------------------------------------
-
-sub teardown
-{
-    my $self = shift;
-
-    $self->{dbh}->disconnect;    
-}
-
-# -----------------------------------------------------------------------------
-
-sub _CheckLogin()
-{
-    my $self = shift;
-    my $query = $self->query();
-    my $SessionID = $self->{dbh}->quote($query->cookie('sessionID')||'');
-    
-    my $sql = "SELECT u.UserID, u.FullName, u.eMail, u.isAdmin, u.LastLogin, u.UserName ".
-	"FROM Logins l LEFT JOIN User u ON u.UserID = l.UserID ".
-	"WHERE SessionID = $SessionID ".
-	"AND Expires > now()";
-
-    my $UserData = $self->{dbh}->selectrow_hashref($sql);
-
-    if( defined($UserData) )
-    {
-	foreach(keys(%$UserData))
-	{
-	    $self->{$_} = $UserData->{$_};
-	}
-
-	return 1;
-    }
-    else
-    {
-	return 0;
-    }
-}
-
-# -----------------------------------------------------------------------------
-
-sub _CheckUser($$)
-{
-    my $self = shift;
-
-    my $User_sql = $self->{dbh}->quote($_[0]);
-    my $Password_sql = $self->{dbh}->quote($_[1]);
-
-    my $sql = "SELECT UserID, FullName, eMail, isAdmin, LastLogin, UserName ".
-	"FROM User ".
-	"WHERE UserName = $User_sql ".
-	"AND Password = password($Password_sql)";
-
-    my $UserData = $self->{dbh}->selectrow_hashref($sql);
-
-    if( defined($UserData) )
-    {
-	foreach(keys(%$UserData))
-	{
-	    $self->{$_} = $UserData->{$_};
-	}
-
-	return 1;
-    }
-    else
-    {
-	return 0;
-    }
-}
-
-# -----------------------------------------------------------------------------
-
-sub _FillMenu
-{
-    my $self = shift;
-    
-    $self->{MainTmpl}->param('NavMenu' =>
-			     $self->_getNavMenu( $self->{IsAdmin}  ) ) if $self->{UserID};
-
-    return 1;
-}
-
-# -----------------------------------------------------------------------------
-
-sub _NavMenuCleanup(@)
-{
-    my $self = shift;
-
-    my @Entries = @_;
-    my @Result = ();
-
-    my $FileName = basename( $0 );    
-    my $rm = $self->get_current_runmode();
-
-    foreach my $Entry (@Entries)
-    {
-	my $Admin = delete( $Entry->{'Admin'} );
-
-	if( !( $Admin ) || $self->{isAdmin} )
-	{
-	    if( exists( $Entry->{'SubLevel'} ) ) 
-	    {
-		my @tmp = $self->_NavMenuCleanup( @{$Entry->{'SubLevel'}} );
-		$Entry->{'SubLevel'} = \@tmp;
-	    }
-
-	    if( $Entry->{'RunMode'} eq $rm )
-	    {
-		$Entry->{'Current'} = 1;
-	    }
-
-	    $Entry->{'FileName'} = "$FileName?mode=".$Entry->{'RunMode'};
-
-	    push( @Result, $Entry );
-	}
-    }
-
-    return @Result;
 }
 
 # -----------------------------------------------------------------------------
@@ -221,35 +70,6 @@ sub _getNavMenu
 }
 
 # -----------------------------------------------------------------------------
-
-sub _MakeSessionID($)
-{
-        my $i;
-        my $SID = crypt($_[0], 'SI');
-        my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890');
-
-        for($i = 0; $i < 37; $i++)
-        {
-                $SID .= @Chars[rand(@Chars)];
-        }
-
-        return $SID;
-}
-
-# -----------------------------------------------------------------------------
-
-sub logger($)
-{
-    my $self = shift;
-    my ($message) = @_;
-    my $UserName = $self->{'UserName'} || $self->{'REMOTE_HOST'};
-
-    open( LOG, ">>". $self->{'Logfile'} );
-
-    printf( LOG "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n", Today_and_Now(), $UserName, $message );
-
-    close( LOG );
-}
 
 sub _getOrgList
 {
@@ -539,6 +359,11 @@ sub Add
 	}
 	else
 	{
+	    foreach( qw( KeepOrg IncDate KeepTime KeepPlace KeepDesc KeepPublic) )
+	    {
+		$SubTmpl->param($_ => $query->param($_) );
+	    }
+
 	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
@@ -613,7 +438,84 @@ sub Edit
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Termin bearbeiten' );
 
-    return 0;
+    my $SubTmpl = $self->load_tmpl( 'edit.tmpl');
+
+    my $query = $self->query();
+
+    my $EntryID = $query->param('EntryID') || '';
+
+    return $self->EventList() unless( $EntryID );
+
+    # -----------------------------------------------------------------------
+    my $result = '';
+
+    my $OrgID = $query->param('OrgID') || '';
+    my $Public = $query->param('Public') || 0;
+    my $DateStr = $query->param('Date') || '';
+    my $TimeStr = $query->param('Time') || '';
+    my $Place = $query->param('Place') || '';
+    my $Description = $query->param('Description') || '';
+
+    my $Action = $query->param('Action') || '';
+
+    $SubTmpl->param('Orgs' => $self->_getOrgList());
+    $SubTmpl->param('Public' => 1);
+
+    my $Event = WebEve::cEvent->newFromDB($EntryID);
+
+    if($Action eq 'Save')
+    {
+	$Event->setOrgID($OrgID);
+	$Event->setIsPublic($Public);
+	$Event->setPlace($Place);
+
+	$SubTmpl->param('DateError' => 1) unless $Event->setDate($DateStr);
+	$SubTmpl->param('TimeError' => 1) unless $Event->setTime($TimeStr);
+	$SubTmpl->param('DescError' => 1) unless $Event->setDesc($Description);
+
+	if( $Event->isValid() )
+	{
+	    if($Event->SaveData($self->{UserID}))
+	    {
+		$result = $self->EventList();
+	    }
+	    else
+	    {
+		$SubTmpl->param('Saved' => 0);
+		$SubTmpl->param('Error' => 1);
+
+		$result = $SubTmpl->output();
+	    }
+
+	}
+	else
+	{
+	    $SubTmpl->param('EntryID' => $query->param('EntryID'));
+	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
+	    $SubTmpl->param('Date' => $query->param('Date'));
+	    $SubTmpl->param('Time' => $query->param('Time'));
+	    $SubTmpl->param('Place' => $query->param('Place'));
+	    $SubTmpl->param('Description' => $query->param('Description'));
+	    $SubTmpl->param('Public' => $Public ? 1 : 0);
+
+	    $result = $SubTmpl->output();
+	}
+    }
+    else
+    {
+	$SubTmpl->param('EntryID' => $query->param('EntryID'));
+	$SubTmpl->param('Orgs' => $self->_getOrgList($Event->getOrgID()));
+	my $tmpDate = join('-', reverse($Event->getDate->getDate()));
+	$SubTmpl->param('Date' => $tmpDate);
+	$SubTmpl->param('Time' => $Event->getTime());
+	$SubTmpl->param('Place' => $Event->getPlace());
+	$SubTmpl->param('Description' => $Event->getDesc());
+	$SubTmpl->param('Public' => $Event->isPublic());
+
+	$result = $SubTmpl->output();
+    }
+    
+    return $result;
 }
 
 sub Passwd
