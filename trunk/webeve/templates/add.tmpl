@@ -27,7 +27,8 @@
     </tr>
     <tr><td><TMPL_VAR NAME=SvDescription></td></tr>
     </table>
-    <hr size="2" noshade>
+    <hr size="1" color="#000000" noshade>
+    <h2>Weiteren Termin hinzufügen:</h2><br>
 </TMPL_IF>
 
 <TMPL_IF Error>
@@ -65,7 +66,7 @@ Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> 
   </SELECT>
 </td>
 <td>
-<input type="Checkbox" name="KeepOrg" value="1">Beibehalten
+<input type="Checkbox" name="KeepOrg" value="1" <TMPL_IF KeepOrg>checked</TMPL_IF>>Beibehalten
 </td>
 </tr>
 
@@ -87,7 +88,7 @@ Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> 
 </TMPL_IF>
 </td>
 <td>
-<input type="Checkbox" name="KeepPublic" value="1">Beibehalten
+<input type="Checkbox" name="KeepPublic" value="1" <TMPL_IF KeepPublic>checked</TMPL_IF>>Beibehalten
 </td>
 </tr>
 
@@ -108,7 +109,7 @@ Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> 
 </tr>
 <tr>
 <td><input type="text" name="Date" value="<TMPL_VAR Date>" size="8" maxlength="10"></td>
-<td><input type="Checkbox" name="IncDate" value="1">Weiterzählen</td>
+<td><input type="Checkbox" name="IncDate" value="1" <TMPL_IF IncDate>checked</TMPL_IF>>Weiterzählen</td>
 </tr>
 
 <tr>
@@ -120,7 +121,7 @@ Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> 
 </tr>
 <tr>
 <td colspan="2"><input type="text" name="Time" value="<TMPL_VAR Time>" size="5" maxlength="5"></td>
-<td><input type="Checkbox" name="KeepTime" value="1">Beibehalten</td>
+<td><input type="Checkbox" name="KeepTime" value="1" <TMPL_IF KeepTime>checked</TMPL_IF>>Beibehalten</td>
 </tr>
 
 <tr>
@@ -132,7 +133,7 @@ Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> 
 </tr>
 <tr>
 <td colspan="2"><input type="text" name="Place" value="<TMPL_VAR Place>" size="43"></td>
-<td><input type="Checkbox" name="KeepPlace" value="1">Beibehalten</td>
+<td><input type="Checkbox" name="KeepPlace" value="1" <TMPL_IF KeepPlace>checked</TMPL_IF>>Beibehalten</td>
 </tr>
 
 <tr>
@@ -153,12 +154,13 @@ Wichtige HTML-Tags:<br>
 &lt;br&gt;: damit macht man einen Zeilenum<b>br</b>uch
 </span>
 </td>
-<td><input type="Checkbox" name="KeepDesc" value="1">Beibehalten</td>
+<td valign="top"><input type="Checkbox" name="KeepDesc" value="1" <TMPL_IF KeepDesc>checked</TMPL_IF>>Beibehalten</td>
 </tr>
 
 <tr>
 <td colspan="3" align="right">
-<input type="submit" name="Action" value="Save">
+<input type="hidden" name="Action" value="Save">
+<input type="submit" value="Speichern">
 </td>
 </tr>
 </table>
