@@ -1,18 +1,25 @@
-<TABLE ALIGN="CENTER" style="padding:6px;">
+<table align="center" style="padding:6px;">
 <TMPL_LOOP NAME=List>
-<TR ALIGN="LEFT" VALIGN="TOP">
-<TD><FONT FACE="Arial, Helvetica"><B><TMPL_VAR NAME=Date></B></FONT><BR>
-<FONT SIZE="-3" FACE="Arial, Helvetica"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></FONT></TD>
-<TD><FONT FACE="Arial, Helvetica">
-<TMPL_VAR NAME=Org><br>
-<TMPL_VAR NAME=Desc></FONT></TD></TR>
+    <tr>
+    <td rowspan="2">
+    <B><TMPL_VAR NAME=Date></B><BR>
+    <span class="smallfont"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></span><BR>
+    <TMPL_IF NAME=Public>
+    <FONT color="#008000">öffentlich</font>
+    <TMPL_ELSE>
+    <FONT color="#FF0000">intern</FONT>
+    </TMPL_IF>
+    </td>
+    <td><B><TMPL_VAR NAME=Org></B></td>
+    </tr>
+    <tr><td><TMPL_VAR NAME=Desc></td></tr>
 </TMPL_LOOP>
 <tr>
 <td colspan="2" align="center">
 <br><br>
 Diese Termine wirklich l&ouml;schen?
-<a href="delete.pl?Action=Delete<TMPL_VAR NAME=EntryIDs>"><b>Ja</b></a> |
-<a href="edit-list.pl"><b>Nein</b></a>
+<a href="webeve.pl?mode=delete&Confirm=1<TMPL_VAR NAME=EntryIDs>"><b>Ja</b></a> |
+<a href="webeve.pl"><b>Nein</b></a>
 </td>
 </tr>
 </table>
