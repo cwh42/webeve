@@ -1,5 +1,29 @@
 <!-- Last Updated: 2003-04-08 -->
 
+<form action="webeve.pl" method="POST">
+<input type="hidden" name="OrgID" value="<TMPL_VAR OrgID>">
+<input type="hidden" name="mode" value="config">
+<input type="hidden" name="action" value="save">
+<table align="center">
+<tr>
+<td>Hintergrundfarbe</td><td><input type="text" name="bgcolor" value="<TMPL_VAR bgcolor>" size="10"></td>
+</tr>
+<tr>
+<td>Textfarbe</td><td><input type="text" name="textcolor" value="<TMPL_VAR textcolor>" size="10"></td>
+</tr>
+<tr>
+<td>Linkfarbe</td><td><input type="text" name="linkcolor" value="<TMPL_VAR linkcolor>" size="10"></td>
+</tr>
+<tr>
+<td>Schriftart</td><td><input type="text" name="font" value="<TMPL_VAR font>" size="10"></td>
+</tr>
+<tr>
+<td></td><td align="right"><input type="submit" value="Speichern"></td>
+</tr>
+</table>
+</form>
+
+
 <TMPL_IF SimpleSaved>
 <p class="ok">Template wurde gespeichert.</p>
 </TMPL_IF>
