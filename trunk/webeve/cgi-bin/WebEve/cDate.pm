@@ -9,6 +9,8 @@ use strict;
 use Date::Calc qw( check_date
 		   Moving_Window
 		   Delta_Days
+		   Add_Delta_Days
+		   Add_Delta_YM
 		   Day_of_Week
 		   Days_in_Month
 		   Day_of_Week_to_Text
@@ -313,6 +315,34 @@ sub setDate()
     $self->_init(@_);
 
     return $self->{isValid};
+}
+
+# --------------------------------------------------------------------------------
+
+sub incr
+{
+    my $self = shift;
+
+    my $result = 0;
+
+    if( $self->isValid )
+    {
+	if( $self->{isFullDate} )
+	{
+	    $result = $self->setDate( Add_Delta_Days( $self->getDate(), 1) );
+	}
+	else
+	{
+	    my @Date = Add_Delta_YM( $self->getDate(), 1, 0, 1 );
+	    $result = $self->setDate( @Date[0,1] );
+	}
+    }
+    else
+    {
+	$result = 0;
+    }
+
+    return $result;
 }
 
 # --------------------------------------------------------------------------------
