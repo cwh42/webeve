@@ -8,29 +8,29 @@
 </TR>
 <tr>
 <td><b>Name</b></td>
-<td><b>eMail</b><br>
-<b>Website</b></td>
+<td align="center"><b>eMail &amp; Website</b></td>
 <td>&nbsp;</td>
 </tr>
 
 <TR>
-<TD colspan="5"><hr size="2" noshade></TD>
+<TD colspan="5"><hr size="1" color="#000000" noshade></TD>
 </TR>
 
 <TMPL_LOOP NAME=Orgs>
 <tr>
 <td><b><TMPL_VAR NAME=OrgName></b></td>
-<td><a href="mailto:<TMPL_VAR NAME=eMail>"><TMPL_VAR NAME=eMail></a><br>
-<a href="http://<TMPL_VAR NAME=Website>" target="OrgWebsite"><TMPL_VAR NAME=Website></a></td>
-<td>
-	<ul>
-        <li><a href="webeve.pl?mode=orgedit&OrgID=<TMPL_VAR NAME=OrgID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></li>
-<!--        <li><a href="org-delete.pl?OrgID=<TMPL_VAR NAME=OrgID>"><font FACE="Arial, Helvetica">L&ouml;schen</font></a></li> -->
-	</ul>
+<td align="center">
+<TMPL_IF eMail>
+<a href="mailto:<TMPL_VAR NAME=eMail>"><img src="../kmail.png" border="0"></a>
+</TMPL_IF>
+<TMPL_IF Website>
+<a href="http://<TMPL_VAR NAME=Website>" target="Website"><img src="../konqueror.png" border="0"></a>
+</TMPL_IF>
 </td>
+<td><a href="webeve.pl?mode=orgedit&OrgID=<TMPL_VAR NAME=OrgID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></td>
 </tr>
 <TR>
-<TD colspan="4"><hr size="2" noshade></TD>
+<TD colspan="4"><hr size="1" color="#000000" noshade></TD>
 </TR>
 </TMPL_LOOP>
 
