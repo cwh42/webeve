@@ -146,7 +146,7 @@ sub main
 
 	$HashRef->{'Org'} = $query->escapeHTML($OrgName) unless( $Intern );
 
-	if( $DateObj->getDate ne $LastDate )
+	if( $DateObj->getDate->getDateStr ne $LastDate )
 	{
 	    $HashRef->{'Date'} = $query->escapeHTML($DateObj->getDate->getDateStr);
 	    $LastDate = $DateObj->getDate->getDateStr;
