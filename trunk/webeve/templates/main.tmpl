@@ -28,13 +28,13 @@
   <TMPL_IF NAME=Current>
     <p><TMPL_VAR NAME=Title></p>
   <TMPL_ELSE>
-    <p><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p>
+    <p><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p><!-- <TMPL_VAR NAME=RunMode> -->
   </TMPL_IF>
   <TMPL_LOOP NAME=SubLevel>
     <TMPL_IF NAME=Current>
       <p class="submenu"><TMPL_VAR NAME=Title></p>
     <TMPL_ELSE>
-      <p class="submenu"><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p>
+      <p class="submenu"><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p><!-- <TMPL_VAR NAME=RunMode> -->
     </TMPL_IF>
   </TMPL_LOOP>
 </TMPL_LOOP>
