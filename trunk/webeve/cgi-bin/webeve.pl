@@ -281,6 +281,168 @@ sub _ArrayDiff($$;$)
 }
 
 # ---------------------------------------------------------
+
+sub getOrgPref($$)
+{
+    my $self = shift;
+
+    my ($OrgID, $PrefType) = @_;
+
+    my $sql = sprintf("SELECT PrefValue FROM OrgPrefs up ".
+		      "LEFT JOIN OrgPrefTypes pt ON up.PrefType = pt.TypeID ".
+		      "WHERE OrgID = %d AND TypeName = %s",
+		      $OrgID,
+		      $self->{dbh}->quote($PrefType));
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    my @result = ();
+
+    while( my $row = $sth->fetchrow_arrayref() )
+    {
+	push( @result, $row->[0] );
+    }
+
+    return @result;
+}
+
+sub setOrgPref($@)
+{
+    my $self = shift;
+
+    my ( $OrgID, $PrefType, @NewValues ) = @_;
+
+    my $sql = sprintf("SELECT TypeID FROM OrgPrefTypes WHERE TypeName = %s LIMIT 1",
+		      $self->{dbh}->quote($PrefType));
+
+    my $PrefTypeID = $self->{dbh}->selectrow_array($sql);
+
+    unless( $PrefTypeID )
+    {
+	my $sql = sprintf("INSERT INTO OrgPrefTypes (TypeName) VALUES (%s)",
+			  $self->{dbh}->quote($PrefType));
+
+	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM OrgPrefTypes LIMIT 1");
+    }
+
+    my @OldValues = $self->getOrgPref($PrefType);
+
+    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@NewValues, \@OldValues, 1);
+
+    my @ToAdd = @$ToAddRef;
+    my @ToDelete = @$ToDeleteRef;
+
+    #print STDERR "ALL:".join(',', @OldValues)."\n";
+    #print STDERR "SEL:".join(',', @NewValues)."\n";
+
+    #print STDERR "ADD:".join(',', @ToAdd)."\n";
+    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+
+    if(@ToAdd)
+    {
+	my $sql = "INSERT INTO OrgPrefs (OrgID, PrefType, PrefValue) VALUES ";
+	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, $_)" } @ToAdd );
+
+	$self->{dbh}->do($sql);
+    }
+
+    if(@ToDelete)
+    {
+	my $sql = "DELETE FROM UserPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeID AND (";
+	$sql .=  join( ' OR ', map { "PrefValue = $_" } @ToDelete );
+	$sql .= ")";
+
+	$self->{dbh}->do($sql);
+    }
+
+    return 1;
+}
+
+# ---------------------------------------------------------
+
+sub getUserPref($)
+{
+    my $self = shift;
+
+    my ($PrefType) = @_;
+
+    my $sql = sprintf("SELECT PrefValue FROM UserPrefs up ".
+		      "LEFT JOIN UserPrefTypes pt ON up.PrefType = pt.TypeID ".
+		      "WHERE UserID = %d AND TypeName = %s",
+		      $self->{UserID},
+		      $self->{dbh}->quote($PrefType));
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    my @result = ();
+
+    while( my $row = $sth->fetchrow_arrayref() )
+    {
+	push( @result, $row->[0] );
+    }
+
+    return @result;
+}
+
+sub setUserPref($@)
+{
+    my $self = shift;
+
+    my ( $PrefType, @NewValues ) = @_;
+    my $UserID = $self->{UserID};
+
+    my $sql = sprintf("SELECT TypeID FROM UserPrefTypes WHERE TypeName = %s LIMIT 1",
+		      $self->{dbh}->quote($PrefType));
+
+    my $PrefTypeID = $self->{dbh}->selectrow_array($sql);
+
+    unless( $PrefTypeID )
+    {
+	my $sql = sprintf("INSERT INTO UserPrefTypes (TypeName) VALUES (%s)",
+			  $self->{dbh}->quote($PrefType));
+
+	$PrefTypeID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM UserPrefTypes LIMIT 1");
+    }
+
+    my @OldValues = $self->getUserPref($PrefType);
+
+    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@NewValues, \@OldValues, 1);
+
+    my @ToAdd = @$ToAddRef;
+    my @ToDelete = @$ToDeleteRef;
+
+    #print STDERR "ALL:".join(',', @OldValues)."\n";
+    #print STDERR "SEL:".join(',', @NewValues)."\n";
+
+    #print STDERR "ADD:".join(',', @ToAdd)."\n";
+    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+
+    if(@ToAdd)
+    {
+	my $sql = "INSERT INTO UserPrefs (UserID, PrefType, PrefValue) VALUES ";
+	$sql .=  join( ', ', map { "($UserID, $PrefTypeID, $_)" } @ToAdd );
+
+	$self->{dbh}->do($sql);
+    }
+
+    if(@ToDelete)
+    {
+	my $sql = "DELETE FROM UserPrefs where UserID = $UserID  AND PrefType = $PrefTypeID AND (";
+	$sql .=  join( ' OR ', map { "PrefValue = $_" } @ToDelete );
+	$sql .= ")";
+
+	$self->{dbh}->do($sql);
+    }
+
+    return 1;
+}
+
+# ---------------------------------------------------------
+
+
+# ---------------------------------------------------------
 # Run Modes
 # ---------------------------------------------------------
 
@@ -409,12 +571,24 @@ sub EventList
 
     # -----------------------------------------------------------------------
 
-    my @ShowOrg = $query->param('ShowOrg');
-
     my %params = ( 'ForUserID' => $self->{UserID},
 		   'BeforeToday' => 1 );
 
-    $params{'ForOrgID'} = \@ShowOrg if( scalar(@ShowOrg) > 0 );
+    my @ShowOrg = ();
+
+    if( $query->param('ShowOrg') )
+    {
+	@ShowOrg = $query->param('ShowOrg');
+	$self->setUserPref('ShowOrg', @ShowOrg);
+    }
+    else
+    {
+	@ShowOrg = $self->getUserPref('ShowOrg');
+    }
+
+    @ShowOrg = map { $_->{'OrgID'} } ( @{$self->_getUsersOrgList()} ) unless( scalar(@ShowOrg) );
+
+    $params{'ForOrgID'} = \@ShowOrg;
 
     my $EventList = WebEve::cEventList->new( %params );
     $EventList->readData();
@@ -441,7 +615,6 @@ sub EventList
     $SubTmpl->param('User' => $self->{UserName});
     $SubTmpl->param('Admin' => $self->{isAdmin});
 
-    @ShowOrg = map { $_->{'OrgID'} } ( @{$self->_getUsersOrgList()} ) if( scalar(@ShowOrg) == 0 );
     $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => \@ShowOrg ));
 
     return $SubTmpl->output;
@@ -771,11 +944,25 @@ sub Config
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Konfiguration' );
-    #my $SubTmpl = $self->load_tmpl( '');
+    my $SubTmpl;
 
     my $query = $self->query();
 
-    return 0;
+    if( $query->param('OrgID') )
+    {
+	$SubTmpl = $self->load_tmpl( 'tmpl-upload.tmpl' );
+	my $OrgID = $query->param('OrgID');
+
+	$SubTmpl->param('OrgName' => );
+    }
+    else
+    {
+	$SubTmpl = $self->load_tmpl( 'config.tmpl' );
+	$SubTmpl->param('Orgs' => $self->_getUsersOrgList());
+
+    }
+
+    return $SubTmpl->output();    
 }
 
 sub UserList
