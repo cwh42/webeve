@@ -156,16 +156,18 @@ sub _CheckUser($$)
 
 sub _MakeSessionID($)
 {
-        my $i;
-        my $SID = crypt($_[0], 'SI');
-        my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890');
+    my $self = shift;
 
-        for($i = 0; $i < 37; $i++)
-        {
-                $SID .= @Chars[rand(@Chars)];
-        }
-
-        return $SID;
+    my $i;
+    my $SID = crypt($_[0], 'SI');
+    my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890');
+    
+    for($i = 0; $i < 37; $i++)
+    {
+	$SID .= @Chars[rand(@Chars)];
+    }
+    
+    return $SID;
 }
 
 # -----------------------------------------------------------------------------
