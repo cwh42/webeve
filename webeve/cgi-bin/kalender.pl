@@ -1,17 +1,15 @@
 #!/usr/bin/perl
 
 #########################################################################
-# kalender.pl                                              22. Apr 2002 #
+# $Id$
 # (c)1999-2002 C.Hofmann tr1138@bnbt.de                                 #
 #########################################################################
 
 use strict;
 use CGI;
 use HTML::Template;
-use Date::Calc qw( Today Language Month_to_Text Day_of_Week_to_Text Day_of_Week );
-use WebEve::mysql;
-use WebEve::termine;
 use WebEve::Config;
+use WebEve::cEventList;
 
 main();
 
@@ -76,12 +74,13 @@ sub main
     my $SubTmpl = HTML::Template->new(filename => "$BasePath/$SubTmplName",
 				      die_on_bad_params => 0,
 				       loop_context_vars => 1);
-    my %OrgList = getAllOrgs();
 
-    my %Dates = getDates( 'PerPage' => 15,
-			  'Page' => $Page,
-			  'PublicOnly' => !$Intern,
-			  'ForOrgID' => $Intern ? $Organization : 0 );
+    my $EventList = WebEve::cEventList->new( 'PerPage' => 15,
+					     'Page' => $Page,
+					     'PublicOnly' => !$Intern,
+					     'ForOrgID' => $Intern ? $Organization : 0 );
+    $EventList->readData();
+    my $Pages = $EventList->getPageCount();
 
     # Seitenumschalter
     # -----------------------------------------------------------------------
@@ -90,7 +89,7 @@ sub main
     my $Format = "kalender.pl?Seite=%d&Verein=$Organization";
     $Format .= "&Intern=Intern" if $Intern;
 
-    for( my $i = 1; $i <= $Dates{'Pages'}; $i++)
+    for( my $i = 1; $i <= $Pages; $i++)
     {
 	my $HashRef = { 'Page' => $i };
 	$HashRef->{'PageURL'} = sprintf($Format, $i) if $i != $Page; 
@@ -99,23 +98,17 @@ sub main
 	push( @PageSwitch, $HashRef );
     }
     
-    $SubTmpl->param( 'Pages' => \@PageSwitch ) if $Dates{'Pages'} > 1;
-    $SubTmpl->param( 'NextPage' => $Page + 1 ) if $Page < $Dates{'Pages'};
-    $SubTmpl->param( 'NextPageURL' => sprintf($Format, $Page + 1) ) if $Page < $Dates{'Pages'};
+    $SubTmpl->param( 'Pages' => \@PageSwitch ) if $Pages > 1;
+    $SubTmpl->param( 'NextPage' => $Page + 1 ) if $Page < $Pages;
+    $SubTmpl->param( 'NextPageURL' => sprintf($Format, $Page + 1) ) if $Page < $Pages;
     $SubTmpl->param( 'PrevPage' => $Page - 1 ) if $Page > 1;
     $SubTmpl->param( 'PrevPageURL' => sprintf($Format, $Page - 1) ) if $Page > 1;
-    $SubTmpl->param( 'PageCount' => $Dates{'Pages'} );
+    $SubTmpl->param( 'PageCount' => $Pages );
     $SubTmpl->param( 'CurrentPage' => $Page );
     
     # -----------------------------------------------------------------------
 
-    Language(3);
-    my ($year, $month, $day) = Today();
-    my $Today = sprintf( "%.2s, %02d.%.02d.%d",
-			 Day_of_Week_to_Text(Day_of_Week($year,$month,$day)),
-			 $day,
-			 $month,
-			 $year );
+    my $Today = WebEve::cDate->new('today');
 
     # Terminliste
     # -----------------------------------------------------------------------
@@ -124,46 +117,45 @@ sub main
     my $LastYear = 0;
     my $LastWasNextWeek = 0;
 
-    my @TodayDates = ( { 'Header' => "Heute - $Today" } );
+    my @TodayDates = ( { 'Header' => "Heute - ".$Today->getDateStr } );
     my @NextWeekDates = ( { 'Header' => "In den nächsten 7 Tagen" } );
     my @OtherDates = ();
 
-    foreach my $DateObj ( @{$Dates{'Dates'}} )
+    foreach my $DateObj ( $EventList->getDateList() )
     {
-	my $OrgName = $OrgList{ $DateObj->getOrgID }->[0];
-	$OrgName = '' if $OrgName eq '-unbekannt-';
+	my $OrgName = $DateObj->getOrg;
 
 	my $HashRef = { 'Time' => $DateObj->getTime,
 			'Place' => HTMLFilter($DateObj->getPlace, $Template),
-			'Desc' => HTMLFilter($DateObj->getDesc, $Template),
-			'eMail' => $OrgList{ $DateObj->getOrgID }->[1],
-			'Website' => $OrgList{ $DateObj->getOrgID }->[2] };
+			'Desc' => HTMLFilter($DateObj->getDesc, $Template) }; #,
+#			'eMail' => $OrgList{ $DateObj->getOrgID }->[1],
+#			'Website' => $OrgList{ $DateObj->getOrgID }->[2] };
 
 	$HashRef->{'Org'} = $OrgName unless( $Intern );
 
 	if( $DateObj->getDate ne $LastDate )
 	{
-	    $HashRef->{'Date'} = $DateObj->getDate;
-	    $LastDate = $DateObj->getDate;
+	    $HashRef->{'Date'} = $DateObj->getDate->getDateStr;
+	    $LastDate = $DateObj->getDate->getDateStr;
 	}
 
-	if( $DateObj->isToday )
+	if( $DateObj->getDate->isToday )
 	{
 	    push( @TodayDates, $HashRef );
 	}
-	elsif( $DateObj->isNextWeek )
+	elsif( $DateObj->getDate->isNextWeek )
 	{
 	    push( @NextWeekDates, $HashRef );
 	}
 	else
 	{
-	    if( $DateObj->getMonth != $LastMonth || $DateObj->getYear != $LastYear )
+	    if( $DateObj->getDate->getMonth != $LastMonth || $DateObj->getDate->getYear != $LastYear )
 	    {
-		my $TextMonth = Month_to_Text( $DateObj->getMonth );
-		push( @OtherDates, { 'Header' => "$TextMonth ".$DateObj->getYear } );
+		my $TextMonth = $DateObj->getDate->getMonthText;
+		push( @OtherDates, { 'Header' => "$TextMonth ".$DateObj->getDate->getYear } );
 		
-		$LastMonth = $DateObj->getMonth;
-		$LastYear =  $DateObj->getYear;
+		$LastMonth = $DateObj->getDate->getMonth;
+		$LastYear =  $DateObj->getDate->getYear;
 	    }
 
 	    push( @OtherDates, $HashRef );	
