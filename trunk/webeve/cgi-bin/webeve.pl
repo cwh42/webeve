@@ -20,11 +20,12 @@ $app->run();
 package WebEveX;
 
 use strict;
-use base 'WebEve::WebEveApp';
+use base qw( WebEve WebEve::WebEveApp );
 use WebEve::cMySQL;
 use WebEve::cEventList;
 use WebEve::cEvent;
 use WebEve::cDate;
+use WebEve::cOrg;
 
 sub setup
 {
@@ -101,36 +102,6 @@ sub _getUsersOrgList
     return \@Data;
 }
 
-sub _getOrgsUserList
-{
-    my $self = shift;
-
-    my %Params = @_;
-
-    my $OrgID = $Params{'OrgID'} ? $Params{'OrgID'} : 0;
-    die unless $OrgID;
-
-    my @SelUserID = @{$Params{'Selected'}} if exists( $Params{'Selected'} );
-
-    my $sql = "SELECT u.UserID, u.FullName, u.UserName ".
-	"FROM Org_User ou LEFT JOIN User u ON ou.UserID = u.UserID ".
-	"WHERE ou.OrgID = $OrgID ".
-	"ORDER BY u.UserName";
-
-    my @Data = ();
-
-    my $sth = $self->{dbh}->prepare($sql);
-    $sth->execute();
-
-    while( my $row = $sth->fetchrow_hashref() )
-    {
-	$row->{'selected'} = 1 if grep { $_ == $row->{UserID}} (@SelUserID);
-	push( @Data, $row);
-    }
-
-    return \@Data;
-}
-
 sub _getUserList
 {
     my $self = shift;
@@ -175,109 +146,6 @@ sub _getOrgList
 
     return \@Data;
 
-}
-
-sub _trim($)
-{
-    my ($string) = @_;
-
-    $string =~ s/^\s+//s;
-    $string =~ s/\s+$//s;
-
-    return $string;
-}
-
-#########################################################################
-# sub ArrayDiff($$)
-# ----------------------------------------------------------------------
-# compares 2 arrays and reports the differences
-# expects 2 array-references as parameters for array A and array B
-# If the optional 3rd parameter is TRUE the arrays are sorted as strings
-# returns 2 array-references:
-#    the first contains all elements only found in A
-#    the second contains all elements only found in B
-#########################################################################
-
-sub _ArrayDiff($$;$)
-{
-        my ($Aref, $Bref, $String) = @_;
-
-        my @A;
-        my @B;
-
-        if($String)
-        {
-                # sort arrays as strings
-                @A = sort { $a cmp $b } @$Aref;
-                @B = sort { $a cmp $b } @$Bref;
-        }
-        else
-        {
-                # sort both arrays numeric ascending
-                @A = sort { $a <=> $b } @$Aref;
-                @B = sort { $a <=> $b } @$Bref;
-        }
-
-        my $ai = 0;
-        my $bi = 0;
-
-        my @Aonly;
-        my @Bonly;
-
-        while(defined($A[$ai]) || defined($B[$bi]))
-        {
-                if(!defined($A[$ai])) # A has less elements than B
-                {
-                        push(@Bonly, $B[$bi]);
-                        $bi++;
-                }
-                elsif(!defined($B[$bi])) # B has less elements than A
-                {
-                        push(@Aonly, $A[$ai]);
-                        $ai++;
-                }
-                else
-                {
-                        if($String)
-                        {
-                                if(($A[$ai] cmp $B[$bi]) == -1)
-                                {
-                                        push(@Aonly, $A[$ai]);
-                                        $ai++;
-                                }
-                                elsif(($A[$ai] cmp $B[$bi]) == +1)
-                                {
-                                        push(@Bonly, $B[$bi]);
-                                        $bi++;
-                                }
-                                else
-                                {
-                                        $ai++;
-                                        $bi++;
-                                }
-                        }
-                        else
-                        {
-                                if($A[$ai] < $B[$bi])
-                                {
-                                        push(@Aonly, $A[$ai]);
-                                        $ai++;
-                                }
-                                elsif($A[$ai] > $B[$bi])
-                                {
-                                        push(@Bonly, $B[$bi]);
-                                        $bi++;
-                                }
-                                else
-                                {
-                                        $ai++;
-                                        $bi++;
-                                }
-                        }
-                }
-        }
-
-        return \@Aonly, \@Bonly;
 }
 
 # ---------------------------------------------------------
@@ -330,7 +198,7 @@ sub setOrgPref($$@)
 
     my @OldValues = $self->getOrgPref($OrgID, $PrefType);
 
-    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@NewValues, \@OldValues, 1);
+    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@NewValues, \@OldValues, 1);
 
     my @ToAdd = @$ToAddRef;
     my @ToDelete = @$ToDeleteRef;
@@ -412,7 +280,7 @@ sub setUserPref($@)
 
     my @OldValues = $self->getUserPref($PrefType);
 
-    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@NewValues, \@OldValues, 1);
+    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@NewValues, \@OldValues, 1);
 
     my @ToAdd = @$ToAddRef;
     my @ToDelete = @$ToDeleteRef;
@@ -1019,7 +887,7 @@ sub UserAdd
     my $Action = $query->param('Action') || '';
 
     my $LoginName = $query->param('Login') || '';
-    $LoginName = _trim( $LoginName );
+    $LoginName = $self->_trim( $LoginName );
 
     my $FullName = $query->param('FullName') || '';
     my $eMail = $query->param('eMail') || '';
@@ -1149,7 +1017,7 @@ sub UserEdit
 	    my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
 	    my @UserOrgs = map { $_->{OrgID} } @$ArrRef;
 
-	    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@Orgs, \@UserOrgs);
+	    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Orgs, \@UserOrgs);
 
 	    my @ToAdd = @$ToAddRef;
 	    my @ToDelete = @$ToDeleteRef;
@@ -1345,10 +1213,12 @@ sub OrgEdit
                                WHERE OrgID = $OrgID");
 	    
 	    # Update relations Orgs->Users
-	    my $ArrRef = $self->_getOrgsUserList( 'OrgID' => $OrgID );
+	    my $Org = WebEve::cOrg->new( OrgID => $OrgID);
+
+	    my $ArrRef = $Org->getUsers();
 	    my @OrgUsers = map { $_->{UserID} } @$ArrRef;
 
-	    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@Users, \@OrgUsers);
+	    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Users, \@OrgUsers);
 
 	    my @ToAdd = @$ToAddRef;
 	    my @ToDelete = @$ToDeleteRef;
@@ -1401,7 +1271,9 @@ sub OrgEdit
 	$SubTmpl->param('eMail' => $OrgData->{eMail});
 	$SubTmpl->param('Website' => $OrgData->{Website});
 
-	my $ArrRef = $self->_getOrgsUserList( 'OrgID' => $OrgID );
+	my $Org = WebEve::cOrg->new( OrgID => $OrgID);
+	my $ArrRef = $Org->getUsers();
+
 	my @OrgsUsers = map { $_->{UserID} } @$ArrRef;
 
 	my $UserList = $self->_getUserList(@OrgsUsers);
