@@ -43,7 +43,7 @@ sub setup
 		      'config' => 'Config',
 		      'userlist' => 'UserList',
 		      'useradd' => 'UserAdd',
-		      'useredit' => 'Useredit',
+		      'useredit' => 'UserEdit',
 		      'orglist' => 'OrgList',
 		      'orgadd' => 'OrgAdd',
 		      'orgedit' => 'OrgEdit' );
@@ -77,13 +77,14 @@ sub _getUsersOrgList
 {
     my $self = shift;
 
-    my @SelOrgID = @_;
+    my %Params = @_;
 
+    my $UserID = $Params{'UserID'} ? $Params{'UserID'} : $self->{UserID};
+    my @SelOrgID = @{$Params{'Selected'}} if exists( $Params{'Selected'} );
 
     my $sql = "SELECT o.OrgID, o.OrgName ".
-	"FROM Org_User ou, Organization o ".
-	"WHERE ou.UserID = ".$self->{UserID}.
-	" AND ou.OrgID = o.OrgID ".
+	"FROM Org_User ou LEFT JOIN Organization o ON ou.OrgID = o.OrgID ".
+	"WHERE ou.UserID = $UserID ".
 	"ORDER BY o.OrgName";
 
     my @Data = ();
@@ -100,6 +101,82 @@ sub _getUsersOrgList
     return \@Data;
 }
 
+sub _getOrgsUserList
+{
+    my $self = shift;
+
+    my %Params = @_;
+
+    my $OrgID = $Params{'OrgID'} ? $Params{'OrgID'} : 0;
+    die unless $OrgID;
+
+    my @SelUserID = @{$Params{'Selected'}} if exists( $Params{'Selected'} );
+
+    my $sql = "SELECT u.UserID, u.FullName, u.UserName ".
+	"FROM Org_User ou LEFT JOIN User u ON ou.UserID = u.UserID ".
+	"WHERE ou.OrgID = $OrgID ".
+	"ORDER BY u.UserName";
+
+    my @Data = ();
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $row = $sth->fetchrow_hashref() )
+    {
+	$row->{'selected'} = 1 if grep { $_ == $row->{UserID}} (@SelUserID);
+	push( @Data, $row);
+    }
+
+    return \@Data;
+}
+
+sub _getUserList
+{
+    my $self = shift;
+    my @SelUserID = @_;
+
+    my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
+	"FROM User u ".
+	"ORDER BY u.UserName";
+
+    my @Data = ();
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $row = $sth->fetchrow_hashref() )
+    {
+	$row->{'selected'} = 1 if grep { $_ == $row->{UserID}} (@SelUserID);
+	push( @Data, $row);
+    }
+
+    return \@Data;
+}
+
+sub _getOrgList
+{
+    my $self = shift;
+    my @SelOrgID = @_;
+
+    my $sql = "SELECT o.OrgID, o.OrgName, o.eMail, o.Website ".
+	"FROM Organization o ORDER BY o.OrgName";
+
+    my @Data = ();
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $row = $sth->fetchrow_hashref() )
+    {
+	$row->{'selected'} = 1 if grep { $_ == $row->{OrgID}} (@SelOrgID);
+	push( @Data, $row);
+    }
+
+    return \@Data;
+
+}
+
 sub _trim($)
 {
     my ($string) = @_;
@@ -108,6 +185,99 @@ sub _trim($)
     $string =~ s/\s+$//s;
 
     return $string;
+}
+
+#########################################################################
+# sub ArrayDiff($$)
+# ----------------------------------------------------------------------
+# compares 2 arrays and reports the differences
+# expects 2 array-references as parameters for array A and array B
+# If the optional 3rd parameter is TRUE the arrays are sorted as strings
+# returns 2 array-references:
+#    the first contains all elements only found in A
+#    the second contains all elements only found in B
+#########################################################################
+
+sub _ArrayDiff($$;$)
+{
+        my ($Aref, $Bref, $String) = @_;
+
+        my @A;
+        my @B;
+
+        if($String)
+        {
+                # sort arrays as strings
+                @A = sort { $a cmp $b } @$Aref;
+                @B = sort { $a cmp $b } @$Bref;
+        }
+        else
+        {
+                # sort both arrays numeric ascending
+                @A = sort { $a <=> $b } @$Aref;
+                @B = sort { $a <=> $b } @$Bref;
+        }
+
+        my $ai = 0;
+        my $bi = 0;
+
+        my @Aonly;
+        my @Bonly;
+
+        while(defined($A[$ai]) || defined($B[$bi]))
+        {
+                if(!defined($A[$ai])) # A has less elements than B
+                {
+                        push(@Bonly, $B[$bi]);
+                        $bi++;
+                }
+                elsif(!defined($B[$bi])) # B has less elements than A
+                {
+                        push(@Aonly, $A[$ai]);
+                        $ai++;
+                }
+                else
+                {
+                        if($String)
+                        {
+                                if(($A[$ai] cmp $B[$bi]) == -1)
+                                {
+                                        push(@Aonly, $A[$ai]);
+                                        $ai++;
+                                }
+                                elsif(($A[$ai] cmp $B[$bi]) == +1)
+                                {
+                                        push(@Bonly, $B[$bi]);
+                                        $bi++;
+                                }
+                                else
+                                {
+                                        $ai++;
+                                        $bi++;
+                                }
+                        }
+                        else
+                        {
+                                if($A[$ai] < $B[$bi])
+                                {
+                                        push(@Aonly, $A[$ai]);
+                                        $ai++;
+                                }
+                                elsif($A[$ai] > $B[$bi])
+                                {
+                                        push(@Bonly, $B[$bi]);
+                                        $bi++;
+                                }
+                                else
+                                {
+                                        $ai++;
+                                        $bi++;
+                                }
+                        }
+                }
+        }
+
+        return \@Aonly, \@Bonly;
 }
 
 # ---------------------------------------------------------
@@ -272,7 +442,7 @@ sub EventList
     $SubTmpl->param('Admin' => $self->{isAdmin});
 
     @ShowOrg = map { $_->{'OrgID'} } ( @{$self->_getUsersOrgList()} ) if( scalar(@ShowOrg) == 0 );
-    $SubTmpl->param('Orgs' => $self->_getUsersOrgList(@ShowOrg));
+    $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => \@ShowOrg ));
 
     return $SubTmpl->output;
 }
@@ -328,7 +498,7 @@ sub Add
 
 		if( $query->param('KeepOrg') )
 		{
-		    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($Event->getOrgID()));
+		    $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => [$Event->getOrgID()]));
 		    $SubTmpl->param('KeepOrg' => 1);
 		}
 
@@ -378,7 +548,7 @@ sub Add
 		$SubTmpl->param($_ => $query->param($_) );
 	    }
 
-	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($OrgID));
+	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => [$OrgID] ));
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
@@ -513,7 +683,7 @@ sub Edit
 	else
 	{
 	    $SubTmpl->param('EntryID' => $query->param('EntryID'));
-	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($OrgID));
+	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => [$OrgID] ));
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
@@ -527,7 +697,7 @@ sub Edit
     else
     {
 	$SubTmpl->param('EntryID' => $query->param('EntryID'));
-	$SubTmpl->param('Orgs' => $self->_getUsersOrgList($Event->getOrgID()));
+	$SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => [$Event->getOrgID()] ));
 	my $tmpDate = join('-', reverse($Event->getDate->getDate()));
 	$SubTmpl->param('Date' => $tmpDate);
 	$SubTmpl->param('Time' => $Event->getTime());
@@ -606,26 +776,6 @@ sub Config
     my $query = $self->query();
 
     return 0;
-}
-
-sub _getUserList
-{
-    my $self = shift;
-    my @Userlist;
-
-    my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
-	"FROM User u ".
-	"ORDER BY u.UserName";
-
-    my $sth = $self->{dbh}->prepare($sql);
-    $sth->execute();
-
-    while( my $hrefData = $sth->fetchrow_hashref() )
-    {
-	push( @Userlist, $hrefData);
-    }
-
-    return \@Userlist;
 }
 
 sub UserList
@@ -719,21 +869,7 @@ sub UserAdd
 	}
     }
 
-    my $OrgList = $self->_getOrgList();
-
-    foreach my $Org ( @$OrgList )
-    {
-	my $selected = '';
-
-	foreach(@Orgs)
-	{
-	    $selected = 'checked' if($_ == $Org->{'OrgID'});
-	}
-
-	$Org->{'Selected'} = $selected;
-    }
-
-    $SubTmpl->param('Orgs' => $OrgList);
+    $SubTmpl->param('Orgs' => $self->_getOrgList(@Orgs));
 
     return $SubTmpl->output();
 }
@@ -742,31 +878,126 @@ sub UserEdit
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer Bearbeiten' );
-    #my $SubTmpl = $self->load_tmpl( '');
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer bearbeiten' );
+    my $SubTmpl = $self->load_tmpl( 'user-edit.tmpl' );
 
     my $query = $self->query();
 
-    return 0;
-}
+    my $Action = $query->param('Action') || '';
 
-sub _getOrgList
-{
-    my $self = shift;
-    my @Orglist;
+    my $UserID = $query->param('UserID') || '';
+    my $FullName = $query->param('FullName') || '';
+    my $eMail = $query->param('eMail') || '';
+    my $isAdmin = $query->param('isAdmin') ? 1 : 0;
+    my @Orgs =  $query->param('Orgs');
 
-    my $sql = "SELECT o.OrgID, o.OrgName, o.eMail, o.Website ".
-	"FROM Organization o ORDER BY o.OrgName";
-
-    my $sth = $self->{dbh}->prepare($sql);
-    $sth->execute();
-
-    while( my $hrefData = $sth->fetchrow_hashref() )
+    if($Action eq 'Save')
     {
-	push( @Orglist, $hrefData);
+	my $Error = 0;
+
+        if(@Orgs == 0)
+        {
+	    $SubTmpl->param( 'OrgError' => 1 );
+	    $Error = 1;
+        }
+
+        if($UserID eq '')
+        {
+	    $Error = 1;
+        }
+
+        if($FullName eq '')
+        {
+	    $SubTmpl->param( 'FullNameError' => 1 );
+	    $Error = 1;
+        }
+
+        if($eMail eq '')
+        {
+	    $SubTmpl->param( 'eMailError' => 1 );
+	    $Error = 1;
+        }
+	
+	unless( $Error )
+	{
+	    my $FullNameSQL = $self->{dbh}->quote($FullName);
+	    my $eMailSQL = $self->{dbh}->quote($eMail);
+
+	    $self->{dbh}->do("UPDATE User
+                               SET FullName = $FullNameSQL,
+                               eMail = $eMailSQL,
+                               isAdmin = $isAdmin
+                               WHERE UserID = $UserID");
+
+	    my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
+	    my @UserOrgs = map { $_->{OrgID} } @$ArrRef;
+
+	    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@Orgs, \@UserOrgs);
+
+	    my @ToAdd = @$ToAddRef;
+	    my @ToDelete = @$ToDeleteRef;
+
+	    #print STDERR "ALL:".join(',', @UserOrgs)."\n";
+	    #print STDERR "SEL:".join(',', @Orgs)."\n";
+
+	    #print STDERR "ADD:".join(',', @ToAdd)."\n";
+	    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+
+	    if(@ToAdd)
+	    {
+		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
+		$sql .=  join( ', ', map { "($_, $UserID)" } @ToAdd );
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    if(@ToDelete)
+	    {
+		my $sql = "DELETE FROM Org_User where UserID = $UserID  AND (";
+		$sql .=  join( ' OR ', map { "OrgID = $_" } @ToDelete );
+		$sql .= ")";
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    $self->logger("Modified user ID: '$UserID'");
+
+	    $self->_FillMenu('userlist');
+	    return $self->UserList();
+	}
+	else
+	{
+	    $SubTmpl->param('UserID' => $query->param('UserID'));
+	    $SubTmpl->param('Login' => $query->param('Login'));
+	    $SubTmpl->param('FullName' => $query->param('FullName'));
+	    $SubTmpl->param('eMail' => $query->param('eMail'));
+	    $SubTmpl->param('isAdmin' => 'checked') if $query->param('isAdmin');
+	    $SubTmpl->param('Orgs' => $self->_getOrgList(@Orgs));
+	}
+    }
+    else
+    {
+	my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
+	    "FROM User u ".
+	    "WHERE u.UserID = $UserID";
+
+	my $UserData = $self->{dbh}->selectrow_hashref($sql);
+
+	$SubTmpl->param('UserID' => $UserData->{UserID});
+	$SubTmpl->param('UserName' => $UserData->{UserName});
+	$SubTmpl->param('FullName' => $UserData->{FullName});
+	$SubTmpl->param('eMail' => $UserData->{eMail});
+	$SubTmpl->param('LastLogin' => $UserData->{LastLogin});
+	$SubTmpl->param('isAdmin' => 'checked') if $UserData->{isAdmin};
+
+	my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
+	my @UsersOrgs = map { $_->{OrgID} } @$ArrRef;
+
+	my $OrgList = $self->_getOrgList(@UsersOrgs);
+	$SubTmpl->param('Orgs' => $OrgList);
     }
 
-    return \@Orglist;
+    return $SubTmpl->output();
 }
 
 sub OrgList
@@ -786,23 +1017,181 @@ sub OrgAdd
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Verein' );
-    #my $SubTmpl = $self->load_tmpl( '');
+    my $SubTmpl = $self->load_tmpl( 'org-add.tmpl' );
 
     my $query = $self->query();
 
-    return 0;
+    my $Action = $query->param('Action') || '';
+    
+    my $Name = $query->param('Name') || '';
+    my $eMail = $query->param('eMail') || '';
+    my $Website = $query->param('Website') || '';
+    my @Users =  $query->param('Users');   
+    
+    if($Action eq 'Save')
+    {
+	my $Error = 0;
+
+	if( $Name eq '' )
+	{
+	    $SubTmpl->param( 'NameError' => 1 );
+	    $Error = 1;
+	}
+
+	if( $eMail ne '' && !($eMail =~ /\@/) )
+	{
+	    $SubTmpl->param( 'eMailError' => 1 );
+	    $Error = 1;
+	}
+
+	unless( $Error )
+	{
+	    my $NameSQL = $self->{dbh}->quote($Name);
+	    my $eMailSQL = $self->{dbh}->quote($eMail);
+	    my $WebsiteSQL = $self->{dbh}->quote($Website);
+
+	    $self->{dbh}->do("INSERT INTO Organization
+                   (OrgName, eMail, Website)
+                   VALUES ($NameSQL, $eMailSQL, $WebsiteSQL)");
+	    
+	    # Update relations Orgs->Users
+	    my $OrgID = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Organization LIMIT 1");
+
+	    if(@Users)
+	    {
+		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
+		$sql .=  join( ', ', map { "($OrgID, $_)" } @Users );
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    $self->logger("Added Organization: '$Name'; Users: ".join( ', ', @Users ));
+
+	    $self->_FillMenu('orglist');
+	    return $self->OrgList();
+	}
+	else
+	{
+	    $SubTmpl->param('Name' => $query->param('Name'));
+	    $SubTmpl->param('eMail' => $query->param('eMail'));
+	    $SubTmpl->param('Website' => $query->param('Website'));
+	    $SubTmpl->param('Users' => $self->_getUserList(@Users));
+	}
+    }
+    else
+    {
+	$SubTmpl->param('Users' => $self->_getUserList());
+    }
+
+    return $SubTmpl->output();
 }
 
 sub OrgEdit
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Verein Bearbeiten' );
-    #my $SubTmpl = $self->load_tmpl( '');
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Verein bearbeiten' );
+    my $SubTmpl = $self->load_tmpl( 'org-edit.tmpl' );
 
     my $query = $self->query();
 
-    return 0;
+    my $Action = $query->param('Action') || '';
+
+    my $OrgID = $query->param('OrgID') || '';
+    my $Name = $query->param('Name') || '';
+    my $eMail = $query->param('eMail') || '';
+    my $Website = $query->param('Website') || '';
+    my @Users =  $query->param('Users');   
+
+    if($Action eq 'Save')
+    {
+	my $Error = 0;
+
+	if($OrgID eq '')
+	{
+	    $Error = 1;
+	}
+
+	if( $eMail ne '' && !($eMail =~ /\@/) )
+	{
+	    $Error = 1;
+	    $SubTmpl->param( 'eMailError' => 1 );
+	}
+
+	unless( $Error )
+	{
+	    my $eMailSQL = $self->{dbh}->quote($eMail);
+	    my $WebsiteSQL = $self->{dbh}->quote($Website);
+
+	    $self->{dbh}->do("UPDATE Organization
+                               SET eMail = $eMailSQL, Website = $WebsiteSQL
+                               WHERE OrgID = $OrgID");
+	    
+	    # Update relations Orgs->Users
+	    my $ArrRef = $self->_getOrgsUserList( 'OrgID' => $OrgID );
+	    my @OrgUsers = map { $_->{UserID} } @$ArrRef;
+
+	    my ($ToAddRef, $ToDeleteRef) = _ArrayDiff(\@Users, \@OrgUsers);
+
+	    my @ToAdd = @$ToAddRef;
+	    my @ToDelete = @$ToDeleteRef;
+
+	    #print STDERR "ALL:".join(',', @OrgUsers)."\n";
+	    #print STDERR "SEL:".join(',', @Users)."\n";
+
+	    #print STDERR "ADD:".join(',', @ToAdd)."\n";
+	    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+
+	    if(@ToAdd)
+	    {
+		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
+		$sql .=  join( ', ', map { "($OrgID, $_)" } @ToAdd );
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    if(@ToDelete)
+	    {
+		my $sql = "DELETE FROM Org_User where OrgID = $OrgID  AND (";
+		$sql .=  join( ' OR ', map { "UserID = $_" } @ToDelete );
+		$sql .= ")";
+
+		$self->{dbh}->do($sql);
+	    }
+
+	    $self->_FillMenu('orglist');
+	    return $self->OrgList();
+	}
+	else
+	{
+	    $SubTmpl->param('OrgID' => $query->param('OrgID'));
+	    $SubTmpl->param('Name' => $query->param('Name'));
+	    $SubTmpl->param('eMail' => $query->param('eMail'));
+	    $SubTmpl->param('Website' => $query->param('Website'));
+	    $SubTmpl->param('Users' => $self->_getUserList(@Users));
+	}
+    }
+    else # $Action ne 'Save'
+    {
+	my $sql = "SELECT o.OrgID, o.OrgName, o.eMail, o.Website ".
+	    "FROM Organization o ".
+	    "WHERE o.OrgID = $OrgID";
+
+	my $OrgData = $self->{dbh}->selectrow_hashref($sql);
+
+	$SubTmpl->param('OrgID' => $OrgData->{OrgID});
+	$SubTmpl->param('OrgName' => $OrgData->{OrgName});
+	$SubTmpl->param('eMail' => $OrgData->{eMail});
+	$SubTmpl->param('Website' => $OrgData->{Website});
+
+	my $ArrRef = $self->_getOrgsUserList( 'OrgID' => $OrgID );
+	my @OrgsUsers = map { $_->{UserID} } @$ArrRef;
+
+	my $UserList = $self->_getUserList(@OrgsUsers);
+	$SubTmpl->param('Users' => $UserList);
+    }
+
+    return $SubTmpl->output();
 }
 
 1;
