@@ -45,7 +45,10 @@ sub setup
 		      'config' => 'Config',
 		      'userlist' => 'UserList',
 		      'useradd' => 'UserAdd',
-		      'orgadd' => 'OrgAdd' );
+		      'useredit' => 'Useredit',
+		      'orglist' => 'OrgList',
+		      'orgadd' => 'OrgAdd',
+		      'orgedit' => 'OrgEdit' );
 }
 
 # -----------------------------------------------------------------------------
@@ -60,8 +63,9 @@ sub _getNavMenu
 		    { 'Admin' => 0, 'Title' => 'Passwort', 'RunMode' => 'passwd' },
 		    { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
 		    { 'Admin' => 1, 'Title' => 'Benutzer', 'RunMode' => 'userlist',
-		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' },
-				      { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
+		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
+		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
+		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
 		    { 'Admin' => 0, 'Title' => 'Logout', 'RunMode' => 'logout' }
 		    );
 
@@ -71,7 +75,7 @@ sub _getNavMenu
 
 # -----------------------------------------------------------------------------
 
-sub _getOrgList
+sub _getUsersOrgList
 {
     my $self = shift;
 
@@ -188,7 +192,7 @@ sub Login()
 
 	    $self->{dbh}->do("UPDATE User SET LastLogin = now() where UserID = ".$self->{UserID});
 
-	    my $SessionID = _MakeSessionID($User);
+	    my $SessionID = $self->_MakeSessionID($User);
 
 	    my $Cookie = $query->cookie(-name=>'sessionID',
 					-value=>$SessionID);
@@ -257,8 +261,8 @@ sub EventList
     $SubTmpl->param('User' => $self->{UserName});
     $SubTmpl->param('Admin' => $self->{isAdmin});
 
-    @ShowOrg = map { $_->{'OrgID'} } ( @{$self->_getOrgList()} ) if( scalar(@ShowOrg) == 0 );
-    $SubTmpl->param('Orgs' => $self->_getOrgList(@ShowOrg));
+    @ShowOrg = map { $_->{'OrgID'} } ( @{$self->_getUsersOrgList()} ) if( scalar(@ShowOrg) == 0 );
+    $SubTmpl->param('Orgs' => $self->_getUsersOrgList(@ShowOrg));
 
     return $SubTmpl->output;
 }
@@ -283,7 +287,7 @@ sub Add
 
     my $Action = $query->param('Action') || '';
 
-    $SubTmpl->param('Orgs' => $self->_getOrgList());
+    $SubTmpl->param('Orgs' => $self->_getUsersOrgList());
     $SubTmpl->param('Public' => 1);
 
     if($Action eq 'Save')
@@ -314,7 +318,7 @@ sub Add
 
 		if( $query->param('KeepOrg') )
 		{
-		    $SubTmpl->param('Orgs' => $self->_getOrgList($Event->getOrgID()));
+		    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($Event->getOrgID()));
 		    $SubTmpl->param('KeepOrg' => 1);
 		}
 
@@ -364,7 +368,7 @@ sub Add
 		$SubTmpl->param($_ => $query->param($_) );
 	    }
 
-	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
+	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($OrgID));
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
@@ -458,7 +462,7 @@ sub Edit
 
     my $Action = $query->param('Action') || '';
 
-    $SubTmpl->param('Orgs' => $self->_getOrgList());
+    $SubTmpl->param('Orgs' => $self->_getUsersOrgList());
     $SubTmpl->param('Public' => 1);
 
     my $Event = WebEve::cEvent->newFromDB($EntryID);
@@ -491,7 +495,7 @@ sub Edit
 	else
 	{
 	    $SubTmpl->param('EntryID' => $query->param('EntryID'));
-	    $SubTmpl->param('Orgs' => $self->_getOrgList($OrgID));
+	    $SubTmpl->param('Orgs' => $self->_getUsersOrgList($OrgID));
 	    $SubTmpl->param('Date' => $query->param('Date'));
 	    $SubTmpl->param('Time' => $query->param('Time'));
 	    $SubTmpl->param('Place' => $query->param('Place'));
@@ -504,7 +508,7 @@ sub Edit
     else
     {
 	$SubTmpl->param('EntryID' => $query->param('EntryID'));
-	$SubTmpl->param('Orgs' => $self->_getOrgList($Event->getOrgID()));
+	$SubTmpl->param('Orgs' => $self->_getUsersOrgList($Event->getOrgID()));
 	my $tmpDate = join('-', reverse($Event->getDate->getDate()));
 	$SubTmpl->param('Date' => $tmpDate);
 	$SubTmpl->param('Time' => $Event->getTime());
@@ -523,8 +527,53 @@ sub Passwd
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Passwort ändern' );
+    my $SubTmpl = $self->load_tmpl( 'user-passwd.tmpl');
 
-    return 0;
+    my $query = $self->query();
+
+    my $Action = $query->param('Action') || '';
+    my $OldPass = $query->param('OldPass') || '';
+    my $NewPass1 = $query->param('NewPass1') || '';
+    my $NewPass2 = $query->param('NewPass2') || '';
+
+    my $UserID = $self->{UserID};
+
+    if($Action eq 'save')
+    {
+	if($NewPass1 ne $NewPass2)
+	{
+	    $SubTmpl->param('NewPWError' => 1);
+	}
+	else
+	{
+	    my $sql = sprintf( "SELECT password(%s) = User.Password FROM User WHERE User.UserID = %d LIMIT 1",
+			       $self->{dbh}->quote($OldPass),
+			       $UserID );
+	    
+	    my $Result = $self->{dbh}->selectrow_array($sql);
+
+	    if( $Result == 1 )
+	    {
+		$sql = sprintf("UPDATE User SET Password=password(%s)
+                                WHERE password(%s) = User.Password
+                                AND User.UserID = %d",
+			       $self->{dbh}->quote($NewPass1),
+			       $self->{dbh}->quote($OldPass),
+			       $UserID );
+	    
+		$self->{dbh}->do($sql);
+
+		$self->logger("Changed password");
+		$SubTmpl->param('OK' => 1);
+	    }
+	    else
+	    {
+		$SubTmpl->param('OldPWError' => 1);
+	    }
+	}
+    }
+
+    return $SubTmpl->output();    
 }
 
 sub Config
@@ -532,17 +581,43 @@ sub Config
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Konfiguration' );
+    #my $SubTmpl = $self->load_tmpl( '');
+
+    my $query = $self->query();
 
     return 0;
+}
+
+sub _getUserList
+{
+    my $self = shift;
+    my @Userlist;
+
+    my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
+	"FROM User u ".
+	"ORDER BY u.UserName";
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $hrefData = $sth->fetchrow_hashref() )
+    {
+	push( @Userlist, $hrefData);
+    }
+
+    return \@Userlist;
 }
 
 sub UserList
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer &amp; Vereine' );
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer' );
+    my $SubTmpl = $self->load_tmpl('user-list.tmpl');
 
-    return 0;
+    $SubTmpl->param( 'Users' => $self->_getUserList() );
+
+    return $SubTmpl->output();
 }
 
 sub UserAdd
@@ -550,8 +625,54 @@ sub UserAdd
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Benutzer' );
+    #my $SubTmpl = $self->load_tmpl( '');
+
+    my $query = $self->query();
 
     return 0;
+}
+
+sub UserEdit
+{
+    my $self = shift;
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer Bearbeiten' );
+    #my $SubTmpl = $self->load_tmpl( '');
+
+    my $query = $self->query();
+
+    return 0;
+}
+
+sub _getOrgList
+{
+    my $self = shift;
+    my @Orglist;
+
+    my $sql = "SELECT o.OrgID, o.OrgName, o.eMail, o.Website ".
+	"FROM Organization o ORDER BY o.OrgName";
+
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+
+    while( my $hrefData = $sth->fetchrow_hashref() )
+    {
+	push( @Orglist, $hrefData);
+    }
+
+    return \@Orglist;
+}
+
+sub OrgList
+{
+    my $self = shift;
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Vereine' );
+    my $SubTmpl = $self->load_tmpl('org-list.tmpl');
+
+    $SubTmpl->param( 'Orgs' => $self->_getOrgList() );
+
+    return $SubTmpl->output();
 }
 
 sub OrgAdd
@@ -559,6 +680,21 @@ sub OrgAdd
     my $self = shift;
 
     $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Verein' );
+    #my $SubTmpl = $self->load_tmpl( '');
+
+    my $query = $self->query();
+
+    return 0;
+}
+
+sub OrgEdit
+{
+    my $self = shift;
+
+    $self->{'MainTmpl'}->param( 'TITLE' => 'Verein Bearbeiten' );
+    #my $SubTmpl = $self->load_tmpl( '');
+
+    my $query = $self->query();
 
     return 0;
 }
