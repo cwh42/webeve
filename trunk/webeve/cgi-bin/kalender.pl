@@ -33,11 +33,47 @@ sub HTMLFilter($$)
     return $String;
 }
 
+# -----------------------------------------------------------------------
+# Page Switch
+# Param-Hash: Org, Page, Pages, Internal
+# -----------------------------------------------------------------------
+sub PageSwitch(%)
+{
+    my %Param = @_;
+    my $Pages = $Param{Pages};
+    my $Page = $Param{Page};
+
+    my @Switch = ();
+    my %Result;
+    
+    my $Format = "kalender.pl?Seite=%d&Verein=%s";
+    $Format .= "&Intern=Intern" if $Param{Internal};
+    
+    for( my $i = 1; $i <= $Pages; $i++)
+    {
+	my $HashRef = { 'Page' => $i };
+	$HashRef->{'PageURL'} = sprintf($Format, $i, $Param{Org}) if $i != $Page;
+	$HashRef->{'IsCurrent'} = 1 if $i == $Page; 
+	
+	push( @Switch, $HashRef );
+    }
+
+    $Result{'Pages'} = \@Switch if $Pages > 1;
+    $Result{'NextPage'} = $Page + 1 if $Page < $Pages;
+    $Result{'NextPageURL'} = sprintf($Format, $Page + 1) if $Page < $Pages;
+    $Result{'PrevPage'} = $Page - 1 if $Page > 1;
+    $Result{'PrevPageURL'} = sprintf($Format, $Page - 1) if $Page > 1;
+    $Result{'PageCount'} = $Pages;
+    $Result{'CurrentPage'} = $Page;
+
+    return %Result;
+}
+
 sub main
 {
-    my $ContentType = "text/html";
     my $MainTmplName = "kalender.tmpl";
     my $SubTmplName = "kalender-table.tmpl";
+    #WAP: "text/vnd.wap.wml"
 
     my $query = new CGI;
 
@@ -57,16 +93,6 @@ sub main
     {
 	$MainTmplName = "print.tmpl";
     }
-    elsif( lc($Template) eq 'wap')
-    {
-	$ContentType = "text/vnd.wap.wml";
-	$MainTmplName = "wap.tmpl";
-    }
-    elsif( lc($Template) eq 'csv')
-    {
-	$ContentType = "text/plain";
-	$MainTmplName = "csv.tmpl";
-    }
 
     my $MainTmpl = HTML::Template->new(filename => "$BasePath/$MainTmplName",
 				       die_on_bad_params => 0);
@@ -75,36 +101,18 @@ sub main
 				      die_on_bad_params => 0,
 				       loop_context_vars => 1);
 
+    # -----------------------------------------------------------------------
+
     my $EventList = WebEve::cEventList->new( 'PerPage' => 15,
 					     'Page' => $Page,
 					     'PublicOnly' => !$Intern,
 					     'ForOrgID' => $Intern ? $Organization : 0 );
     $EventList->readData();
-    my $Pages = $EventList->getPageCount();
-
-    # Seitenumschalter
-    # -----------------------------------------------------------------------
-    my @PageSwitch = ();
-
-    my $Format = "kalender.pl?Seite=%d&Verein=$Organization";
-    $Format .= "&Intern=Intern" if $Intern;
-
-    for( my $i = 1; $i <= $Pages; $i++)
-    {
-	my $HashRef = { 'Page' => $i };
-	$HashRef->{'PageURL'} = sprintf($Format, $i) if $i != $Page; 
-	$HashRef->{'IsCurrent'} = 1 if $i == $Page; 
-
-	push( @PageSwitch, $HashRef );
-    }
     
-    $SubTmpl->param( 'Pages' => \@PageSwitch ) if $Pages > 1;
-    $SubTmpl->param( 'NextPage' => $Page + 1 ) if $Page < $Pages;
-    $SubTmpl->param( 'NextPageURL' => sprintf($Format, $Page + 1) ) if $Page < $Pages;
-    $SubTmpl->param( 'PrevPage' => $Page - 1 ) if $Page > 1;
-    $SubTmpl->param( 'PrevPageURL' => sprintf($Format, $Page - 1) ) if $Page > 1;
-    $SubTmpl->param( 'PageCount' => $Pages );
-    $SubTmpl->param( 'CurrentPage' => $Page );
+    $SubTmpl->param( PageSwitch( Org => $Organization,
+				 Page => $Page,
+				 Pages => $EventList->getPageCount(),
+				 Internal => $Intern ) );
     
     # -----------------------------------------------------------------------
 
@@ -176,6 +184,6 @@ sub main
     $MainTmpl->param( 'Terminliste' => $SubTmpl->output );
 
 # Ausgabe
-    print "Content-type: $ContentType\n\n";
+    print "Content-type: text/html\n\n";
     print $MainTmpl->output;
 }
