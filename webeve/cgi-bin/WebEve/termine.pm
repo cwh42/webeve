@@ -17,9 +17,9 @@ use WebEve::Config;
 use WebEve::cEvent;
 use CGI::Carp qw(fatalsToBrowser set_message);
 
-set_message('<hr><b>Hierbei handelt es sich um einen Programmfehler.<br>'.
-	    'Bitte schicke die Meldung oberhalb der Linie an <a href="mailto:ch@goessenreuth.de">'.
-	    'ch@goessenreuth.de</a>, damit ich den Fehler beheben kann.</b>');
+set_message('<hr><b>Hierbei handelt es sich vermutlich um einen Programmfehler.<br>'.
+	    'Bitte schicke die Meldung oberhalb der Linie an mich (<a href="mailto:ch@goessenreuth.de">'.
+	    'ch@goessenreuth.de</a>), damit ich den Fehler beheben kann.</b>');
 
 $CGI::POST_MAX=1024 * 100;  # max 100K posts
 
