@@ -30,17 +30,25 @@ Der Login-Name existiert bereits.
 
 <form action="webeve.pl" method="GET">
 <table align="center" border="0">
-<tr>
+<tr valign="top">
 <td>Login-Name:</td><td><input type="TEXT" name="Login" value="<TMPL_VAR NAME=Login>"></td>
+<td rowspan="3" width="200">
+<b>Hinweis:</b><br>
+Dem neuen Benutzer wird ein zuf‰llig genieriertes Passwort per eMail an die
+angegebene Adresse geschickt. Daher ist es wichtig, daﬂ diese auch richtig ist.
+</td>
 </tr>
-<tr>
+<tr valign="top">
 <td>Voller Name:</td><td><input type="TEXT" name="FullName" value="<TMPL_VAR NAME=FullName>"></td>
 </tr>
-<tr>
+<tr valign="top">
 <td>eMail:</td><td><input type="TEXT" name="eMail" value="<TMPL_VAR NAME=eMail>"></td>
 </tr>
+</table>
+
+<table align="center" border="0">
 <tr>
-<td colspan="2" align="left">
+<td align="left">
 <br>
 <b>Vereine:</b><br>
 <TMPL_LOOP NAME=Orgs>
