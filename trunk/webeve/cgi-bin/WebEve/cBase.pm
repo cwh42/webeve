@@ -2,7 +2,7 @@
 package WebEve::cBase;
 
 use strict;
-use vars qw( $LogFileHandle $cvUserData );
+use vars qw( $LogFileHandle );
 use CGI;
 use FileHandle;
 use Date::Calc qw( Today_and_Now );
@@ -12,7 +12,7 @@ use WebEve::Config;
 
 sub BEGIN
 {
-    $LogFileHandle = new FileHandle ">$LogFile";
+    $LogFileHandle = new FileHandle ">>$LogFile";
     die("Could not open Logfile <$LogFile>") unless defined( $LogFileHandle );
 }
 
@@ -31,7 +31,8 @@ sub logger($)
     my ($message) = @_;
     my $UserName = $self->getUser()->{UserName} || $ENV{'REMOTE_HOST'};
 
-    printf( $LogFileHandle "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n", Today_and_Now(), $UserName, $message );
+    printf( $LogFileHandle "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n",
+	    Today_and_Now(), $UserName, $message );
 }
 
 #-----------------------------------------------------------------------
@@ -96,11 +97,7 @@ sub getConfig
 
     my $Param = shift;
 
-    if( $Param eq 'BaseURL' )
-    {
-	return $BaseURL;
-    }
-    elsif( $Param eq 'BasePath' )
+    if( $Param eq 'BasePath' )
     {
 	return $BasePath;
     }
