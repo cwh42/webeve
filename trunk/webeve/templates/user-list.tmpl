@@ -10,21 +10,19 @@
 
 <tr>
 <td><b>Login Name</b></td>
-<td><b>Vollständiger Name</b></td>
-<td><b>eMail</b></td>
+<td><b>Vollständiger Name &amp; eMail</b></td>
 <td><b>Letzter Login</b></td>
 <td>&nbsp;</td>
 </tr>
 
 <TR>
-<TD colspan="5"><hr size="2" noshade></TD>
+<TD colspan="5"><hr size="1" color="#000000" noshade></TD>
 </TR>
 
 <TMPL_LOOP NAME=Users>
 <tr>
 <td><TMPL_IF NAME=isAdmin><font color="#FF0000">@</font></TMPL_IF><TMPL_VAR NAME=UserName></td>
-<td><b><TMPL_VAR NAME=FullName><b></td>
-<td><a href="mailto:<TMPL_VAR NAME=eMail>"><TMPL_VAR NAME=eMail></a></td>
+<td><a href="mailto:<TMPL_VAR NAME=eMail>"><b><TMPL_VAR NAME=FullName></b></a></td>
 <td><TMPL_VAR NAME=LastLogin></td>
 <td>
 	<ul>
@@ -34,7 +32,7 @@
 </td>
 </tr>
 <TR>
-<TD colspan="5"><hr size="2" noshade></TD>
+<TD colspan="5"><hr size="1" color="#000000" noshade></TD>
 </TR>
 </TMPL_LOOP>
 </table>
