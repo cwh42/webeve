@@ -1,4 +1,10 @@
-<!-- Last Updated: 2003-04-08 -->
+<!-- Last Updated: 2003-08-22 -->
+
+<p>
+Hier kann das Aussehen des Kalenders an die eigenen Wünsche angepasst werden.<br>
+Zum Verändern der Farben sind HTML üblichen <a href="http://selfhtml.teamone.de/html/allgemein/farben.htm#hexadezimal" target="_new">Farbangaben</a> erlaubt. Für das Hintergrundbild ist die vollständige URL des Bildes anzugeben. Die Bilddatei kann nicht heraufgeladen werden, sondern muß auf einer eigenen Homepage liegen.<br>
+Sollten weitere Einstellmöglichkeiten gewünscht werden, dann bitte <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
+</p>
 
 <form action="webeve.pl" method="POST">
 <input type="hidden" name="OrgID" value="<TMPL_VAR OrgID>">
@@ -7,6 +13,9 @@
 <table align="center">
 <tr>
 <td>Hintergrundfarbe</td><td><input type="text" name="bgcolor" value="<TMPL_VAR bgcolor>" size="10"></td>
+</tr>
+<tr>
+<td>Hintergrundbild</td><td><input type="text" name="bgimage" value="<TMPL_VAR bgimage>" size="10"></td>
 </tr>
 <tr>
 <td>Textfarbe</td><td><input type="text" name="textcolor" value="<TMPL_VAR textcolor>" size="10"></td>
@@ -18,11 +27,23 @@
 <td>Schriftart</td><td><input type="text" name="font" value="<TMPL_VAR font>" size="10"></td>
 </tr>
 <tr>
+<td>Monatstrenner Hintergrundfarbe</td><td><input type="text" name="tl-bgcolor" value="<TMPL_VAR tl-bgcolor>" size="10"></td>
+</tr>
+<tr>
+<td>Monatstrenner Textfarbe</td><td><input type="text" name="tl-textcolor" value="<TMPL_VAR tl-textcolor>" size="10"></td>
+</tr>
+<tr>
 <td></td><td align="right"><input type="submit" value="Speichern"></td>
 </tr>
 </table>
 </form>
 
+<p>
+<b>Hinweis:</b><br>
+Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an dieser Stelle nichts. Soll das eigene Template verändert werden, dann bitte einfach <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
+</p>
+
+<!--
 
 <TMPL_IF SimpleSaved>
 <p class="ok">Template wurde gespeichert.</p>
@@ -56,12 +77,12 @@
     <td>Templatedatei:</td>
     <td><input type="file" size="30" maxlength="20000" name="simple" accept="text/*"></td>
   </tr>
-<!--
+
   <tr>
     <td>Erweitertes Template:</td>
     <td><input type="file" size="30" maxlength="20000" name="advanced" accept="text/*"></td>
   </tr>
--->
+
   <tr>
     <td align="right" colspan="2"><input type="submit" name="Action" value="Speichern"></td>
   </tr>
@@ -97,7 +118,7 @@
        </p>
 
        <p>Die Gestaltung der Terminliste erfolgt über Style-Sheets in diesem Template.
-<!--
+
         In der Termintabelle sind die folgenden Klassen definiert:
         <ul>
         <li></li><br>
@@ -106,7 +127,7 @@
         <li></li><br>
         <li></li><br>
         </ul>
--->
+
         </p>
 
        <p>Hier gibt es ein funktionierendes <a href="http://www.bnbt.de/~tr1138/bvg/kalender-example.tmpl">
@@ -130,3 +151,4 @@
     </td>
   </tr>
 </table> 
+-->

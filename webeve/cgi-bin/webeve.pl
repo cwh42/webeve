@@ -845,13 +845,19 @@ sub Config
 	    $self->setOrgPref( $OrgID, 'bgcolor', $query->param('bgcolor'));
 	    $self->setOrgPref( $OrgID, 'textcolor', $query->param('textcolor'));
 	    $self->setOrgPref( $OrgID, 'linkcolor', $query->param('linkcolor'));
+	    $self->setOrgPref( $OrgID, 'bgimage', $query->param('bgimage'));
 	    $self->setOrgPref( $OrgID, 'font', $query->param('font'));
+	    $self->setOrgPref( $OrgID, 'tl-bgcolor', $query->param('tl-bgcolor'));
+	    $self->setOrgPref( $OrgID, 'tl-textcolor', $query->param('tl-textcolor'));
 	}
 
 	$SubTmpl->param('bgcolor' => $self->getOrgPref($OrgID, 'bgcolor'));
+	$SubTmpl->param('bgimage' => $self->getOrgPref($OrgID, 'bgimage'));
 	$SubTmpl->param('textcolor' => $self->getOrgPref($OrgID, 'textcolor'));
 	$SubTmpl->param('linkcolor' => $self->getOrgPref($OrgID, 'linkcolor'));
 	$SubTmpl->param('font' => $self->getOrgPref($OrgID, 'font'));
+	$SubTmpl->param('tl-bgcolor' => $self->getOrgPref($OrgID, 'tl-bgcolor'));
+	$SubTmpl->param('tl-textcolor' => $self->getOrgPref($OrgID, 'tl-textcolor'));
     }
     else
     {
