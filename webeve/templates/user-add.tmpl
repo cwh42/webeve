@@ -1,4 +1,34 @@
-<form action="user-add.pl" method="GET">
+<TMPL_IF Saved>
+<p class="ok">
+Neuer Benutzer '<TMPL_VAR Saved>' angelegt.
+</p>
+</TMPL_IF>
+
+<TMPL_IF LoginError>
+<p class="error">
+Login-Name muß angegeben werden.
+</p>
+</TMPL_IF>
+
+<TMPL_IF FullNameError>
+<p class="error">
+Voller Name muß angegeben werden.
+</p>
+</TMPL_IF>
+
+<TMPL_IF eMailError>
+<p class="error">
+eMail muß angegeben werden.
+</p>
+</TMPL_IF>
+
+<TMPL_IF UserExists>
+<p class="error">
+Der Login-Name existiert bereits.
+</p>
+</TMPL_IF>
+
+<form action="webeve.pl" method="GET">
 <table align="center" border="0">
 <tr>
 <td>Login-Name:</td><td><input type="TEXT" name="Login" value="<TMPL_VAR NAME=Login>"></td>
@@ -14,12 +44,14 @@
 <br>
 <b>Vereine:</b><br>
 <TMPL_LOOP NAME=Orgs>
-<INPUT TYPE="CHECKBOX" NAME="Orgs" VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<TMPL_VAR NAME=OrgName><br>
+<INPUT TYPE="CHECKBOX" NAME="Orgs" VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<TMPL_VAR NAME=OrgName><!-- <TMPL_VAR eMail> <TMPL_VAR Website> --><br>
 </TMPL_LOOP>
 </td>
 </tr>
 <tr>
-<td colspan="2" align="right"><input type="SUBMIT" name="Action" value="Save"></td>
+<td colspan="2" align="right">
+<input type="hidden" name="mode" value="useradd">
+<input type="SUBMIT" name="Action" value="Save"></td>
 </tr>
 </table>
 </form>
