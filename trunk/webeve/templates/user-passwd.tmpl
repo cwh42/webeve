@@ -1,4 +1,14 @@
-<form action="user-passwd.pl" method="POST">
+<TMPL_IF OldPWError>
+<p class="error">Altes Passwort ist falsch!</p>
+</TMPL_IF>
+<TMPL_IF NewPWError>
+<p class="error">Neues Passwort stimmt nicht mit Passwortwiederholung überein!</p>
+</TMPL_IF>
+<TMPL_IF OK>
+<p class="ok">Passwort wurde erfolgreich geändert!</p>
+</TMPL_IF>
+
+<form action="webeve.pl" method="POST">
 <table align="center" border="0">
 <tr>
   <td><b>Altes Passwort:</b></td>
@@ -18,8 +28,9 @@
 </tr>
 <tr align="right">
   <td>&nbsp;</td>
-  <td><input type="SUBMIT" name="Action" value="Ändern"></td>
+  <td><input type="hidden" name="mode" value="passwd">
+      <input type="hidden" name="Action" value="save">
+      <input type="submit" value="Ändern"></td>
 </tr>
 </table>
 </form>
-<b><TMPL_VAR NAME=Message></b>
