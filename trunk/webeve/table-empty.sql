@@ -1,3 +1,5 @@
+-- $Id$
+--
 -- MySQL dump 8.22
 --
 -- Host: venus.bnbt.de    Database: chofmann
@@ -22,6 +24,13 @@ CREATE TABLE Dates (
 ) TYPE=MyISAM;
 
 --
+-- Dumping data for table 'Dates'
+--
+
+
+INSERT INTO Dates VALUES (1,'2010-01-01','00:00:00','At home','A first Date',1,1,1,20030101000000);
+
+--
 -- Table structure for table 'Logins'
 --
 
@@ -43,6 +52,13 @@ CREATE TABLE Org_User (
 ) TYPE=MyISAM;
 
 --
+-- Dumping data for table 'Org_User'
+--
+
+
+INSERT INTO Org_User VALUES (1,1);
+
+--
 -- Table structure for table 'Organization'
 --
 
@@ -53,6 +69,13 @@ CREATE TABLE Organization (
   Website varchar(127) NOT NULL default '',
   PRIMARY KEY  (OrgID)
 ) TYPE=MyISAM;
+
+--
+-- Dumping data for table 'Organization'
+--
+
+
+INSERT INTO Organization VALUES (1,'-unbekannt-','','');
 
 --
 -- Table structure for table 'User'
@@ -69,3 +92,10 @@ CREATE TABLE User (
   PRIMARY KEY  (UserID)
 ) TYPE=MyISAM;
 
+--
+-- Dumping data for table 'User'
+--
+-- password is 'default'
+
+
+INSERT INTO User VALUES (1,'Administrator','admin@host.org','admin','0a1838273cbc9961',1,NULL);
