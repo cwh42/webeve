@@ -2,15 +2,31 @@
 <tr><td>
 Du bist eingeloggt als: <TMPL_VAR NAME=User> <b>(<TMPL_VAR NAME=FullName>)</b><br>
 <TMPL_IF Admin>Du bist <b>Administrator</b><br></TMPL_IF>
-Du darfst Termine für folgende(n) Verein(e) eintragen:
-<ul>
-<TMPL_LOOP NAME=Orgs>
-<li><TMPL_VAR NAME=OrgName></li>
-</TMPL_LOOP>
-</ul>
-<b>Vergiß nicht Dich auszuloggen, wenn Du fertig bist!</b>
 </td></tr>
 </table>
+
+<form action="" method="POST">
+<table align="center" width="400">
+<tr>
+<td>
+Nur Termine folgender Vereine anzeigen:
+<ul style="list-style-type:none;">
+<TMPL_LOOP NAME=Orgs>
+<li>
+<input type="checkbox" name="ShowOrg" value="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=selected> checked</TMPL_IF>>
+<TMPL_VAR NAME=OrgName></li>
+</TMPL_LOOP>
+</ul>
+<input type="hidden" name="mode" value="list">
+</td>
+</tr>
+<tr>
+<td align="right">
+<input type="submit" value="Anzeigen">
+</td>
+</tr>
+</table>
+</form>
 
 <br>
 
