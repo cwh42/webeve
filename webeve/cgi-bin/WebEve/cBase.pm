@@ -29,7 +29,7 @@ sub logger($)
 {
     my $self = shift;
     my ($message) = @_;
-    my $UserName = $self->getUser()->{UserName} || $ENV{'REMOTE_HOST'};
+    my $UserName = $self->getUser()->{UserName} || $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_ADDR'};
 
     printf( $LogFileHandle "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n",
 	    Today_and_Now(), $UserName, $message );
