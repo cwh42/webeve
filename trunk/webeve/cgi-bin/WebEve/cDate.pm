@@ -1,3 +1,4 @@
+# $Id$
 # ===============================================================================
 # The Class 'cDate'
 # ===============================================================================
@@ -293,7 +294,7 @@ sub getDateStr
 {
     my $self = shift;
 
-    return undef unless $self->{isValid};
+    return '' unless $self->{isValid};
 
     Language(3);
 
