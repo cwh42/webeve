@@ -47,7 +47,10 @@ sub PageSwitch(%)
     my @Switch = ();
     my %Result;
     
-    my $Format = "kalender.pl?Seite=%d&Verein=%s";
+    my $Format = $Param{'ScriptURL'} || 'kalender.pl';
+
+    $Format .= ( index( $Format, '?' ) == -1 ) ? '?' : '&';
+    $Format .= "Seite=%d&Verein=%s";
     $Format .= "&Intern=Intern" if $Param{Internal};
     
     for( my $i = 1; $i <= $Pages; $i++)
@@ -112,6 +115,7 @@ sub main
     $EventList->readData();
     
     $SubTmpl->param( PageSwitch( Org => $Organization,
+				 ScriptURL => getOrgPref($Organization, 'script-url'),
 				 Page => $Page,
 				 Pages => $EventList->getPageCount(),
 				 Internal => $Intern ) );
