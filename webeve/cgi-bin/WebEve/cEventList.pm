@@ -28,7 +28,18 @@ sub new
     # Initialize variables
     $self->_init(@_);
 
+    $self->{dbh} = WebEve::cMySQL->connect('default');
+
     return $self;
+}
+
+# -------------------------------------------------------------------------------
+# The Destructor
+# -------------------------------------------------------------------------------
+
+sub DESTROY
+{
+    my $self = shift;
 }
 
 # -------------------------------------------------------------------------------
@@ -91,13 +102,10 @@ sub _init
     $self->{Page} = $Params{'Page'} || '1';
 }
 
-
-sub readData
+sub _mkWhere
 {
     my $self = shift;
 
-    my $join;
-    my $where;
     my @where = ();
 
     unless( $self->{'BeforeToday'} )
@@ -122,8 +130,6 @@ sub readData
 
     if( $self->{'ForUserID'} )
     {
-	$join = "LEFT JOIN Org_User ou ON d.OrgID = ou.OrgID";
-
 	my $tmp = "ou.UserID = ".$self->{'ForUserID'};
 	
 	push( @where, "( $tmp )" );
@@ -136,15 +142,31 @@ sub readData
 	push( @where, "( $tmp )" ) unless( scalar(@{$self->{ID}}) == 0 );
     }
 
-    # ------------------------------------------------------------------------
+    return 'WHERE '.join( ' AND ', @where ) if @where;
+}
 
-    $where = 'WHERE '.join( ' AND ', @where ) if @where;
+sub _mkJoin
+{
+    my $self = shift;
 
-    # ------------------------------------------------------------------------
+    my $join = '';
 
-    my $dbh = WebEve::cMySQL->connect('default');
-    
-    my $Count = @{$dbh->selectcol_arrayref("select count(*) from Dates d $join $where")}[0];
+    if( $self->{'ForUserID'} )
+    {
+	$join = "LEFT JOIN Org_User ou ON d.OrgID = ou.OrgID";
+    }
+
+    return $join;
+}
+
+sub readData
+{
+    my $self = shift;
+
+    my $join = $self->_mkJoin();;
+    my $where = $self->_mkWhere();
+
+    my $Count = @{$self->{dbh}->selectcol_arrayref("select count(*) from Dates d $join $where")}[0];
 
     $self->{Pages} = 1;
     my $limit = '';
@@ -185,7 +207,7 @@ sub readData
 
     my @Dates = ();
     
-    my $sth = $dbh->prepare($sql);
+    my $sth = $self->{dbh}->prepare($sql);
     $sth->execute();
     while( my $hrefData = $sth->fetchrow_hashref() )
     {
@@ -197,16 +219,56 @@ sub readData
     return scalar(@Dates);
 }
 
+sub getEventCount
+{
+    my $self = shift;
+    return scalar( @{$self->{'DateList'}} );
+}
+
+sub deleteData($)
+{
+    my $self = shift;
+    my ($UserID) = shift;    
+    my $result = 0;
+    
+    foreach( $self->getDateList() )
+    {
+	$result += $_->DeleteData($UserID);
+    }
+
+    return $result;
+}
+
 sub getDateList
 {
     my $self = shift;
     
+    $self->readData() unless( exists($self->{'DateList'}));
+
     return @{$self->{'DateList'}};
+}
+
+sub getIDs
+{
+    my $self = shift;
+
+    $self->readData() unless( exists($self->{'DateList'}));
+    
+    my @result = ();
+    
+    foreach( $self->getDateList() )
+    {
+	push( @result, $_->getID());
+    }
+
+    return @result;
 }
 
 sub getPageCount
 {
     my $self = shift;
+
+    $self->readData() unless( exists($self->{'DateList'}));
 
     return $self->{'Pages'};
 }
