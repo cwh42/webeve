@@ -7,8 +7,10 @@ package WebEve::cEvent;
 
 use strict;
 use vars qw( $Count $HashRefOrgs );
+
+use base 'WebEve::cBase';
+
 use WebEve::cDate;
-use WebEve::cMySQL;
 
 $Count = 0;
 
@@ -29,8 +31,6 @@ sub new
     # Initialize variables
     $self->_init(@_);
 
-    $self->{dbh} = WebEve::cMySQL->connect('default');
-
     $Count++;
     return $self;
 }
@@ -46,7 +46,6 @@ sub newFromDB
     bless( $self, $class );
 
     # Initialize variables
-    $self->{dbh} = WebEve::cMySQL->connect('default');
     $self->_getFromDB(@_);
 
     $Count++;
@@ -65,8 +64,6 @@ sub newForEventList
 
     # Initialize variables
     $self->_fillValues(@_);
-
-    $self->{dbh} = WebEve::cMySQL->connect('default');
 
     $Count++;
     return $self;
@@ -181,7 +178,7 @@ sub _getFromDB
       	           WHERE EntryID = $EntryID
       	           ORDER by d.Date, d.Time";
       
-	my $hrefData = 	$self->{dbh}->selectrow_hashref($sql);
+	my $hrefData = 	$self->getDBH()->selectrow_hashref($sql);
 
 	if( scalar( keys( %{$hrefData} ) ) == 0 )
 	{
@@ -215,7 +212,7 @@ sub _fillOrgCache
 	my $sql = "SELECT OrgID, OrgName FROM Organization";
 
 	# HashRefOrgs is a Class-Values
-	$HashRefOrgs = $self->{dbh}->selectall_hashref($sql, 'OrgID');
+	$HashRefOrgs = $self->getDBH()->selectall_hashref($sql, 'OrgID');
     }
 }
    
@@ -562,7 +559,7 @@ sub _CheckPermission($)
     my $sql = "SELECT count(*) FROM Org_User ".
 	"WHERE OrgID = $OrgID AND UserID = $UserID LIMIT 1";
 
-    return $self->{dbh}->selectrow_array($sql);
+    return $self->getDBH()->selectrow_array($sql);
 }
 
 sub SaveData($)
@@ -574,27 +571,27 @@ sub SaveData($)
 
     unless( defined($UserID) )
     {
-#	logger("ERROR: SaveData failed: no UserID");
+	$self->logger("ERROR: SaveData failed: no UserID");
 	return 0;
     }
 
     unless( $self->isValid )
     {
-#	logger("SaveData failed: not valid");
+	$self->logger("SaveData failed: not valid");
 	return 0;
     }
 
     unless( $self->_CheckPermission($UserID) )
     {
-#	logger("ERROR: SaveData failed: User not permitted");
+	$self->logger("ERROR: SaveData failed: User not permitted");
 	return 0;
     }
 
-    my $DateSQL = $self->{dbh}->quote($self->{DateObj}->getDateStrSQL());
-    my $TimeSQL = $self->{dbh}->quote($self->getTimeSQL);
+    my $DateSQL = $self->getDBH()->quote($self->{DateObj}->getDateStrSQL());
+    my $TimeSQL = $self->getDBH()->quote($self->getTimeSQL);
     
-    my $PlaceSQL = $self->{dbh}->quote($self->getPlace);
-    my $DescriptionSQL = $self->{dbh}->quote($self->getDesc);
+    my $PlaceSQL = $self->getDBH()->quote($self->getPlace);
+    my $DescriptionSQL = $self->getDBH()->quote($self->getDesc);
 
     if( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
@@ -610,9 +607,9 @@ sub SaveData($)
 			   $self->isPublic,
 			   $self->{'EntryID'} );
 
-#	logger("SaveData: UPDATE for EntryID ".$self->{'EntryID'});
+	$self->logger("SaveData: UPDATE for EntryID ".$self->{'EntryID'});
 
-	$result = $self->{dbh}->do($sql) ? $self->{EntryID} : 0;
+	$result = $self->getDBH()->do($sql) ? $self->{EntryID} : 0;
     }
     else
     {
@@ -626,11 +623,11 @@ sub SaveData($)
 			   $UserID,
 			   $self->isPublic );
 
-	$self->{dbh}->do($sql);
+	$self->getDBH()->do($sql);
 
-	$self->{EntryID} = $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
+	$self->{EntryID} = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM Dates LIMIT 1");
 
-#	logger("SaveData: INSERT for new date: ".$self->{EntryID});
+	$self->logger("SaveData: INSERT for new date: ".$self->{EntryID});
 
 	$result = $self->{EntryID};
     }
@@ -648,23 +645,23 @@ sub DeleteData($)
 
     unless( defined($UserID) )
     {
-#	logger("ERROR: DeleteData failed: no UserID");
+	$self->logger("ERROR: DeleteData failed: no UserID");
 	$result = 0;
     }
     elsif( ! $self->_CheckPermission($UserID) )
     {
-#	logger("ERROR: DeleteData failed: User not permitted");
+	$self->logger("ERROR: DeleteData failed: User not permitted");
 	$result = 0;
     }
     elsif( exists( $self->{'EntryID'} ) && $self->{'EntryID'} )
     {
-#	logger("DeleteData: Deleted Event:".$self->getID());
-	$result = $self->{dbh}->do("DELETE FROM Dates WHERE EntryID = ".$self->getID());
+	$self->logger("DeleteData: Deleted Event:".$self->getID());
+	$result = $self->getDBH()->do("DELETE FROM Dates WHERE EntryID = ".$self->getID());
 	$self->{EntryID} = undef if $result;
     }
     else
     {
-#	logger("ERROR: DeleteData failed: EntryID missing");
+	$self->logger("ERROR: DeleteData failed: EntryID missing");
 	$result = 0;
     }
 
