@@ -50,8 +50,7 @@ sub setup
 		      'orgadd' => 'OrgAdd',
 		      'orgedit' => 'OrgEdit' );
 
-    my @Menu = ( { 'Admin' => 0, 'Title' => 'Login', 'RunMode' => 'login' },
-		 { 'Admin' => 0, 'Title' => 'Übersicht', 'RunMode' => 'list',
+    my @Menu = ( { 'Admin' => 0, 'Title' => 'Übersicht', 'RunMode' => 'list',
 		   'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'RunMode' => 'add' } ] },
 		 { 'Admin' => 0, 'Title' => 'Passwort', 'RunMode' => 'passwd' },
 		 { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
@@ -59,6 +58,7 @@ sub setup
 		   'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
 		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
 		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
+		 { 'Admin' => 0, 'Title' => 'Login', 'RunMode' => 'login' },
 		 { 'Admin' => 0, 'Title' => 'Logout', 'RunMode' => 'logout' }
 		 );
     
@@ -1128,114 +1128,121 @@ sub UserEdit
     my $isAdmin = $query->param('isAdmin') ? 1 : 0;
     my @Orgs =  $query->param('Orgs');
 
-    if($Action eq 'Save')
+    if( $UserID )
     {
-	my $Error = 0;
-
-        if(@Orgs == 0)
-        {
-	    $SubTmpl->param( 'OrgError' => 1 );
-	    $Error = 1;
-        }
-
-        if($UserID eq '')
-        {
-	    $Error = 1;
-        }
-
-        if($FullName eq '')
-        {
-	    $SubTmpl->param( 'FullNameError' => 1 );
-	    $Error = 1;
-        }
-
-        if($eMail eq '')
-        {
-	    $SubTmpl->param( 'eMailError' => 1 );
-	    $Error = 1;
-        }
-	
-	unless( $Error )
+	if($Action eq 'Save')
 	{
-	    my $FullNameSQL = $self->getDBH()->quote($FullName);
-	    my $eMailSQL = $self->getDBH()->quote($eMail);
+	    my $Error = 0;
 
-	    $self->getDBH()->do("UPDATE User
+	    if(@Orgs == 0)
+	    {
+		$SubTmpl->param( 'OrgError' => 1 );
+		$Error = 1;
+	    }
+
+	    if($UserID eq '')
+	    {
+		$Error = 1;
+	    }
+
+	    if($FullName eq '')
+	    {
+		$SubTmpl->param( 'FullNameError' => 1 );
+		$Error = 1;
+	    }
+
+	    if($eMail eq '')
+	    {
+		$SubTmpl->param( 'eMailError' => 1 );
+		$Error = 1;
+	    }
+
+	    unless( $Error )
+	    {
+		my $FullNameSQL = $self->getDBH()->quote($FullName);
+		my $eMailSQL = $self->getDBH()->quote($eMail);
+
+		$self->getDBH()->do("UPDATE User
                                SET FullName = $FullNameSQL,
                                eMail = $eMailSQL,
                                isAdmin = $isAdmin
                                WHERE UserID = $UserID");
 
-	    my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
-	    my @UserOrgs = map { $_->{OrgID} } @$ArrRef;
+		my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
+		my @UserOrgs = map { $_->{OrgID} } @$ArrRef;
 
-	    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Orgs, \@UserOrgs);
+		my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Orgs, \@UserOrgs);
 
-	    my @ToAdd = @$ToAddRef;
-	    my @ToDelete = @$ToDeleteRef;
+		my @ToAdd = @$ToAddRef;
+		my @ToDelete = @$ToDeleteRef;
 
-	    #print STDERR "ALL:".join(',', @UserOrgs)."\n";
-	    #print STDERR "SEL:".join(',', @Orgs)."\n";
+		#print STDERR "ALL:".join(',', @UserOrgs)."\n";
+		#print STDERR "SEL:".join(',', @Orgs)."\n";
 
-	    #print STDERR "ADD:".join(',', @ToAdd)."\n";
-	    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+		#print STDERR "ADD:".join(',', @ToAdd)."\n";
+		#print STDERR "DEL:".join(',', @ToDelete)."\n";
 
-	    if(@ToAdd)
-	    {
-		my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
-		$sql .=  join( ', ', map { "($_, $UserID)" } @ToAdd );
+		if(@ToAdd)
+		{
+		    my $sql = "INSERT INTO Org_User (OrgID, UserID) VALUES ";
+		    $sql .=  join( ', ', map { "($_, $UserID)" } @ToAdd );
 
-		$self->getDBH()->do($sql);
+		    $self->getDBH()->do($sql);
+		}
+
+		if(@ToDelete)
+		{
+		    my $sql = "DELETE FROM Org_User where UserID = $UserID  AND (";
+		    $sql .=  join( ' OR ', map { "OrgID = $_" } @ToDelete );
+		    $sql .= ")";
+
+		    $self->getDBH()->do($sql);
+		}
+
+		$self->logger( "Modified user: '$FullName' ($UserID); Admin: $isAdmin; ".
+			       "Add Orgs: ".join( ', ', @ToAdd )."; Remove Orgs: ".join( ', ', @ToDelete ) );
+
+		$self->_FillMenu('userlist');
+		return $self->UserList();
 	    }
-
-	    if(@ToDelete)
+	    else
 	    {
-		my $sql = "DELETE FROM Org_User where UserID = $UserID  AND (";
-		$sql .=  join( ' OR ', map { "OrgID = $_" } @ToDelete );
-		$sql .= ")";
-
-		$self->getDBH()->do($sql);
+		$SubTmpl->param('UserID' => $query->param('UserID'));
+		$SubTmpl->param('Login' => $query->param('Login'));
+		$SubTmpl->param('FullName' => $query->param('FullName'));
+		$SubTmpl->param('eMail' => $query->param('eMail'));
+		$SubTmpl->param('isAdmin' => 'checked') if $query->param('isAdmin');
+		$SubTmpl->param('Orgs' => $self->_getOrgList(@Orgs));
 	    }
-
-	    $self->logger( "Modified user: '$FullName' ($UserID); Admin: $isAdmin; ".
-			   "Add Orgs: ".join( ', ', @ToAdd )."; Remove Orgs: ".join( ', ', @ToDelete ) );
-
-	    $self->_FillMenu('userlist');
-	    return $self->UserList();
 	}
 	else
 	{
- 	    $SubTmpl->param('UserID' => $query->param('UserID'));
-	    $SubTmpl->param('Login' => $query->param('Login'));
-	    $SubTmpl->param('FullName' => $query->param('FullName'));
-	    $SubTmpl->param('eMail' => $query->param('eMail'));
-	    $SubTmpl->param('isAdmin' => 'checked') if $query->param('isAdmin');
-	    $SubTmpl->param('Orgs' => $self->_getOrgList(@Orgs));
+	    my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
+		"FROM User u ".
+		"WHERE u.UserID = $UserID";
+
+	    my $UserData = $self->getDBH()->selectrow_hashref($sql);
+
+	    $SubTmpl->param('UserID' => $UserData->{UserID});
+	    $SubTmpl->param('UserName' => $UserData->{UserName});
+	    $SubTmpl->param('FullName' => $UserData->{FullName});
+	    $SubTmpl->param('eMail' => $UserData->{eMail});
+	    $SubTmpl->param('LastLogin' => $UserData->{LastLogin});
+	    $SubTmpl->param('isAdmin' => 'checked') if $UserData->{isAdmin};
+	    
+	    my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
+	    my @UsersOrgs = map { $_->{OrgID} } @$ArrRef;
+	    
+	    my $OrgList = $self->_getOrgList(@UsersOrgs);
+	    $SubTmpl->param('Orgs' => $OrgList);
 	}
+
+	return $SubTmpl->output();
     }
     else
     {
-	my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail, u.isAdmin, u.LastLogin ".
-	    "FROM User u ".
-	    "WHERE u.UserID = $UserID";
-
-	my $UserData = $self->getDBH()->selectrow_hashref($sql);
-
-	$SubTmpl->param('UserID' => $UserData->{UserID});
-	$SubTmpl->param('UserName' => $UserData->{UserName});
-	$SubTmpl->param('FullName' => $UserData->{FullName});
-	$SubTmpl->param('eMail' => $UserData->{eMail});
-	$SubTmpl->param('LastLogin' => $UserData->{LastLogin});
-	$SubTmpl->param('isAdmin' => 'checked') if $UserData->{isAdmin};
-
-	my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
-	my @UsersOrgs = map { $_->{OrgID} } @$ArrRef;
-
-	my $OrgList = $self->_getOrgList(@UsersOrgs);
-	$SubTmpl->param('Orgs' => $OrgList);
+	return $self->UserList();
     }
-
-    return $SubTmpl->output();
 }
 
 # ---------------------------------------------------------
