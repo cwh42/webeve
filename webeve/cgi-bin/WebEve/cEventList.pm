@@ -1,3 +1,4 @@
+# $Id$
 # ===============================================================================
 # The Class 'cEventList'
 # ===============================================================================
@@ -8,8 +9,6 @@ use strict;
 use vars qw( );
 use WebEve::cEvent;
 use WebEve::cMySQL;
-
-$Count = 0;
 
 # -------------------------------------------------------------------------------
 # The Constructor
@@ -42,14 +41,10 @@ sub new
 # num | arrayref ID - get only dates with the specified EntryID(s)
 # num PerPage - return at most num dates
 # num Page - return the num'th block of dates
-#
-# Returns a hash:
-# Pages - the number of pages when getting dates with PerPage entries
-# Dates - a reference to the array with all the dates
 
 sub _init
 {
-    my $class = shift;
+    my $self = shift;
 
     my %Params = @_;
 
@@ -93,7 +88,7 @@ sub _init
 
 sub readData
 {
-    my $class = shift;
+    my $self = shift;
 
     my $where;
     my @where = ();
@@ -131,14 +126,8 @@ sub readData
 
     # ------------------------------------------------------------------------
 
-#
-#
-#
-    my $sth = SendSQL( "select count(*) from Dates $where;" );
-    my $Count = FetchOneColumn($sth);
-#
-#
-#
+    my $dbh = WebEve::cMySQL->connect('default');
+    my $Count = @{$dbh->selectcol_arrayref("select count(*) from Dates $where")}[0];
 
     $self->{Pages} = 1;
     my $limit = '';
@@ -162,7 +151,7 @@ sub readData
     }
 
     my $sql = "SELECT EntryID,
-	              Date,
+                      Date,
 	              Time,
                       Place,
 	              Description,
@@ -175,18 +164,25 @@ sub readData
 	       ORDER by Dates.Date, Dates.Time
                $limit";
 
-#    print STDERR $sql."\n";
-
-    my $dbh = WebEve::cMySQL->connect('default');
-
     my @Dates;
     
-    while( my $hrefData = $dbh->selectrow_hashref($sql) )
+    my $sth = $dbh->prepare($sql);
+    $sth->execute();
+    while( my $hrefData = $sth->fetchrow_hashref() )
     {
-	push( @Dates, WebEve::cEvent->new( %{$hrefData} ) )
+	push( @Dates, WebEve::cEvent->newForEventList( $hrefData ) );
     }
     
     $self->{'DateList'} = \@Dates;
 
     return WebEve::cEvent->Count;
 }
+
+sub getDateList
+{
+    my $self = shift;
+    
+    return @{$self->{'DateList'}};
+}
+
+1;
