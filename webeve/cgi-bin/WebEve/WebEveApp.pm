@@ -172,12 +172,13 @@ sub _MakeSessionID($)
 
 # -----------------------------------------------------------------------------
 
-sub _FillMenu
+sub _FillMenu(;$)
 {
     my $self = shift;
+    $self->{'RunMode'} = shift;
     
     $self->{MainTmpl}->param('NavMenu' =>
-			     $self->_getNavMenu( $self->{IsAdmin}  ) ) if $self->{UserID};
+			     $self->_getNavMenu( $self->{IsAdmin} ) ) if $self->{UserID};
 
     return 1;
 }
@@ -192,7 +193,7 @@ sub _NavMenuCleanup(@)
     my @Result = ();
 
     my $FileName = basename( $0 );    
-    my $rm = $self->get_current_runmode();
+    my $rm = $self->{'RunMode'} ? $self->{'RunMode'} : $self->get_current_runmode();
 
     foreach my $Entry (@Entries)
     {
