@@ -1,4 +1,4 @@
-<!-- Last Updated: 2002-11-26 -->
+<!-- Last Updated: 2003-04-08 -->
 
 <TMPL_IF SimpleSaved>
 <p class="ok">Template wurde gespeichert.</p>
@@ -25,11 +25,7 @@
   <tr>
     <td>Template für</td>
     <td>
-      <SELECT NAME="OrgID" SIZE="1">
-      <TMPL_LOOP NAME=Orgs>
-      <OPTION VALUE="<TMPL_VAR NAME=OrgID>"><TMPL_VAR NAME=OrgName></OPTION>
-      </TMPL_LOOP>
-      </SELECT>
+      <b><TMPL_VAR NAME=OrgName></b>
     </td>
   </tr>
   <tr>
@@ -66,7 +62,7 @@
             Wird in der Anzeige durch die Vereinsnummer (siehe die Liste unten) ersetzt.</li>
     	<li>&lt;TMPL_VAR Terminliste&gt;<br>
             Wird in der Anzeige durch die Liste der Termine ersetzt</li>
-        <li>Durch folgendes Konstrukt kann man eine Fallunterschidung für die interne und
+        <li>Durch folgendes Konstrukt kann man eine Fallunterscheidung für die interne und
             öffentliche Terminansicht erreichen:<br>
             &lt;TMPL_IF Intern&gt;<br>
                 Nur in interner Ansicht sichtbar<br>
