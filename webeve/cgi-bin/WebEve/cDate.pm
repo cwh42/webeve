@@ -41,7 +41,7 @@ sub newSQL
 {
     my $class = shift;
 
-    return  $class->new( join('-', reverse( split(/-/, $_[0]) )) );
+    return  $class->new( split(/-/, $_[0] ) );
 }
 
 # --------------------------------------------------------------------------------
@@ -51,8 +51,16 @@ sub newSQL
 sub _init
 {
     my $self = shift;
-    
-    if( @_ == 1)
+
+    if( $_[0] eq 'today' )
+    {
+	$self->{isFullDate} = 1;
+
+	( $self->{Year}, $self->{Month}, $self->{Day} ) = Today();
+
+	$self->{isValid} = 1;
+    }
+    elsif( @_ == 1)
     {
 	$self->{isValid} = $self->_ParseDate(@_);
     }
@@ -67,7 +75,7 @@ sub _init
     }
     elsif( @_ == 3)
     {
-	$self->{isFullDate} = 1;
+	$self->{isFullDate} = ($_[2] > 0) ? 1 : 0;
 
 	$self->{Day} = $_[2];
 	$self->{Month} = $_[1];
@@ -259,6 +267,16 @@ sub getMonth
 
     return undef unless $self->{isValid};
     return $self->{'Month'};
+}
+
+# --------------------------------------------------------------------------------
+
+sub getMonthText
+{
+    my $self = shift;
+
+    return undef unless $self->{isValid};
+    return Month_to_Text( $self->{'Month'} );
 }
 
 # --------------------------------------------------------------------------------
