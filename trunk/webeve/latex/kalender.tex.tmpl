@@ -1,0 +1,31 @@
+\documentclass[german,10pt]{article}
+\usepackage{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[dvips]{geometry}
+\geometry{landscape,a4paper,noheadfoot,margin=1.5cm}
+
+\makeatletter
+
+\usepackage{babel}
+\makeatother
+\begin{document}
+<TMPL_IF Intern>{\huge\textbf{Terminkalender <TMPL_VAR Vereinsname>}}\\
+<TMPL_ELSE>{\huge\textbf{Terminkalender}}</TMPL_IF> {\tiny Stand: <TMPL_VAR Today>}
+
+<TMPL_LOOP Dates>
+<TMPL_IF Header><TMPL_UNLESS __FIRST__>\end{tabular}<TMPL_IF NewPage>\newpage</TMPL_IF></TMPL_UNLESS>\begin{tabular}[t]{|p{19mm}p{57mm}|}
+\hline 
+\multicolumn{2}{|l|}{\textbf{<TMPL_VAR Header>}}\\
+\hline
+\hline<TMPL_ELSE>
+% <TMPL_VAR NAME=Time> <TMPL_VAR NAME=Website>
+\footnotesize{\textbf{<TMPL_VAR NAME=Date>}}&
+\footnotesize{\textbf{<TMPL_VAR NAME=Org>}}\\
+{\tiny <TMPL_VAR NAME=Time> <TMPL_VAR NAME=Place>}&
+\footnotesize{<TMPL_VAR NAME=Desc>}\\
+\hline
+<TMPL_IF __LAST__>\end{tabular}</TMPL_IF>
+</TMPL_IF>
+</TMPL_LOOP>
+\end{document}

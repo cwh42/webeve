@@ -1,0 +1,23 @@
+<TMPL_IF Intern>
+Vereinsinterne Termine <TMPL_VAR Vereinsname>
+<TMPL_ELSE>
+Veranstaltungskalender für den Raum Bayreuth, Kulmbach, Hof
+</TMPL_IF>
+
+<TMPL_IF Dates>
+
+<TMPL_LOOP Dates>
+<TMPL_IF Header>
+</TMPL_IF>
+
+<TMPL_VAR NAME=Date>
+<TMPL_VAR NAME=Time>
+<TMPL_VAR NAME=Place>
+<TMPL_VAR NAME=Website>
+<TMPL_VAR NAME=Org>
+<TMPL_VAR NAME=Desc>
+</TMPL_LOOP>
+
+<TMPL_ELSE>
+Keine Termine vorhanden.
+</TMPL_IF>

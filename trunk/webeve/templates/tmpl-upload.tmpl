@@ -1,0 +1,112 @@
+<!-- Last Updated: 2002-11-26 -->
+
+<TMPL_IF SimpleSaved>
+<p class="ok">Template wurde gespeichert.</p>
+</TMPL_IF>
+<TMPL_IF SimpleNotSaved>
+<p class="error">Template konnte nicht gespeichert werden.</p>
+<b>Bitte Mail an <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a>!</b>
+</TMPL_IF>
+
+<TMPL_IF AdvancedSaved>
+<p class="ok">Erweitertes Template wurde gespeichert.</p>
+</TMPL_IF>
+<TMPL_IF AdvancedNotSaved>
+<p class="error">Erweitertes Template konnte nicht gespeichert werden.</p>
+<b>Bitte Mail an <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a>!</b>
+</TMPL_IF>
+
+<TMPL_IF Error>
+<p class="error"><TMPL_VAR Error></p>
+</TMPL_IF>
+
+<form action="tmpl-upload.pl" enctype="multipart/form-data" method="POST">
+  <table border="0" cellpadding="3" cellspacing="0" align="center">
+  <tr>
+    <td>Template für</td>
+    <td>
+      <SELECT NAME="OrgID" SIZE="1">
+      <TMPL_LOOP NAME=Orgs>
+      <OPTION VALUE="<TMPL_VAR NAME=OrgID>"><TMPL_VAR NAME=OrgName></OPTION>
+      </TMPL_LOOP>
+      </SELECT>
+    </td>
+  </tr>
+  <tr>
+    <td>Templatedatei:</td>
+    <td><input type="file" size="30" maxlength="20000" name="simple" accept="text/*"></td>
+  </tr>
+<!--
+  <tr>
+    <td>Erweitertes Template:</td>
+    <td><input type="file" size="30" maxlength="20000" name="advanced" accept="text/*"></td>
+  </tr>
+-->
+  <tr>
+    <td align="right" colspan="2"><input type="submit" name="Action" value="Speichern"></td>
+  </tr>
+  </table>
+</form>
+
+<br>
+
+<table border="0" cellpadding="4" cellspacing="0" align="center" width="75%">
+  <tr>
+    <td colspan="2" bgcolor="#ee9c59">
+       <h1>Anleitung:</h1>
+       <p>Das Aussehen des Terminkalenders kannst Du mit grundlegenden
+    	HTML-Kenntnissen relativ einfach an die eigenen Wünsche anpassen.
+    	Dazu mußt Du nur hier eine Template-Datei (Template = Vorlage)
+    	heraufladen. Ein Template sieht aus wie eine normale HTML-Datei nur, daß
+    	zusätzlich noch die folgenden Tags verwendet werden:
+    	<ul>
+    	<li>&lt;TMPL_VAR Vereinsname&gt;<br>
+            Wird in der Anzeige durch den im Kalender hinterlegten Vereinsnamen ersetzt</li>
+    	<li>&lt;TMPL_VAR VereinsID&gt;<br>
+            Wird in der Anzeige durch die Vereinsnummer (siehe die Liste unten) ersetzt.</li>
+    	<li>&lt;TMPL_VAR Terminliste&gt;<br>
+            Wird in der Anzeige durch die Liste der Termine ersetzt</li>
+        <li>Durch folgendes Konstrukt kann man eine Fallunterschidung für die interne und
+            öffentliche Terminansicht erreichen:<br>
+            &lt;TMPL_IF Intern&gt;<br>
+                Nur in interner Ansicht sichtbar<br>
+            &lt;TMPL_ELSE&gt;<br>
+                Nur in externer Ansicht sichtbar<br>
+            &lt;/TMPL_IF&gt;<br>
+        </ul>
+       </p>
+
+       <p>Die Gestaltung der Terminliste erfolgt über Style-Sheets in diesem Template.
+<!--
+        In der Termintabelle sind die folgenden Klassen definiert:
+        <ul>
+        <li></li><br>
+        <li></li><br>
+        <li></li><br>
+        <li></li><br>
+        <li></li><br>
+        </ul>
+-->
+        </p>
+
+       <p>Hier gibt es ein funktionierendes <a href="http://www.bnbt.de/~tr1138/bvg/kalender-example.tmpl">
+	Beispieltemplate</a> zum herunterladen, das nach eigenen Wünschen
+	gestaltet werden kann. (Auf den Link rechtsklicken und "Speichern unter
+	..." auswählen)</p>
+	<hr noshade size="1" color="#000000">
+
+       <p>Um alle öffentlichen Termine mit Deinem eigenen Template anzuzeigen, mußt Du
+	auf diese URL verlinken:<br>
+	<b>http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=<font color="#ff0000">X</font></b><br>
+	Für die für Deinen Verein als nichtöffentlich markierten Termine verwende diese URL:<br>
+	<b>http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=<font color="#ff0000">X</font>&Intern=Intern</b><br>
+	wobei <font color="#ff0000"><b>X</b></font> durch folgende Zahl zu ersetzen ist:<br>
+	<ul>
+          <TMPL_LOOP NAME=Orgs>
+	    <li>für <TMPL_VAR NAME=OrgName>: <TMPL_VAR NAME=OrgID></li>
+          </TMPL_LOOP>
+	</ul>
+       </p>
+    </td>
+  </tr>
+</table> 

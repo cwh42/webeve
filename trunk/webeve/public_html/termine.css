@@ -1,0 +1,88 @@
+/* ---------------------------------------------------------  */
+/* Styles f. www.goessenreuth.de                              */
+/* (c)2002 Burschenverein Goessenreuth                        */
+/* ---------------------------------------------------------  */
+
+ body           { font-family:sans-serif;
+                  font-size:12pt;
+                  color:#000000; 
+                  margin:0px;
+                  background:#E87B14; 
+                  background-image:url(bground2.gif);
+                  background-repeat:repeat-y; }
+
+ .ok            { background:#00BB00;
+                  font-size:14pt;
+                  color:#FFFFFF;
+                  font-weight:bold;
+                  padding:4px;
+                  margin:8px; }
+	      
+ .warn          { background:#FFFF00;
+                  font-size:14pt;
+                  font-weight:bold;
+                  padding:4px;
+                  margin:8px; }
+
+ .error         { background:#FF0000;
+                  font-size:14pt;
+                  color:#FFFFFF;
+                  font-weight:bold;
+                  padding:4px;
+                  margin:8px; }
+
+ .bigfont       { font-size:16pt; }
+ .smallfont     { font-size:8pt; }
+     
+ .boldfont      { font-weight:bold; }
+     
+ .menu          { font-weight:bold;
+                  font-size:14pt;
+                  color:#FF0000; }
+
+ .submenu       { font-weight:normal;
+                  font-size:12pt;
+                  color:#FF0000;
+                  text-indent:20px; }
+
+ .ok a          { color:#FFFFFF; text-decoration:underline; }
+ .warn a          { color:#000000; text-decoration:underline; }
+ .error a       { color:#FFFFFF; text-decoration:underline; }
+ .menu a        { color:#E87B14; text-decoration:none; }
+ .menu a:hover  { color:#FF0000; text-decoration:none; }
+ .menu a:active { color:#FF0000; text-decoration:none; }
+ .menu p        { margin:2px 10px 0px; text-align:left; }
+
+ a              { color:#0000a0; }
+ p              { text-align:justify; }
+
+ h1             { font-size:18pt;
+                  font-weight:bold;
+                  margin:0px; }
+
+ h2             { font-size:16pt;
+                  font-weight:bold;
+                  margin:0px; }
+
+ ul             { list-style-type:disc; }
+
+ img.left       { float:right;
+                  margin:10px 0px 10px 10px; }
+	     
+ table          { table-layout:auto;
+                  border-style:none; }
+
+ table.slim     { table-layout:auto;
+                  border-spacing:0px;
+                  padding:0px; }
+
+ table.border   { table-layout:auto;
+                  border-width:1px;
+                  border-style:solid;
+                  border-color:#2B0E72;
+                  padding:2px }
+	     
+ th             { text-align:left;
+                  background-color:#2B0E72;
+	          color:#E87B14;
+	          font-weight:bold; }

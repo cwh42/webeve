@@ -1,0 +1,77 @@
+ToDo-Liste für Online-Terminkalender:
+(Last Updated: 2002-11-29 )
+--------------------------------------------------------------
+Zeichenerklärung:
+! = bald
+!! = sehr bald
+* = irgendwann
+? = vielleicht
+--------------------------------------------------------------
+
+!! Sicherheit: Löschen, bearbeiten & hinzufügen
+! Templates runderladbar machen
+! Zugriffs-Counter und Browser-Log pro Verein und allgemein
+? Massen-Terminhinzufügen per File-Upload
+* Link zu den verschiedenen vereinsinterenen Terminseiten
+* Kalender-Infoseite mit Hilfe und diesem ToDo
+* Login/Logout: IP abfragen; Logout-Zeit anzeigen.
+* Vereinsnamen für Admin editierbar
+* Öffentliche Termine anderer Vereine in Interne übernehmen (mit Kommentar)
+? Benutzerrechte (passwort ändern, template raufladen)
+* Terminkategorien (Party, Wettbewerb, Sport ...)
+? Templates online editierbar machen
+
+- Termine hinzufügen:
+  ! Zuletzt gespeicherten Termin vollständig anzeigen und mit
+    Edit-Button versehen
+  ! Datumsfeld: intelligent vorbelegen.
+  ! Verein und evtl. Ort mit zuletzt Verwendetem vorbelegen
+  * Regelmäßig wiederkehrende Termine erzeugen
+
+- Termine anzeigen:
+  * Feiertage anzeigen
+  * Filterfunktionen:
+    nach:
+    * Verein
+    * Kategorie
+    * Datum (zwischen x.x.xx und y.y.yy)
+    ? PLZ - Umkreis
+    * Strings
+
+
+Erledigt:
+--------------------------------------------------------------
+
+2002-29-11:
+-----------
+- Es gibt jetzt Termine, die für einen ganzen Monat gelten.
+
+2002-11-26:
+-----------
+- Terminliste jetzt nach Monaten gegliedert und auf mehrere Seiten verteilt
+- neue Templates
+- Template-Upload-Seite entsprechend angepasst
+
+2002-11-21:
+-----------
+- Perl-Fatals (Fehlermeldungen) werden jetzt im Browser angezeigt.
+
+2002-11-20:
+-----------
+- Rausschmuss erst nach 8 Stunden
+- Logout-Funktion eingebaut
+- login.pl mit ausführlicheren Meldungen versehen
+
+2002-11-19:
+-----------
+- Links für Website und eMail in Benutzer/Vereinsliste
+
+2002-11-07:
+-----------
+- WAP-Ansicht
+
+2002-10-10:
+-----------
+- 'öffentlich' defaultmäßig 'checked'
+- Termine Löschen vereinfachen: Checkboxen in edit-list.pl
+  Vergangene Termine vorauswählen

@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+
+<wml>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   -->
+	<card id="today" title="Heute - <TMPL_VAR NAME=Today>">
+		<do type="prev" label="Info">
+			<go href="#info"/>
+		</do>
+		<do type="accept" label="Naechste 7 Tage">
+			<go href="#next7"/>
+		</do>
+		<p align="center">
+		<table columns="1">
+<TMPL_UNLESS NAME=TodayDates>
+<tr><td>Keine Termine</td></tr>
+</TMPL_UNLESS>
+<TMPL_LOOP NAME=TodayDates>
+<TMPL_IF NAME=Org>
+<tr><td><TMPL_VAR NAME=Org></td></tr>
+</TMPL_IF>
+<tr><td><TMPL_VAR NAME=Time><TMPL_IF NAME=Time> </TMPL_IF><TMPL_VAR NAME=Place></td></tr>
+<tr><td><TMPL_VAR NAME=Desc></td></tr>
+<tr><td></td></tr>
+</TMPL_LOOP>
+		</table>
+		</p>
+	</card>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   -->
+	<card id="next7" title="Naechste 7 Tage">
+		<do type="prev" label="Heute">
+			<go href="#today"/>
+		</do>
+		<do type="accept" label="Spaeter">
+			<go href="#other"/>
+		</do>
+		<p align="center">
+		<table columns="1">
+<TMPL_UNLESS NAME=NextWeekDates>
+<tr><td>Keine Termine</td></tr>
+</TMPL_UNLESS>
+<TMPL_LOOP NAME=NextWeekDates>
+<tr><td><b><TMPL_VAR NAME=Date></b></td></tr>
+<TMPL_IF NAME=Org>
+<tr><td><TMPL_VAR NAME=Org></td></tr>
+</TMPL_IF>
+<tr><td><TMPL_VAR NAME=Time><TMPL_IF NAME=Time> </TMPL_IF><TMPL_VAR NAME=Place></td></tr>
+<tr><td><TMPL_VAR NAME=Desc></td></tr>
+<tr><td></td></tr>
+</TMPL_LOOP>
+		</table>
+		</p>
+	</card>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   -->
+	<card id="other" title="Spaeter">
+		<do type="prev" label="Naechste 7 Tage">
+			<go href="#next7"/>
+		</do>
+		<do type="accept" label="Info">
+			<go href="#Info"/>
+		</do>
+		<p align="center">
+		<table columns="1">
+<TMPL_UNLESS NAME=OtherDates>
+<tr><td>Keine Termine</td></tr>
+</TMPL_UNLESS>
+<TMPL_LOOP NAME=OtherDates>
+<tr><td><b><TMPL_VAR NAME=Date></b></td></tr>
+<TMPL_IF NAME=Org>
+<tr><td><TMPL_VAR NAME=Org></td></tr>
+</TMPL_IF>
+<tr><td><TMPL_VAR NAME=Time><TMPL_IF NAME=Time> </TMPL_IF><TMPL_VAR NAME=Place></td></tr>
+<tr><td><TMPL_VAR NAME=Desc></td></tr>
+<tr><td></td></tr>
+</TMPL_LOOP>
+		</table>
+		</p>
+	</card>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   -->
+	<card id="info" title="Info">
+		<do type="prev" label="Sp&auml;ter">
+			<go href="#other"/>
+		</do>
+		<do type="prev" label="Heute">
+			<go href="#today"/>
+		</do>
+		<p align="center">
+			BVG-Terminkalender
+			im Internet:
+			http://www.goessenreuth.de
+		</p>
+	</card>
+ 
+</wml>

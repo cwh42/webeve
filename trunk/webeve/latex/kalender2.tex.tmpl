@@ -1,0 +1,36 @@
+\documentclass[twocolumn,german,10pt]{article}
+\usepackage{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[dvips]{geometry}
+\geometry{portrait,columnsep=1.5cm,a4paper,noheadfoot,margin=1.5cm}
+
+\makeatletter
+
+ \newenvironment{lyxlist}[1]
+   {\begin{list}{}
+     {\settowidth{\labelwidth}{#1}
+      \setlength{\leftmargin}{\labelwidth}
+      \addtolength{\leftmargin}{\labelsep}
+      \renewcommand{\makelabel}[1]{##1\hfil}}}
+   {\end{list}}
+
+\usepackage{babel}
+\makeatother
+\begin{document}
+<TMPL_IF Intern>{\huge\textbf{Terminkalender <TMPL_VAR Vereinsname>}}
+<TMPL_ELSE>{\huge\textbf{Terminkalender}}</TMPL_IF>\\{\tiny Stand: <TMPL_VAR Today>}
+
+<TMPL_LOOP Dates>
+<TMPL_IF Header>
+<TMPL_UNLESS __FIRST__>\end{lyxlist}</TMPL_UNLESS>
+\paragraph{<TMPL_VAR Header>}
+\line(1,0){60mm}
+\begin{lyxlist}{00.00.0000}
+<TMPL_ELSE>
+\item [{\footnotesize <TMPL_VAR NAME=Date>}]{\footnotesize <TMPL_VAR NAME=Org>}\\
+ {\footnotesize <TMPL_VAR NAME=Desc>}
+<TMPL_IF __LAST__>\end{lyxlist}</TMPL_IF>
+</TMPL_IF>
+</TMPL_LOOP>
+\end{document}

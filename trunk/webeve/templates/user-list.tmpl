@@ -1,0 +1,84 @@
+<TABLE BORDER="0" ALIGN="CENTER" CELLPADDING="4" CELLSPACING="0" width="95%">
+<TR>
+<TD colspan="5" bgcolor="#2B0E72">
+    <FONT SIZE="+1" COLOR="#E87B14" FACE="Arial, Helvetica"><b>Existierende User:</b></TD>
+</TR>
+
+<TR>
+<TD colspan="5"></TD>
+</TR>
+
+<tr>
+<td><b>Login Name</b></td>
+<td><b>Vollständiger Name</b></td>
+<td><b>eMail</b></td>
+<td><b>Letzter Login</b></td>
+<td>&nbsp;</td>
+</tr>
+
+<TR>
+<TD colspan="5"><hr size="2" noshade></TD>
+</TR>
+
+<TMPL_LOOP NAME=Users>
+<tr>
+<td><TMPL_VAR NAME=UserName></td>
+<td><b><TMPL_VAR NAME=FullName><b></td>
+<td><a href="mailto:<TMPL_VAR NAME=eMail>"><TMPL_VAR NAME=eMail></a></td>
+<td><TMPL_VAR NAME=LastLogin></td>
+<td>
+	<ul>
+        <li><a href="user-edit.pl?UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></li>
+<!--        <li><a href="user-delete.pl?UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">L&ouml;schen</font></a></li> -->
+	</ul>
+</td>
+</tr>
+<TR>
+<TD colspan="5"><hr size="2" noshade></TD>
+</TR>
+</TMPL_LOOP>
+</table>
+
+<!---------------------------------------------------------------------------------------->
+
+<br>
+
+<!---------------------------------------------------------------------------------------->
+
+<TABLE BORDER="0" ALIGN="CENTER" CELLPADDING="4" CELLSPACING="0" width="95%">
+<TR>
+<TD colspan="4" bgcolor="#2B0E72">
+    <FONT SIZE="+1" COLOR="#E87B14" FACE="Arial, Helvetica"><b>Existierende Vereine:</b></TD>
+</TR>
+<TR>
+<TD colspan="4"></TD>
+</TR>
+<tr>
+<td><b>Name</b></td>
+<td><b>eMail</b><br>
+<b>Website</b></td>
+<td>&nbsp;</td>
+</tr>
+
+<TR>
+<TD colspan="5"><hr size="2" noshade></TD>
+</TR>
+
+<TMPL_LOOP NAME=Orgs>
+<tr>
+<td><b><TMPL_VAR NAME=OrgName></b></td>
+<td><a href="mailto:<TMPL_VAR NAME=eMail>"><TMPL_VAR NAME=eMail></a><br>
+<a href="http://<TMPL_VAR NAME=Website>" target="OrgWebsite"><TMPL_VAR NAME=Website></a></td>
+<td>
+	<ul>
+        <li><a href="org-edit.pl?OrgID=<TMPL_VAR NAME=OrgID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></li>
+<!--        <li><a href="org-delete.pl?OrgID=<TMPL_VAR NAME=OrgID>"><font FACE="Arial, Helvetica">L&ouml;schen</font></a></li> -->
+	</ul>
+</td>
+</tr>
+<TR>
+<TD colspan="4"><hr size="2" noshade></TD>
+</TR>
+</TMPL_LOOP>
+
+</table>

@@ -1,0 +1,27 @@
+<form action="org-add.pl" method="GET">
+<input type="HIDDEN" name="OrgID" value="<TMPL_VAR NAME=OrgID>">
+<table align="center" border="0">
+<tr>
+<td>Name:</td><td><input type="TEXT" name="Name" value="<TMPL_VAR NAME=Name>" size="24"></td>
+</tr>
+<tr>
+<td>eMail:</td><td><input type="TEXT" name="eMail" value="<TMPL_VAR NAME=eMail>" size="24"></td>
+</tr>
+<tr>
+<td>Website:</td><td>http://<input type="TEXT" name="Website" value="<TMPL_VAR NAME=Website>" size="20"></td>
+</tr>
+<tr>
+<td colspan="2" align="left">
+<br>
+<b>Benutzer:</b><br>
+<TMPL_LOOP NAME=Users>
+<INPUT TYPE="CHECKBOX" NAME="Users" VALUE="<TMPL_VAR NAME=UserID>"<TMPL_IF NAME=Selected> checked</TMPL_IF>>&nbsp;<b><TMPL_VAR NAME=Fullname></b>&nbsp;(<TMPL_VAR NAME=Username>)<br>
+</TMPL_LOOP>
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right"><input type="SUBMIT" name="Action" value="Save"></td>
+</tr>
+</table>
+</form>
+<b><TMPL_VAR NAME=Message></b>

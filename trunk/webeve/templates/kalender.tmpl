@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                 "http://www.w3.org/TR/html4/transitional.dtd">
+<html>
+<head>
+<TMPL_IF Intern>
+  <title><TMPL_VAR Vereinsname> - Termine</title>
+<TMPL_ELSE>
+  <title>Burschenverein Gössenreuth - Veranstaltungskalender</title>
+</TMPL_IF>
+
+  <link rel=stylesheet type="text/css" href="../termine.css">
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <style type="text/css">
+  <!--
+    /* Formate für die Terminliste */
+    .termintabelle    { padding:6px; }
+    .seitenumschalter { padding:6px; }
+
+    .datum            { font-weight:bold; }
+    .zeit             { font-size:8pt; }
+    .ort              { font-size:8pt; }
+    .verein           { font-weight:bold; }
+    .beschreibung     { }
+    
+    .trenner          { background-color:#2B0E72;
+                        color:#E87B14;
+                        font-weight:bold; }
+
+    .linkespalte      {}
+    .rechtespalte     {}
+  -->
+  </style>
+</head>
+<body>
+<!-- Seiteneinteilung in Menü (links) und Inhalt (rechts) -->
+<table width="100%">
+<tr valign="top">
+
+<!-- Linke Seite -->
+<td width="172" style="background-color:#2B0E72;">
+<center>
+<img src="../logo.gif" width="110" height="109" style="margin:15px 0px">
+</center>
+<!-- Menü Box -->
+<span class="menu">
+<p><a href="http://www.goessenreuth.de/index.html">Home</a></p>
+<p><a href="http://www.goessenreuth.de/about.html">Über uns</a></p>
+<p><a href="http://www.goessenreuth.de/goessenreuth.html">Der&nbsp;Weg&nbsp;zu&nbsp;uns</a></p>
+<p><a href="http://www.goessenreuth.de/fotos.html">Fotogalerie</a></p>
+<TMPL_IF Intern>
+<p><a href="http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl">Feste &amp; Feiern</a></p>
+<p>BVG-Termine</p>
+<TMPL_ELSE>
+<p>Feste &amp; Feiern</p>
+<p><a href="http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Intern=1">BVG-Termine</a></p>
+</TMPL_IF>
+<p><a href="http://www.goessenreuth.de/77-80.html">Chronik</a></p>
+<p><a href="http://www.goessenreuth.de/vorstandschaft.html">Vorstandschaft</a></p>
+<p><a href="http://www.goessenreuth.de/satzung.html">Satzung</a></p>
+<p><a href="http://www.goessenreuth.de/vereine.html">Vereine</a></p>
+<p><a href="http://www.goessenreuth.de/links.html">Links</a></p>
+<p><a href="http://www.bnbt.de/~tr1138/bvg/gbook.php3">Gästebuch</a></p>
+<p><a href="mailto:Burschenverein@Goessenreuth.de">Mail</a></p>
+<p><a href="edit-list.pl"><IMG SRC="../key.gif" BORDER="0" WIDTH="40" HEIGHT="26"></a></p>
+</span>
+<!-- Menü Ende-->
+</td>
+
+<!-- Rechte Seite -->
+<td style="padding:20px 12px 10px;">
+<!-- ------------------ Seiteninhalt ------------------- -->
+<TMPL_IF Intern>
+<h1>Vereinsinterne Termine</h1>
+<h2><TMPL_VAR Vereinsname></h2>
+<TMPL_ELSE>
+<h1>Veranstaltungskalender</h1>
+<h2>für den Raum Bayreuth, Kulmbach, Hof</h2>
+</TMPL_IF>
+<hr noshade size="1" color="#000000">
+<!-- --------------------------------------------------- -->
+<TMPL_IF Intern>
+<a href="kalender.pl?Ansicht=Druck&Intern=Intern">Druckansicht</a>
+<!-- <a href="kalender.pl?Ansicht=wap&Intern=Intern">WAP-Ansicht</a> -->
+<TMPL_ELSE>
+<a href="kalender.pl?Ansicht=Druck">Druckansicht</a>
+<!-- <a href="kalender.pl?Ansicht=wap">WAP-Ansicht</a> -->
+</TMPL_IF>
+<TMPL_VAR Terminliste>
+<!-- ---------------- Seiteninhalt Ende ----------------- -->
+</td>
+<!-- Rechte Seite Ende -->
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td valign="bottom" align="right" style="padding:5px 12px;"><hr noshade size="1" color="#000000">
+<font size="-2">&copy; 2002 Burschenverein Gössenreuth</font></td>
+</tr>
+</table>
+<!-- Seiteneinteilung Ende -->
+</body>
+</html>

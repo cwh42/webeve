@@ -1,0 +1,34 @@
+<form action="edit.pl" method="POST">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" align="center">
+<tr>
+<td>&nbsp;</td>
+<td>
+<SELECT NAME="OrgID" SIZE="1">
+<TMPL_LOOP NAME=Orgs>
+<OPTION VALUE="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=Selected> selected</TMPL_IF>><TMPL_VAR NAME=OrgName></OPTION>
+</TMPL_LOOP>
+</SELECT>&nbsp;
+<INPUT TYPE="CHECKBOX" NAME="Public" VALUE="1"<TMPL_IF NAME=Public> checked</TMPL_IF>>&Ouml;ffentlich</td></tr>
+<TR>
+<TD ALIGN="RIGHT">Tag.Monat.Jahr</TD>
+<TD ALIGN="LEFT">
+<INPUT TYPE="TEXT" NAME="Day" VALUE="<TMPL_VAR NAME=Day>" SIZE="2" MAXLENGTH="2">.
+<INPUT TYPE="TEXT" NAME="Month" VALUE="<TMPL_VAR NAME=Month>" SIZE="2" MAXLENGTH="2">.
+<INPUT TYPE="TEXT" NAME="Year" VALUE="<TMPL_VAR NAME=Year>" SIZE="4" MAXLENGTH="4"></TD>
+</TR>
+<TR>
+<TD ALIGN="RIGHT">Std:Min Ort</TD>
+<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="Hour" VALUE="<TMPL_VAR NAME=Hour>" SIZE="2">:
+<INPUT TYPE="TEXT" NAME="Minute" VALUE="<TMPL_VAR NAME=Minute>" SIZE="2">&nbsp;
+<INPUT TYPE="TEXT" NAME="Place" VALUE="<TMPL_VAR NAME=Place>" SIZE="42"></TD>
+</TR>
+<TR>
+<TD ALIGN="RIGHT">Beschreibung</TD>
+<TD><TEXTAREA NAME="Description" ROWS="4" COLS="49" WRAP="VIRTUAL"><TMPL_VAR NAME=Description></TEXTAREA></TD>
+</TR>
+<TR>
+<TD align="right" colspan="2"><TMPL_VAR NAME=Message>&nbsp;<input type="submit" name="Action" value="Save"></TD>
+</TR>
+</TABLE>
+<input type="hidden" name="EntryID" value="<TMPL_VAR NAME=EntryID>">
+</form>

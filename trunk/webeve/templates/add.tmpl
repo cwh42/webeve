@@ -1,0 +1,164 @@
+<TMPL_IF Saved>
+<p class="ok">Der folgende Termin wurde gespeichert:</p>
+    <table align="center">
+    <tr>
+    <td rowspan="2">
+    <B><TMPL_VAR NAME=SvDate></B><BR>
+    <span class="smallfont"><TMPL_VAR NAME=SvTime>&nbsp;<TMPL_VAR NAME=SvPlace></span><BR>
+    <TMPL_IF NAME=SvPublic>
+    <FONT color="#008000">öffentlich</font>
+    <TMPL_ELSE>
+    <FONT color="#FF0000">intern</FONT>
+    </TMPL_IF>
+    </td>
+    <td><B><TMPL_VAR NAME=SvOrgName></B></td>
+    <td rowspan="2">
+     <table>
+      <tr>
+      <td width="20">&nbsp;</td>
+      <td><a href="edit.pl?EntryID=<TMPL_VAR NAME=SvEntryID>">Bearbeiten</a></td>
+      </tr>
+      <tr>
+      <td>&nbsp;</td>
+      <td><a href="delete.pl?EntryID=<TMPL_VAR NAME=SvEntryID>">Löschen</a></td>
+      </tr>
+     </table>
+    </td>
+    </tr>
+    <tr><td><TMPL_VAR NAME=SvDescription></td></tr>
+    </table>
+    <hr size="2" noshade>
+</TMPL_IF>
+
+<TMPL_IF Error>
+<p class="error">Der termin konnte nicht gespeichert werden.
+Bitte Admin via Mail <a href="mailto:ch@goessenreuth.de">ch@goessenreuth.de</a> informieren!</p>
+</TMPL_IF>
+<TMPL_IF DateError>
+<p class="error">Das Datum ist Fehlerhaft.</p>
+</TMPL_IF>
+<TMPL_IF TimeError>
+<p class="error">Die Zeit ist Fehlerhaft.</p>
+</TMPL_IF>
+<TMPL_IF DescError>
+<p class="error">Die Beschreibung darf nicht leer sein.</p>
+</TMPL_IF>
+
+
+<form action="add.pl" method="POST">
+<table align="center">
+<tr>
+<td colspan="3"><b>Verein</b></td>
+</tr>
+
+<tr>
+<td colspan="2">
+  <SELECT NAME="OrgID" SIZE="1">
+  <TMPL_LOOP Orgs>
+  <TMPL_IF selected>
+    <OPTION VALUE="<TMPL_VAR NAME=OrgID>" selected><TMPL_VAR OrgName></OPTION>
+  <TMPL_ELSE>
+  <OPTION VALUE="<TMPL_VAR NAME=OrgID>"><TMPL_VAR OrgName></OPTION>
+    </TMPL_IF>
+  </TMPL_LOOP>
+  </SELECT>
+</td>
+<td>
+<input type="Checkbox" name="KeepOrg" value="1">Beibehalten
+</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="3"><b>Kategorie</b></td>
+</tr>
+<tr>
+<td colspan="2">
+<TMPL_IF Public>
+<input type="radio" name="Public" value="0"> Intern<br>
+<input type="radio" name="Public" value="1" checked> Öffentlich
+<TMPL_ELSE>
+<input type="radio" name="Public" value="0"checked> Intern<br>
+<input type="radio" name="Public" value="1"> Öffentlich
+</TMPL_IF>
+</td>
+<td>
+<input type="Checkbox" name="KeepPublic" value="1">Beibehalten
+</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td><b>Datum</b></td>
+<td rowspan="2" class="smallfont">
+<b>Beispiele:</b><br>
+3-10-02 =&gt; 3.Oktober 2002<br>
+3-10- =&gt; Nächster 3. Oktober<br>
+10-02 =&gt; Oktober 2002<br>
+10 =&gt; Nächster Oktober
+</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><input type="text" name="Date" value="<TMPL_VAR Date>" size="8" maxlength="10"></td>
+<td><input type="Checkbox" name="IncDate" value="1">Weiterzählen</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="3"><b>Uhrzeit</b> (optional)</td>
+</tr>
+<tr>
+<td colspan="2"><input type="text" name="Time" value="<TMPL_VAR Time>" size="5" maxlength="5"></td>
+<td><input type="Checkbox" name="KeepTime" value="1">Beibehalten</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="3"><b>Ort</b> (optional)</td>
+</tr>
+<tr>
+<td colspan="2"><input type="text" name="Place" value="<TMPL_VAR Place>" size="43"></td>
+<td><input type="Checkbox" name="KeepPlace" value="1">Beibehalten</td>
+</tr>
+
+<tr>
+<td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+<td colspan="3"><b>Beschreibung</b></td>
+</tr>
+<tr>
+<td colspan="2">
+<textarea name="Description" rows="6" cols="38" wrap="virtual"><TMPL_VAR Description></textarea>
+<span class="smallfont">
+<br><b>Hinweise:</b><br>
+HTML ist erlaubt, aber bitte <b>KEINE</b> Grafiken oder blinkenden Text!<br>
+Wichtige HTML-Tags:<br>
+&lt;b&gt;<b>was hier steht wird fett</b>&lt;/b&gt;<br>
+&lt;br&gt;: damit macht man einen Zeilenum<b>br</b>uch
+</span>
+</td>
+<td><input type="Checkbox" name="KeepDesc" value="1">Beibehalten</td>
+</tr>
+
+<tr>
+<td colspan="3" align="right">
+<input type="submit" name="Action" value="Save">
+</td>
+</tr>
+</table>
+</form>

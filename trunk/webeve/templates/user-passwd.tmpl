@@ -1,0 +1,25 @@
+<form action="user-passwd.pl" method="POST">
+<table align="center" border="0">
+<tr>
+  <td><b>Altes Passwort:</b></td>
+  <td><input type="PASSWORD" name="OldPass"></td>
+</tr>
+<tr align="right">
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><b>Neues Passwort:</b></td>
+  <td><input type="PASSWORD" name="NewPass1"></td>
+</tr>
+<tr>
+  <td><b>Neues Passwort:</b><br>(Wiederholung)</td>
+  <td><input type="PASSWORD" name="NewPass2"></td>
+</tr>
+<tr align="right">
+  <td>&nbsp;</td>
+  <td><input type="SUBMIT" name="Action" value="Ändern"></td>
+</tr>
+</table>
+</form>
+<b><TMPL_VAR NAME=Message></b>
