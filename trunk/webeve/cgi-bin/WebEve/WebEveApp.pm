@@ -3,6 +3,8 @@ package WebEve::WebEveApp;
 use strict;
 
 use base 'CGI::Application';
+use CGI::Carp;
+use Socket;
 
 # -------------------------------------------------------------------------
 # The official init-Method
@@ -17,6 +19,24 @@ sub cgiapp_init
     $self->{MainTmpl} = $self->load_tmpl( $MainTmpl ? $MainTmpl : 'main.tmpl' );    
 
     print STDERR $self->dump() if $self->param('debug');
+
+    $self->{'Logfile'} = $self->param('Logfile') || './webeve.log';
+
+    $self->_getRemoteHost();
+}
+
+sub _getRemoteHost()
+{
+    my $self = shift;
+
+    $self->{'REMOTE_HOST'} = $ENV{'REMOTE_HOST'} if defined( $ENV{'REMOTE_HOST'} );
+
+    my $ip = inet_aton( $ENV{'REMOTE_ADDR'} );
+    my ( $HostName ) = gethostbyaddr($ip, AF_INET);
+
+    $self->{'REMOTE_HOST'} = $? ? $ENV{'REMOTE_ADDR'} : $HostName;
+
+    return 1;
 }
 
 # -------------------------------------------------------------------------
