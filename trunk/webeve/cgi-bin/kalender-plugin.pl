@@ -18,8 +18,11 @@ sub main
 {
     my $query = new CGI;
     my $Org = $query->param('org') || '0';
+    my $Format = $query->param('format') || 'html';
 
-    my $MainTmpl = HTML::Template->new(filename => "$TemplatePath/kalender-plugin.tmpl",
+    my $TmplFile = $Format eq 'js' ? "js" : "html";
+
+    my $MainTmpl = HTML::Template->new(filename => "$TemplatePath/kalender-plugin-$TmplFile.tmpl",
 				       die_on_bad_params => 0);
 
     my $Today = WebEve::cDate->new('today');
