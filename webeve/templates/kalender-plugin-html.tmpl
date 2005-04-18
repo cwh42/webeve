@@ -1,0 +1,17 @@
+<!-- http://www.goessenreuth.de - Der Veranstaltungskalender für Oberfranken -->
+
+<span class="bvg-ueberschrift">Events für <TMPL_VAR Date>:</span>
+
+<TMPL_IF Events>
+<ul class="bvg-terminliste">
+<TMPL_LOOP Events>
+<li class="bvg-termin"><span class="bvg-verein"><TMPL_VAR NAME=Org></span><TMPL_IF NAME=Org><br></TMPL_IF>
+<span class="bvg-text"><TMPL_VAR NAME=Desc></span></li>
+</TMPL_LOOP>
+</ul>
+<TMPL_ELSE>
+<br>
+<span class="bvg-keinetermine">-&nbsp;keine&nbsp;-</span>
+</TMPL_IF>
+
+<!-- Ende des Terminkalenders -->
