@@ -52,6 +52,9 @@ sub main
 	    
 	    my $HashRef = { 'Desc' => $DateObj->getDesc };
 	    $HashRef->{ 'Org' } = $OrgName unless( $Org );
+
+	    $HashRef->{'Org'} =~ s/\"/&quot;/g;
+	    $HashRef->{'Desc'} =~ s/\"/&quot;/g;
 	    
 	    push( @TodayDates, $HashRef );
 	}
