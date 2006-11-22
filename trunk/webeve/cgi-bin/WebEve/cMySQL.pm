@@ -26,17 +26,19 @@ sub connect
     my $db_type = $DB{$connectTo}->{'type'};
     my $db_name = $DB{$connectTo}->{'name'};
     my $db_host = $DB{$connectTo}->{'host'};
-    my $db_port = $DB{$connectTo}->{'port'};
+    my $db_port = $DB{$connectTo}->{'port'} ? ";port=".$DB{$connectTo}->{'port'} : '';
+    my $db_socket = $DB{$connectTo}->{'socket'} ? ";mysql_socket=".$DB{$connectTo}->{'socket'} : '';
+
     my $db_user = $DB{$connectTo}->{'user'};
     my $db_pass = $DB{$connectTo}->{'pass'};
     
     unless( defined $db_name )
     {
 	die( "Can not connect to database <$connectTo>, no DB name configured.\n" .
-	     "Check AddDB-Parameter in Config.pm\n" );
+	     "Check Parameter 'DB' in Config.pm\n" );
     }
     
-    my $data_source = "dbi:$db_type:$db_name;host=$db_host;port=$db_port";
+    my $data_source = "dbi:$db_type:$db_name;host=$db_host$db_port$db_socket";
 
     my $self = $class->SUPER::connect( $data_source,
 				       $db_user,
