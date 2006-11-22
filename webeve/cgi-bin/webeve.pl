@@ -450,7 +450,9 @@ sub Login()
 		$self->getDBH()->do("DELETE FROM Logins WHERE SessionID = $OldSessionID");
 	    }
 
-	    $self->getDBH()->do("UPDATE User SET LoginCount = LoginCount + 1, LastLogin = now() where UserID = ".$self->getUser()->{UserID});
+	    # Here is a temporarly migratition from on password encryption to another.
+	    $self->getDBH()->do("UPDATE User SET LoginCount = LoginCount + 1, LastLogin = now(), NewPassword = encrypt(".
+				$self->getDBH()->quote($Password).") where UserID = ".$self->getUser()->{UserID});
 
 	    my $SessionID = $self->_MakeSessionID($User);
 
@@ -853,7 +855,7 @@ sub Passwd
 	}
 	else
 	{
-	    my $sql = sprintf( "SELECT password(%s) = User.Password FROM User WHERE User.UserID = %d LIMIT 1",
+	    my $sql = sprintf( "SELECT old_password(%s) = User.Password FROM User WHERE User.UserID = %d LIMIT 1",
 			       $self->getDBH()->quote($OldPass),
 			       $UserID );
 	    
@@ -861,9 +863,10 @@ sub Passwd
 
 	    if( $Result == 1 )
 	    {
-		$sql = sprintf("UPDATE User SET Password=password(%s)
-                                WHERE password(%s) = User.Password
+		$sql = sprintf("UPDATE User SET Password=old_password(%s), NewPassword = encrypt(%s)
+                                WHERE old_password(%s) = User.Password
                                 AND User.UserID = %d",
+			       $self->getDBH()->quote($NewPass1),
 			       $self->getDBH()->quote($NewPass1),
 			       $self->getDBH()->quote($OldPass),
 			       $UserID );
@@ -986,8 +989,9 @@ sub SendPassword
 	{
 	    my $NewPass = mkpasswd();
 
-	    $sql = sprintf("UPDATE User SET Password=password(%s)
+	    $sql = sprintf("UPDATE User SET Password=old_password(%s), NewPassword = encrypt(%s)
                             WHERE User.UserID = %d",
+			   $self->getDBH()->quote($NewPass),
 			   $self->getDBH()->quote($NewPass),
 			   $UserID );
 	    
@@ -1081,8 +1085,8 @@ sub UserAdd
 	{
 	    my $Password = mkpasswd();
 
-	    $self->getDBH()->do("INSERT INTO User (FullName, eMail, UserName, Password)
-                   VALUES('$FullName', '$eMail', '$LoginName' , password('$Password'))");
+	    $self->getDBH()->do("INSERT INTO User (FullName, eMail, UserName, Password, NewPassword)
+                   VALUES('$FullName', '$eMail', '$LoginName' , old_password('$Password'), encrypt('$Password'))");
 
 	    my $UserID = $self->getDBH()->selectrow_array("SELECT last_insert_id() FROM User LIMIT 1");
 
