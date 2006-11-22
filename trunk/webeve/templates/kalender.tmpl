@@ -10,47 +10,29 @@
   <!--
 
     body       {
-    <TMPL_IF font>font-family:<TMPL_VAR font>;
-       <TMPL_ELSE>font-family:Arial;</TMPL_IF>
-
-    <TMPL_IF bgimage>
-                            background-image:url(<TMPL_VAR bgimage>);
-    </TMPL_IF>
-
-    <TMPL_IF bgcolor>
-                        background-color:<TMPL_VAR bgcolor>;
-    <TMPL_ELSE>
-                        background-color:#ACD6E6;
-    </TMPL_IF>
-    <TMPL_IF textcolor>
-                        color:<TMPL_VAR textcolor>;
-    <TMPL_ELSE>
-                        color:#000080;
-    </TMPL_IF>
-
+    <TMPL_IF font>font:<TMPL_VAR font>;<TMPL_ELSE>font:Arial;</TMPL_IF>
+    <TMPL_IF bgimage>background-image:url(<TMPL_VAR bgimage>);</TMPL_IF>
+    <TMPL_IF bgcolor>background-color:<TMPL_VAR bgcolor>;<TMPL_ELSE>background-color:#ACD6E6;</TMPL_IF>
+    <TMPL_IF textcolor>color:<TMPL_VAR textcolor>;<TMPL_ELSE>color:#000080;</TMPL_IF>
     }
 
     a                 {
-    <TMPL_IF linkcolor>
-                        color:<TMPL_VAR linkcolor>;
-    <TMPL_ELSE>
-                        color:#000080;
-    </TMPL_IF>
+    <TMPL_IF linkcolor>color:<TMPL_VAR linkcolor>;<TMPL_ELSE>color:#000080;</TMPL_IF>
     }
 
     /* Formate für die Terminliste */
     .termintabelle    { padding:3px;
-    <TMPL_IF font>font-family:<TMPL_VAR font>;
-       <TMPL_ELSE>font-family:Arial;</TMPL_IF>
+    <TMPL_IF font>font:<TMPL_VAR font>;
+       <TMPL_ELSE>font:Arial;</TMPL_IF>
      }
     .seitenumschalter { margin-top:10px;
-    <TMPL_IF font>font-family:<TMPL_VAR font>;
-       <TMPL_ELSE>font-family:Arial;</TMPL_IF>
+    <TMPL_IF font>font:<TMPL_VAR font>;
+       <TMPL_ELSE>font:Arial;</TMPL_IF>
      }
 
     .datum            { font-weight:bold; }
-    .zeit             { font-size:8pt; }
-    .ort              { font-size:8pt; }
+    .zeit             { font-size:70%; }
+    .ort              { font-size:70%; }
     .verein           { font-weight:bold; }
     .beschreibung     { }
     
@@ -96,7 +78,7 @@
 <TMPL_VAR Terminliste>
 
 <br>
-<center>Dieser Kalender stammt von <a href="http://www.goessenreuth.de">www.goessenreuth.de</a></center>
+<center>Dieser Kalender stammt von <a href="http://www.goessenreuth.de" target="_blank">www.goessenreuth.de</a></center>
 </body>
 
 </html>
