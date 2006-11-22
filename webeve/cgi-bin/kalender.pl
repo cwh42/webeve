@@ -144,7 +144,7 @@ sub main
 #			'eMail' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[1]),
 #			'Website' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[2]) };
 
-	$HashRef->{'Org'} = $query->escapeHTML($OrgName) unless( $Intern );
+	$HashRef->{'Org'} = $OrgName unless( $Intern );
 
 	if( $DateObj->getDate->getDateStr ne $LastDate )
 	{
