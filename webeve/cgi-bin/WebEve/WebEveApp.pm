@@ -123,7 +123,8 @@ sub _CheckUser($$)
     my $sql = "SELECT UserID, FullName, eMail, isAdmin, LastLogin, UserName ".
 	"FROM User ".
 	"WHERE UserName = $User_sql ".
-	"AND Password = password($Password_sql)";
+	"AND Password = old_password($Password_sql)";
+#	"AND Password = encrypt($Password_sql)";
 
     my $UserData = $self->getDBH()->selectrow_hashref($sql);
 
