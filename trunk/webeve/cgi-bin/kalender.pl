@@ -138,9 +138,9 @@ sub main
 	my $OrgName = $DateObj->getOrg;
 
 	my $HashRef = { 'Time' => $DateObj->getTime,
-			'Place' => $query->escapeHTML($DateObj->getPlace),
-			'Title' => $query->escapeHTML($DateObj->getTitle),
-			'Desc' => HTMLify($query->escapeHTML($DateObj->getDesc)) }; #,
+			'Place' => $DateObj->getPlace,
+			'Title' => $DateObj->getTitle,
+			'Desc' => $DateObj->getDesc }; #,
 #			'eMail' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[1]),
 #			'Website' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[2]) };
 

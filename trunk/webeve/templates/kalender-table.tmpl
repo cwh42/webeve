@@ -36,20 +36,20 @@ Seite <b><TMPL_VAR CurrentPage></b> von <b><TMPL_VAR PageCount></b><br>
 <tr align="left" valign="top" class="zeile">
 <td width="122" class="linkespalte"><span class="datum"><TMPL_VAR NAME=Date></span>
 <TMPL_IF NAME=Date><br></TMPL_IF>
-<span class="zeit"><TMPL_VAR NAME=Time></span> <span class="ort"><TMPL_VAR NAME=Place></span></td>
+<span class="zeit"><TMPL_VAR NAME=Time></span> <span class="ort"><TMPL_VAR ESCAPE=HTML NAME=Place></span></td>
 
 <td width="391" class="rechtespalte">
 <TMPL_IF NAME=Website>
 <a href="http://<TMPL_VAR NAME=Website>" target="_newwindow_" class="verein"><TMPL_VAR NAME=Org></a>
 <TMPL_ELSE>
-<span class="verein"><TMPL_VAR NAME=Org></span>
+<span class="verein"><TMPL_VAR ESCAPE=HTML NAME=Org></span>
 </TMPL_IF>
 
-<TMPL_IF NAME=Org><br></TMPL_IF>
+<TMPL_IF NAME=Org><br/></TMPL_IF>
 
-<TMPL_VAR NAME=Title>
+<TMPL_IF Title><b><TMPL_VAR ESCAPE=HTML NAME=Title></b><br/></TMPL_IF>
 <TMPL_IF NAME=Desc>
-<br><span class="beschreibung"><TMPL_VAR NAME=Desc></span>
+<span class="beschreibung"><TMPL_VAR NAME=Desc></span>
 </TMPL_IF>
 </td>
 </tr>
