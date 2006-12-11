@@ -123,7 +123,8 @@ sub cgiapp_postrun
 
     my $user = $self->getUser();
 
-    $self->header_add( -charset => 'UTF-8' );
+    $self->header_add( -charset => 'UTF-8',
+                       -expires => 0 );
     $self->{MainTmpl}->param( 'content' => $$out_ref,
                               'UserName' => $user->{UserName},
                               'FullName' => $user->{FullName},
