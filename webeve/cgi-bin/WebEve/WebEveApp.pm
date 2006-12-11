@@ -48,8 +48,6 @@ sub setup
 		   'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
 		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
 		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
-		 { 'Admin' => 0, 'Title' => 'Login', 'RunMode' => 'login' },
-		 { 'Admin' => 0, 'Title' => 'Logout', 'RunMode' => 'logout' },
                  { 'Admin' => 0, Title => 'Impressum & Disclaimer', FileName => 'index.pl?mode=contact' } );
     
     $self->{ALL_MENU_ENTRIES} = \@Menu;
