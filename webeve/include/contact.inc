@@ -1,4 +1,4 @@
-<h1>Impressum &amp; Kontakt</h1>
+<h1>Impressum &amp; Disclaimer</h1>
 
 <p>
   Betreiber:<br/>

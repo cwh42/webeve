@@ -2,6 +2,7 @@
 
 use strict;
 use WebEve::Config;
+use WebEve::cBase;
 use WebEve::View;
 use CGI;
 use HTML::Template;
@@ -15,12 +16,15 @@ sub main
     my $include_path = "../include/";
 
     my $cgi = CGI->new();
-    my $tmpl = HTML::Template->new( filename => "$TemplatePath/index.tmpl" );
+    my $webeve = WebEve::cBase->new();
+    my $user = $webeve->getUser();
+
+    my $tmpl = HTML::Template->new( filename => "$TemplatePath/main.tmpl" );
 
     my @Menu = ( { Title => 'Startseite', RunMode => 'start' },
-		 { Title => 'Über Webeve', RunMode => 'about' },
-		 #{ Title => 'Termine verwalten', RunMode => 'manage' },
-		 { Title => 'Impressum & Kontakt', RunMode => 'contact' } );
+		 { Title => 'Über Webeve', RunMode => 'about' } );
+    push( @Menu, { Title => 'Termine verwalten', RunMode => 'manage' } ) if( $user->{UserName} );
+    push( @Menu, { Title => 'Impressum & Disclaimer', RunMode => 'contact' } );
 
     my $mode = $cgi->param('mode');
     $mode = 'start' unless( scalar( grep { $_->{RunMode} eq $mode } @Menu ) );
@@ -31,6 +35,11 @@ sub main
     {
 	$content = CalendarHTML(basename($0));
     }
+    elsif( $mode eq 'manage' )
+    {
+        print $cgi->redirect( 'webeve.pl' );
+        exit(0);
+    }
     else
     {
 	open( IN, "<$include_path/$mode.inc");
@@ -40,10 +49,15 @@ sub main
 	}
 	close( IN );
     }
-    $tmpl->param( content => $content );
 
+    # NavMenuCleanup has to be called as late as possible because it destroys @Menu
     my $menu = NavMenuCleanup( \@Menu);
-    $tmpl->param( menu => $menu );
+
+    $tmpl->param( content => $content,
+                  UserName => $user->{UserName},
+                  FullName => $user->{FullName},
+                  isAdmin => $user->{isAdmin},
+                  menu => $menu );
 
     my $cookie = $cgi->cookie(-name=>'WebEveCookieTest',
                               -value=>'Cookies_enabled');
