@@ -19,7 +19,7 @@ sub main
 
     my @Menu = ( { Title => 'Startseite', RunMode => 'start' },
 		 { Title => 'Über Webeve', RunMode => 'about' },
-		 { Title => 'Termine verwalten', RunMode => 'manage' },
+		 #{ Title => 'Termine verwalten', RunMode => 'manage' },
 		 { Title => 'Impressum & Kontakt', RunMode => 'contact' } );
 
     my $mode = $cgi->param('mode');
@@ -45,7 +45,11 @@ sub main
     my $menu = NavMenuCleanup( \@Menu);
     $tmpl->param( menu => $menu );
 
-    print $cgi->header( -charset => 'UTF-8' );
+    my $cookie = $cgi->cookie(-name=>'WebEveCookieTest',
+                              -value=>'Cookies_enabled');
+
+    print $cgi->header( -charset => 'UTF-8',
+                        -cookie => $cookie );
     print $tmpl->output();
 }
 
