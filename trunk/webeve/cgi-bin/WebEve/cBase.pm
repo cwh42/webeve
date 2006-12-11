@@ -25,6 +25,21 @@ sub END
 
 #-----------------------------------------------------------------------
 
+sub new
+{
+    my $class = shift;
+
+    die "Constructor has to be used as instance method!" if ref($class);
+
+    my $self = {};
+
+    bless( $self, $class );
+
+    return $self;
+}
+
+#-----------------------------------------------------------------------
+
 sub logger($)
 {
     my $self = shift;

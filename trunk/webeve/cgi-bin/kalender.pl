@@ -71,7 +71,7 @@ sub main
     $MainTmpl->param('tl-textcolor' => getOrgPref($Organization, 'tl-textcolor'));
 
     # Ausgabe
-    print "Content-type: text/html\n\n";
+    print $query->header( -charset => 'UTF-8' );
     print $MainTmpl->output;
 }
 

@@ -1,66 +1,55 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-                 "http://www.w3.org/TR/html4/transitional.dtd">
-<html>
-<head>
-  <title>Burschenverein Gössenreuth - <TMPL_VAR NAME=TITLE></title>
-  <link rel=stylesheet type="text/css" href="../termine.css">
-  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-  <meta http-equiv="expires" content="0"> 
-</head>
-<body>
-<!-- Seiteneinteilung in Menü (links) und Inhalt (rechts) -->
-<table class="slim" width="100%">
-<tr valign="top">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Webeve - <tmpl_var title></title>
+    <link rel="stylesheet" type="text/css" href="../default.css"/>
+  </head>
+  <body>
+    <h1>Webeve</h1>
 
-<!-- Linke Seite -->
-<td width="168" style="background-color:#2B0E72;">
-<center>
-<img src="../logo.gif" width="110" height="109" style="margin:15px 0px">
-</center>
-<!-- Menü Box -->
-<span class="menu">
-<p><a href="http://www.goessenreuth.de/index.html">Home</a></p>
-<p><a href="kalender.pl">Feste &amp; Feiern</a></p>
-<p><a href="kalender.pl?Intern=1">BVG-Termine</a></p>
-<hr noshade align="left" color="#E87B14" width="100%">
+    <ul id="Navigation">
+      <tmpl_loop menu>
+	<tmpl_if Current>
+	  <li class="current"><tmpl_var escape=html Title>
+        <tmpl_else>
+	  <li><a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+	</tmpl_if>
+	<tmpl_if SubLevel>
+	    <ul>
+	      <tmpl_loop SubLevel>
+		<tmpl_if Current>
+		  <li class="current"><tmpl_var escape=html Title></li>
+		<tmpl_else>
+		    <li><a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a></li>
+		</tmpl_if>
+	      </tmpl_loop>
+	    </ul>
+	</tmpl_if>
+      </li>
+      </tmpl_loop>
 
-<TMPL_LOOP NAME=NavMenu>
-  <TMPL_IF NAME=Current>
-    <p><TMPL_VAR NAME=Title></p>
-  <TMPL_ELSE>
-    <p><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p><!-- <TMPL_VAR NAME=RunMode> -->
-  </TMPL_IF>
-  <TMPL_LOOP NAME=SubLevel>
-    <TMPL_IF NAME=Current>
-      <p class="submenu"><TMPL_VAR NAME=Title></p>
-    <TMPL_ELSE>
-      <p class="submenu"><a href="<TMPL_VAR NAME=FileName>"><TMPL_VAR NAME=Title></a></p><!-- <TMPL_VAR NAME=RunMode> -->
-    </TMPL_IF>
-  </TMPL_LOOP>
-</TMPL_LOOP>
-
-<hr noshade align="left" color="#E87B14" width="100%">
-<p><a href="mailto:ch&#x0040;goessenreuth.de">Mail</a></p>
-</span>
-<!-- Menü Ende-->
-</td>
-
-<!-- Rechte Seite -->
-<td style="padding:20px 12px 10px;">
-<!-- Seiteninhalt -->
-<h1><TMPL_VAR NAME=TITLE></h1>
-<hr noshade size="1" color="#000000">
-<TMPL_VAR NAME=CONTENT>
-<!-- Seiteninhalt Ende -->
-</td>
-<!-- Rechte Seite Ende -->
-</tr>
-<tr>
-<td>&nbsp;</td>
-<td valign="bottom" align="right" style="padding:5px 12px;"><hr noshade size="1" color="#000000">
-<font size="-2">&copy; 2002 Christopher Hofmann</font></td>
-</tr>
-</table>
-<!-- Seiteneinteilung Ende -->
-</body>
+      <tmpl_if UserName>
+        <tmpl_var UserName><br/>
+        <tmpl_var FullName><br/>
+        <tmpl_if isAdmin>Administrator</tmpl_if>
+      <tmpl_else>
+        <li>	
+  	  <form id="Login" action="webeve.pl" method="post">
+  	    <div><span>Login:</span>
+  	    <span><input type="text" name="User" value="" /></span></div>
+  	    <div><span>Password:</span>
+  	    <span><input type="password" name="Password" value="" /></span></div>
+  	    <div><span><input type="hidden" name="mode" value="login" /></span>
+  	    <span id="submit"><input type="submit" value="Login" /></span></div>
+  	  </form>
+        </li>
+      </tmpl_if>
+    </ul>
+	  
+    <div id="Content">
+      <tmpl_var content>
+    </div>
+	  
+  </body>
 </html>
