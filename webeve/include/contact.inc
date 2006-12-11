@@ -1,8 +1,11 @@
 <h1>Impressum &amp; Kontakt</h1>
 
 <p>
-  Betreiber: Christopher Hofmann<br/>
-  Kontakt: <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>
+  Betreiber:<br/>
+  Christopher Hofmann<br/>
+  Walter-Meckauer-Str. 13/B24<br/>
+  90478 Nürnberg<br/>
+  <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>
 </p>
 
 <p>
