@@ -13,7 +13,7 @@ main();
 
 sub main
 {
-    my $include_path = "../include/";
+    my $include_path = "$BasePath/include/";
 
     my $cgi = CGI->new();
     my $webeve = WebEve::cBase->new();
