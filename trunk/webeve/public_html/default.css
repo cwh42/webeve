@@ -84,3 +84,46 @@ div#Content h2 {
 div#Content p {
   font-size:1em;
 }
+
+/* Kalender */
+
+table.seitenumschalter {
+ padding:6px;
+}
+
+table.seitenumschalter a {
+  text-decoration: none;
+}
+
+table.termintabelle {
+}
+
+table.termintabelle .datum {
+  font-weight:bold;
+}
+
+table.termintabelle .zeit,.ort {
+  font-size: 0.7em;
+}
+
+table.termintabelle .verein {
+  font-weight:bold;
+}
+
+table.termintabelle .beschreibung {
+  padding-bottom: 1em;
+}
+
+table.termintabelle .trenner {
+  margin: 0 0 0.7em; padding: 0.3em;
+  text-align: left;
+  background-color: #fed;
+  border: 2px ridge silver;
+  font-weight:bold;
+}
+
+table.termintabelle .linkespalte {
+}
+
+table.termintabelle .rechtespalte {
+}
