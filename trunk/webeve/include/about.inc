@@ -23,12 +23,12 @@ Webeve.
 <h2>Wie kann man Webeve nutzen?</h2>
 Sofern Du in der Vorstandschaft eines oberfränkischen Vereins bist oder Du
 Terminverwalter eines solchen bist, kannst Du einfach per
-Email an <a href="webmaster@wevbeve.de">webmaster@webeve.de</a>, unter Angabe des Vereinsnamens, Deine
+Email an <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>, unter Angabe des Vereinsnamens, Deine
 Zugangsdaten anfordern.</p>
 
 <p>
 <h2>Was kostet Webeve?</h2>
-Sowohl für Vernstalter als auch für Partygänger ist die Nutzung
+Sowohl für Veranstalter als auch für Partygänger ist die Nutzung
 kostenlos. Über das eine oder andere Freibier freue ich mich natürlich
 trotzdem. ;) 
 </p>

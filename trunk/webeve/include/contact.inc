@@ -12,8 +12,8 @@
 <h2>Haftung für Inhalte</h2>
 Die Inhalte meiner Seiten wurden mit größter Sorgfalt erstellt. Für die
 Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann ich jedoch
-keine Gewähr übernehmen.  Als Diensteanbieter bin ich gemäß § 6 Abs.1 MDStV
-und § 8 Abs.1 TDG für eigene Inhalte auf diesen Seiten nach den allgemeinen
+keine Gewähr übernehmen.  Als Diensteanbieter bin ich gemäß §6 Abs.1 MDStV
+und §8 Abs.1 TDG für eigene Inhalte auf diesen Seiten nach den allgemeinen
 Gesetzen verantwortlich. Diensteanbieter sind jedoch nicht verpflichtet, die
 von ihnen übermittelten oder gespeicherten fremden Informationen zu überwachen
 oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit
@@ -46,7 +46,10 @@ gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art
 der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
 schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und
 Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch
-gestattet.  Datenschutz Soweit auf meinen Seiten personenbezogene Daten
+gestattet.</p>
+<p>
+<h2>Datenschutz</h2>
+Soweit auf meinen Seiten personenbezogene Daten
 (beispielsweise Name, Anschrift oder eMail-Adressen) erhoben werden, erfolgt
 dies soweit möglich stets auf freiwilliger Basis. Die Nutzung der Angebote und
 Dienste ist, soweit möglich, stets ohne Angabe personenbezogener Daten
