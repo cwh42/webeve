@@ -42,7 +42,6 @@ sub setup
                  { 'Admin' => 0, Title => 'Über Webeve', FileName => 'index.pl?mode=about' },
                  { 'Admin' => 0, 'Title' => 'Termine verwalten', 'RunMode' => 'list',
 		   'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'RunMode' => 'add' } ] },
-		 { 'Admin' => 0, 'Title' => 'Passwort', 'RunMode' => 'passwd' },
 		 { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
 		 { 'Admin' => 1, 'Title' => 'Benutzer', 'RunMode' => 'userlist',
 		   'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
