@@ -4,7 +4,7 @@
 
 <TMPL_IF NoCookies>
 <p class="error">Bei Deinem Browser sind Cookies deaktiviert!<br>
-Um Dich hier einloggen zu können müssen Cookies aktiviert sein.<br>
+Um Dich hier einloggen zu kÃ¶nnen mÃ¼ssen Cookies aktiviert sein.<br>
 <a href="../cookies.html">Hilfe</a> zum Thema &quot;Cookies&quot;</p>
 </TMPL_IF>
 
@@ -19,8 +19,8 @@ Um Dich hier einloggen zu können müssen Cookies aktiviert sein.<br>
 Du kannst entweder ...
 <ul>
 <li>Dich als jemand anderes einloggen</li>
-<li>direkt weitergehen zur <a href="webeve.pl?mode=list">Terminübersicht</a></li>
-<li>Dich <a href="webeve.pl?mode=logout">ausloggen</a></li>
+<li>direkt weitergehen zur <a href="?mode=list">TerminÃ¼bersicht</a></li>
+<li>Dich <a href="?mode=logout">ausloggen</a></li>
 </ul>
 </TMPL_IF>
 
@@ -31,7 +31,7 @@ Probiers nochmal und achte auf eine evtl. aktive FESTSTELLTASTE!
 <TMPL_UNLESS User>
 <TMPL_UNLESS WrongPasswd>
 <TMPL_UNLESS NoCookies>
-<b>Der Browser muß Cookies akzeptieren damit der Login funktioniert!</b>
+<b>Der Browser muÃŸ Cookies akzeptieren damit der Login funktioniert!</b>
 </TMPL_UNLESS>
 </TMPL_UNLESS>
 </TMPL_UNLESS>
@@ -40,7 +40,7 @@ Probiers nochmal und achte auf eine evtl. aktive FESTSTELLTASTE!
 </table>
 <br>
 
-<form action="webeve.pl" method="POST">
+<form method="post">
 <table align="center">
 <tr>
 <td>Username:</td>
