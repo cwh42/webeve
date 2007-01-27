@@ -1,9 +1,69 @@
-<table align="center" width="400">
-<tr><td>
-Du bist eingeloggt als: <TMPL_VAR NAME=User> <b>(<TMPL_VAR NAME=FullName>)</b><br>
-<TMPL_IF Admin>Du bist <b>Administrator</b><br></TMPL_IF>
-</td></tr>
+<form action="webeve.pl" method="POST">
+<input type="hidden" name="mode" value="delete">
+<table align="center">
+ <colgroup>
+   <col width="150">
+   <col>
+   <col width="150">
+ </colgroup>
+
+<TR>
+<th colspan="3">Existierende Termine:</th>
+</TR>
+
+<TR>
+<TD colspan="3" align="right">
+<input type="submit" value="Markierte LÃ¶schen"></TD>
+</TR>
+
+<TR>
+<TD colspan="3"><hr size="2" noshade></TD>
+</TR>
+
+<TMPL_LOOP NAME=List>
+<tr>
+<td rowspan="3">
+<B><TMPL_VAR NAME=Date></B><BR>
+<span class="smallfont"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></span><BR>
+<TMPL_IF NAME=Public>
+<FONT color="#008000">Ã¶ffentlich</font>
+<TMPL_ELSE>
+<FONT color="#FF0000">intern</FONT>
+</TMPL_IF>
+</td>
+<td><B><TMPL_VAR NAME=Org></B></td>
+<td rowspan="3">
+
+ <table>
+  <tr>
+  <td width="20">&nbsp;</td>
+  <td><a href="webeve.pl?mode=edit&EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
+  </tr>
+  <tr>
+  <td><input type="checkbox" name="EntryID" value="<TMPL_VAR NAME=EntryID>"<TMPL_IF NAME=IsOver> checked</TMPL_IF>></td>
+  <td>LÃ¶schen</td>
+  </tr>
+ </table>
+
+</td>
+</tr>
+
+<tr><td><TMPL_VAR NAME=Title></td></tr>
+<tr><td><TMPL_VAR NAME=Desc></td></tr>
+
+<tr>
+<td colspan="3"><hr size="2" noshade></TD>
+</tr>
+</TMPL_LOOP>
+
+<TR>
+<TD colspan="3" align="right">
+<input type="submit" value="Markierte LÃ¶schen"></TD>
+</TR>
 </table>
+</form>
+
+<br>
 
 <form action="" method="POST">
 <table align="center" width="400">
@@ -25,72 +85,5 @@ Nur Termine folgender Vereine anzeigen:
 <input type="submit" value="Anzeigen">
 </td>
 </tr>
-</table>
-</form>
-
-<br>
-
-<form action="webeve.pl" method="POST">
-<input type="hidden" name="mode" value="delete">
-<table align="center">
- <colgroup>
-   <col width="150">
-   <col>
-   <col width="150">
- </colgroup>
-
-<TR>
-<th colspan="3">Existierende Termine:</th>
-</TR>
-
-<TR>
-<TD colspan="3" align="right">
-<input type="submit" value="Markierte Löschen"></TD>
-</TR>
-
-<TR>
-<TD colspan="3"><hr size="2" noshade></TD>
-</TR>
-
-<TMPL_LOOP NAME=List>
-<tr>
-<td rowspan="3">
-<B><TMPL_VAR NAME=Date></B><BR>
-<span class="smallfont"><TMPL_VAR NAME=Time>&nbsp;<TMPL_VAR NAME=Place></span><BR>
-<TMPL_IF NAME=Public>
-<FONT color="#008000">öffentlich</font>
-<TMPL_ELSE>
-<FONT color="#FF0000">intern</FONT>
-</TMPL_IF>
-</td>
-<td><B><TMPL_VAR NAME=Org></B></td>
-<td rowspan="3">
-
- <table>
-  <tr>
-  <td width="20">&nbsp;</td>
-  <td><a href="webeve.pl?mode=edit&EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
-  </tr>
-  <tr>
-  <td><input type="checkbox" name="EntryID" value="<TMPL_VAR NAME=EntryID>"<TMPL_IF NAME=IsOver> checked</TMPL_IF>></td>
-  <td>Löschen</td>
-  </tr>
- </table>
-
-</td>
-</tr>
-
-<tr><td><TMPL_VAR NAME=Title></td></tr>
-<tr><td><TMPL_VAR NAME=Desc></td></tr>
-
-<tr>
-<td colspan="3"><hr size="2" noshade></TD>
-</tr>
-</TMPL_LOOP>
-
-<TR>
-<TD colspan="3" align="right">
-<input type="submit" value="Markierte Löschen"></TD>
-</TR>
 </table>
 </form>

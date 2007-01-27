@@ -4,6 +4,8 @@ use strict;
 
 use base qw( CGI::Application WebEve::cBase );
 
+use WebEve::Config;
+use WebEve::View;
 use WebEve::cEventList;
 use WebEve::cEvent;
 use WebEve::cDate;
@@ -11,6 +13,10 @@ use WebEve::cOrg;
 use Mail::Mailer;
 use File::Basename;
 use Socket; # For importing const AF_INET
+
+use Data::Dumper;
+
+use vars qw{ $static_cache };
 
 # -------------------------------------------------------------------------
 # CGI::Application default hooks:
@@ -20,8 +26,11 @@ sub setup
     my $self = shift;
 
     $self->mode_param('mode');
-    $self->start_mode('list');
+    $self->start_mode('index');
     $self->run_modes( 'AUTOLOAD' => 'WrongRM',
+		      'index' => 'Index',
+		      'about' => 'StaticContent',
+		      'contact' => 'StaticContent',
 		      'login' => 'Login',
 		      'logout' => 'Logout',
 		      'list' => 'EventList',
@@ -38,16 +47,18 @@ sub setup
 		      'orgadd' => 'OrgAdd',
 		      'orgedit' => 'OrgEdit' );
 
-    my @Menu = ( { 'Admin' => 0, Title => 'Startseite', FileName => 'index.pl' },
-                 { 'Admin' => 0, Title => 'Über Webeve', FileName => 'index.pl?mode=about' },
-                 { 'Admin' => 0, 'Title' => 'Termine verwalten', 'RunMode' => 'list',
-		   'SubLevel' => [ { 'Admin' => 0, 'Title' => 'Neuer Termin', 'RunMode' => 'add' } ] },
-		 { 'Admin' => 0, 'Title' => 'Templates', 'RunMode' => 'config' },
-		 { 'Admin' => 1, 'Title' => 'Benutzer', 'RunMode' => 'userlist',
-		   'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Benutzer', 'RunMode' => 'useradd' } ] },
-		    { 'Admin' => 1, 'Title' => 'Vereine', 'RunMode' => 'orglist',
-		      'SubLevel' => [ { 'Admin' => 1, 'Title' => 'Neuer Verein', 'RunMode' => 'orgadd' } ] },
-                 { 'Admin' => 0, Title => 'Impressum & Disclaimer', FileName => 'index.pl?mode=contact' } );
+    my @Menu = ( { UserLevel => 0, Title => 'Startseite', RunMode => 'index' },
+                 { UserLevel => 0, Title => 'Über Webeve', RunMode => 'about' },
+                 { UserLevel => 1, 'Title' => 'Termine verwalten', RunMode => 'list',
+		   'SubLevel' => [ { UserLevel => 1, 'Title' => 'Neuer Termin', RunMode => 'add' } ] },
+		 { UserLevel => 1, 'Title' => 'Templates', RunMode => 'config' },
+		 { UserLevel => 2, 'Title' => 'Benutzer', RunMode => 'userlist',
+		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Benutzer', RunMode => 'useradd' } ] },
+		    { UserLevel => 2, 'Title' => 'Vereine', RunMode => 'orglist',
+		      'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Verein', RunMode => 'orgadd' } ] },
+                 { UserLevel => 0, Title => 'Impressum & Disclaimer', RunMode => 'contact' },
+		 { UserLevel => 1, Title => 'Passwort ändern', RunMode => 'passwd' },
+		 { UserLevel => 1, Title => 'Abmelden', RunMode => 'logout' } );
     
     $self->{ALL_MENU_ENTRIES} = \@Menu;
 }
@@ -89,28 +100,18 @@ sub cgiapp_prerun
 {
     my $self = shift;
 
+    my $rm = $self->get_current_runmode();
+    my $UserLevel = $self->_getUserLevel();
+
     # Check whether user is logged in
     # --------------------------------
-    if( $self->CheckLogin() )
-    {
-	# Check users permissions
-	# --------------------------------
-	if( ( !$self->{USER_DATA}->{isAdmin} ) && $self->_getPermission() )
-	{
-	    $self->logger('User is not Admin.');
-	    $self->prerun_mode('list');
-	    $self->_FillMenu('list');
-	}
-	else
-	{
-	    $self->_FillMenu();
-	}
-    }
-    else
+    unless( !$UserLevel || $self->CheckLogin() )
     {
 	$self->logger('User not logged in.');
 	$self->prerun_mode('login');
     }
+
+    $self->_FillMenu();
 }
 
 sub cgiapp_postrun
@@ -185,20 +186,18 @@ sub _CheckUser($$)
 
 # -----------------------------------------------------------------------------
 
-sub _getPermission
+sub _getUserLevel
 {
     my $self = shift;
 
     my @Entries = @{$self->{ALL_MENU_ENTRIES}};
     my $rm = $self->get_current_runmode();
-    my $MustBeAdmin = 0;
 
     foreach my $Entry ( @Entries )
     {
 	if( $Entry->{'RunMode'} && $Entry->{'RunMode'} eq $rm )
 	{
-	    $MustBeAdmin = $Entry->{'Admin'};
-	    last;
+	    return( $Entry->{'UserLevel'} );
 	}
 	elsif( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} )
 	{
@@ -206,7 +205,8 @@ sub _getPermission
 	}
     }
     
-    return $MustBeAdmin;
+    # If runmode not found in menu definition better assume a very high userlevel
+    return 1000;
 }
 
 # -----------------------------------------------------------------------------
@@ -236,7 +236,7 @@ sub _FillMenu(;$)
 
     my $data = $self->_NavMenuCleanup();
     
-    $self->{MainTmpl}->param( 'menu' => $data ) if $self->getUser()->{UserID};
+    $self->{MainTmpl}->param( 'menu' => $data );# if $self->getUser()->{UserID};
 
     return 1;
 }
@@ -253,12 +253,18 @@ sub _NavMenuCleanup(;$)
     my $FileName = basename( $0 );    
     my $rm = $self->{'RunMode'} || $self->get_current_runmode();
 
+    my $user = $self->getUser();
+
+    my $UsersUserLevel = 0;
+    $UsersUserLevel = 1 if( %$user );
+    $UsersUserLevel = 2 if( $user->{isAdmin} );
+
     foreach my $Entry (@$Entries)
     {
-	my $Admin = delete( $Entry->{'Admin'} );
+	my $UserLevel = delete( $Entry->{UserLevel} );
         my $Runmode = delete( $Entry->{'RunMode'} );
 
-	if( !( $Admin ) || $self->getUser()->{isAdmin} )
+	if( $UserLevel <= $UsersUserLevel )
 	{
 	    if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} ) 
 	    {
@@ -585,6 +591,50 @@ sub WrongRM
 
 # ---------------------------------------------------------
 
+sub Index
+{
+    my $self = shift;
+
+    return CalendarHTML(basename($0));
+}
+
+# ---------------------------------------------------------
+
+sub StaticContent
+{
+    my $self = shift;
+
+    my $include_path = "$BasePath/include/";
+    my $mode = $self->get_current_runmode();
+    my $filename = "$include_path/$mode.inc";
+    my $content = '';
+
+    my $mtime = (stat($filename))[9];
+
+    if( exists($static_cache->{$mode}) && $static_cache->{$mode}->{mtime} == $mtime )
+    {
+	print STDERR "Read $filename from cache.\n";
+	$content = $static_cache->{$mode}->{content};
+    }
+    else
+    {
+	print STDERR "Read $filename from filesystem.\n";
+	open( IN, "<$filename");
+	while( my $ln = <IN> )
+	{
+	    $content .= $ln;
+	}
+	close( IN );
+
+	$static_cache->{$mode}->{mtime} = $mtime;
+	$static_cache->{$mode}->{content} = $content;
+    }
+
+    return $content;
+}
+
+# ---------------------------------------------------------
+
 sub Logout()
 {
     my $self = shift;
@@ -744,10 +794,6 @@ sub EventList
     }
 
     $SubTmpl->param('List' => \@Dates);
-
-    $SubTmpl->param('FullName' => $self->getUser()->{FullName});
-    $SubTmpl->param('User' => $self->getUser()->{UserName});
-    $SubTmpl->param('Admin' => $self->getUser()->{isAdmin});
 
     $SubTmpl->param('Orgs' => $self->_getUsersOrgList( 'Selected' => \@ShowOrg ));
 

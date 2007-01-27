@@ -1,7 +1,7 @@
 <h1>Impressum &amp; Disclaimer</h1>
 
 <p>
-  Betreiber:<br/>
+  <h2>Anbieter:</h2>
   Christopher Hofmann<br/>
   Walter-Meckauer-Str. 13/B24<br/>
   90478 Nürnberg<br/>
