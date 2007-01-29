@@ -677,17 +677,9 @@ sub Login()
     # User submits either a username or a password or both.
     if($User ne '' || $Password ne '')
     {
-	my $CookieTest = $query->cookie('WebEveCookieTest');
 	my $Relogin = $self->getUser()->{'UserID'} ? 1 : 0;
 
-	unless( $CookieTest )
-	{
-	    $self->logger("Cookies disabled!");
-	    $SubTmpl->param( 'NoCookies' => 1 );
-
-	    return $SubTmpl->output;
-	}
-	elsif($self->_CheckUser($User, $Password))
+	if($self->_CheckUser($User, $Password))
 	{
 	    if( $Relogin )
 	    {
