@@ -6,19 +6,19 @@ Neuer Benutzer '<TMPL_VAR Saved>' angelegt.
 
 <TMPL_IF LoginError>
 <p class="error">
-Login-Name muﬂ angegeben werden.
+Login-Name mu√ü angegeben werden.
 </p>
 </TMPL_IF>
 
 <TMPL_IF FullNameError>
 <p class="error">
-Voller Name muﬂ angegeben werden.
+Voller Name mu√ü angegeben werden.
 </p>
 </TMPL_IF>
 
 <TMPL_IF eMailError>
 <p class="error">
-eMail muﬂ angegeben werden.
+eMail mu√ü angegeben werden.
 </p>
 </TMPL_IF>
 
@@ -28,14 +28,14 @@ Der Login-Name existiert bereits.
 </p>
 </TMPL_IF>
 
-<form action="webeve.pl" method="GET">
+<form action="index.pl" method="GET">
 <table align="center" border="0">
 <tr valign="top">
 <td>Login-Name:</td><td><input type="TEXT" name="Login" value="<TMPL_VAR NAME=Login>"></td>
 <td rowspan="3" width="200">
 <b>Hinweis:</b><br>
-Dem neuen Benutzer wird ein zuf‰llig genieriertes Passwort per eMail an die
-angegebene Adresse geschickt. Daher ist es wichtig, daﬂ diese auch richtig ist.
+Dem neuen Benutzer wird ein zuf√§llig genieriertes Passwort per eMail an die
+angegebene Adresse geschickt. Daher ist es wichtig, da√ü diese auch richtig ist.
 </td>
 </tr>
 <tr valign="top">

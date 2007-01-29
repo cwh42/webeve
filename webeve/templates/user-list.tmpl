@@ -1,11 +1,11 @@
 <h1>Existierende User:</h1>
 
-<TABLE BORDER="0" ALIGN="CENTER" CELLPADDING="4" CELLSPACING="0" width="95%">
+<table>
 <tr>
-<td><b>Login Name</b></td>
-<td><b>Vollständiger Name &amp; eMail</b></td>
+<td><b>Login</b></td>
+<td><b>Name &amp; eMail</b></td>
 <td><b>Letzter Login</b></td>
-<td>&nbsp;</td>
+<td></td>
 </tr>
 
 <TMPL_LOOP NAME=Users>
@@ -14,10 +14,8 @@
 <td><a href="mailto:<TMPL_VAR NAME=eMail>"><b><TMPL_VAR NAME=FullName></b></a></td>
 <td><TMPL_VAR NAME=LastLogin></td>
 <td>
-	<ul style="white-space:nowrap;">
-        <li><a href="webeve.pl?mode=useredit&UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">Bearbeiten</font></a></li>
-        <li><a href="webeve.pl?mode=sendpasswd&UserID=<TMPL_VAR NAME=UserID>"><font FACE="Arial, Helvetica">Passwort senden</font></a></li>
-	</ul>
+<a href="index.pl?mode=useredit&UserID=<TMPL_VAR NAME=UserID>">E</a>
+<a href="index.pl?mode=sendpasswd&UserID=<TMPL_VAR NAME=UserID>">P</a>
 </td>
 </tr>
 </TMPL_LOOP>

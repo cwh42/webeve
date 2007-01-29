@@ -2,13 +2,13 @@
 <p class="error">Altes Passwort ist falsch!</p>
 </TMPL_IF>
 <TMPL_IF NewPWError>
-<p class="error">Neues Passwort stimmt nicht mit Passwortwiederholung überein!</p>
+<p class="error">Neues Passwort stimmt nicht mit Passwortwiederholung Ã¼berein!</p>
 </TMPL_IF>
 <TMPL_IF OK>
-<p class="ok">Passwort wurde erfolgreich geändert!</p>
+<p class="ok">Passwort wurde erfolgreich geÃ¤ndert!</p>
 </TMPL_IF>
 
-<form action="webeve.pl" method="POST">
+<form action="index.pl" method="POST">
 <table align="center" border="0">
 <tr>
   <td><b>Altes Passwort:</b></td>
@@ -30,7 +30,7 @@
   <td>&nbsp;</td>
   <td><input type="hidden" name="mode" value="passwd">
       <input type="hidden" name="Action" value="save">
-      <input type="submit" value="Ändern"></td>
+      <input type="submit" value="Ã„ndern"></td>
 </tr>
 </table>
 </form>

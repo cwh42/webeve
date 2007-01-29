@@ -51,11 +51,11 @@ sub setup
                  { UserLevel => 0, Title => 'Über Webeve', RunMode => 'about' },
                  { UserLevel => 1, 'Title' => 'Termine verwalten', RunMode => 'list',
 		   'SubLevel' => [ { UserLevel => 1, 'Title' => 'Neuer Termin', RunMode => 'add' } ] },
-		 { UserLevel => 1, 'Title' => 'Templates', RunMode => 'config' },
+		 { UserLevel => 1, 'Title' => 'Einstellungen', RunMode => 'config' },
 		 { UserLevel => 2, 'Title' => 'Benutzer', RunMode => 'userlist',
 		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Benutzer', RunMode => 'useradd' } ] },
-		    { UserLevel => 2, 'Title' => 'Vereine', RunMode => 'orglist',
-		      'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Verein', RunMode => 'orgadd' } ] },
+		 { UserLevel => 2, 'Title' => 'Vereine', RunMode => 'orglist',
+		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Verein', RunMode => 'orgadd' } ] },
                  { UserLevel => 0, Title => 'Impressum & Disclaimer', RunMode => 'contact' },
 		 { UserLevel => 1, Title => 'Passwort ändern', RunMode => 'passwd' },
 		 { UserLevel => 1, Title => 'Abmelden', RunMode => 'logout' } );
@@ -78,22 +78,22 @@ sub cgiapp_init
 
     $self->{'Logfile'} = $self->param('Logfile') || $self->getConfig( 'LogFile' );
 
-    $self->_getRemoteHost();
-
-    if(exists $ENV{MOD_PERL})
-    { 
-	print STDERR "\n-----------------------------------------\n";
-	print STDERR "-----------------------------------------\n";
-	print STDERR " WARNING:\n";
-	print STDERR " Running under ".$ENV{MOD_PERL}."!\n";
-	print STDERR " This script is not tested with mod_perl!\n";
-	print STDERR "-----------------------------------------\n";
-	print STDERR "-----------------------------------------\n";
-    }
-    else
-    {
+#    $self->_getRemoteHost();
+#
+#    if(exists $ENV{MOD_PERL})
+#    { 
+#	print STDERR "\n-----------------------------------------\n";
+#	print STDERR "-----------------------------------------\n";
+#	print STDERR " WARNING:\n";
+#	print STDERR " Running under ".$ENV{MOD_PERL}."!\n";
+#	print STDERR " This script is not tested with mod_perl!\n";
+#	print STDERR "-----------------------------------------\n";
+#	print STDERR "-----------------------------------------\n";
+#    }
+#    else
+#    {
 #	print STDERR "\nOK, NOT running under mod-perl.\n";
-    }
+#    }
 }
 
 sub cgiapp_prerun
@@ -110,8 +110,6 @@ sub cgiapp_prerun
 	$self->logger('User not logged in.');
 	$self->prerun_mode('login');
     }
-
-    $self->_FillMenu();
 }
 
 sub cgiapp_postrun
@@ -127,6 +125,7 @@ sub cgiapp_postrun
                               'UserName' => $user->{UserName},
                               'FullName' => $user->{FullName},
                               'isAdmin' => $user->{isAdmin} );
+    $self->_FillMenu();
 
     $$out_ref = $self->{MainTmpl}->output();
 }
@@ -232,11 +231,14 @@ sub _MakeSessionID($)
 sub _FillMenu(;$)
 {
     my $self = shift;
-    $self->{'RunMode'} = shift;
 
-    my $data = $self->_NavMenuCleanup();
-    
-    $self->{MainTmpl}->param( 'menu' => $data );# if $self->getUser()->{UserID};
+    unless( $self->{'MenuFilled'} )
+    {
+	$self->{'MenuFilled'} = 1;
+	$self->{'RunMode'} = shift;
+	my $data = $self->_NavMenuCleanup();
+	$self->{MainTmpl}->param( 'menu' => $data );
+    }
 
     return 1;
 }
@@ -647,7 +649,7 @@ sub Logout()
     $self->logger("Logged out");
 
     $self->header_type('redirect');
-    $self->header_props(-uri=>'index.pl');
+    $self->header_props(-uri=>'index.pl?mode=index');
     
     return '<center>Please wait ...</center>';
 }
@@ -670,23 +672,7 @@ sub Login()
     my $Password = $query->param('Password') || '';
 
     # This query removes expired loginmarks from database.
-    # (User should be ticked off for not logging out properly!)
     $self->getDBH()->do('DELETE FROM Logins WHERE Expires < now()');
-
-    # User calls this page without any parameters
-    if($User eq '' && $Password eq '')
-    {
-	if( $self->getUser()->{UserID} )
-	{
-	    $SubTmpl->param( 'User' => $self->getUser()->{UserName} );
-	}
-	my $Cookie = $query->cookie(-name=>'WebEveCookieTest',
-				    -value=>'Cookies_enabled');
-	
-	$self->header_props(-cookie=>$Cookie);
-
-	return $SubTmpl->output;
-    }
 
     # User submits either a username or a password or both.
     if($User ne '' || $Password ne '')

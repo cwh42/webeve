@@ -45,6 +45,11 @@
   	    <div><span><input type="hidden" name="mode" value="login" /></span>
   	    <span id="submit"><input type="submit" value="Login" /></span></div>
   	  </form>
+	  <script type="text/javascript">
+            if(navigator.cookieEnabled == false) {
+              document.write("Login benötigt Cookies!");
+            }
+          </script>
         </li>
       </tmpl_if>
     </ul>

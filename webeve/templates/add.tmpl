@@ -6,7 +6,7 @@
     <B><TMPL_VAR NAME=SvDate></B><BR>
     <span class="smallfont"><TMPL_VAR NAME=SvTime>&nbsp;<TMPL_VAR NAME=SvPlace></span><BR>
     <TMPL_IF NAME=SvPublic>
-    <FONT color="#008000">öffentlich</font>
+    <FONT color="#008000">Ã¶ffentlich</font>
     <TMPL_ELSE>
     <FONT color="#FF0000">intern</FONT>
     </TMPL_IF>
@@ -16,11 +16,11 @@
      <table>
       <tr>
       <td width="20">&nbsp;</td>
-      <td><a href="webeve.pl?mode=edit&EntryID=<TMPL_VAR NAME=SvEntryID>">Bearbeiten</a></td>
+      <td><a href="index.pl?mode=edit&EntryID=<TMPL_VAR NAME=SvEntryID>">Bearbeiten</a></td>
       </tr>
       <tr>
       <td>&nbsp;</td>
-      <td><a href="webeve.pl?mode=delete&EntryID=<TMPL_VAR NAME=SvEntryID>">Löschen</a></td>
+      <td><a href="index.pl?mode=delete&EntryID=<TMPL_VAR NAME=SvEntryID>">LÃ¶schen</a></td>
       </tr>
      </table>
     </td>
@@ -29,7 +29,7 @@
     <tr><td><TMPL_VAR NAME=SvDescription></td></tr>
     </table>
     <hr size="1" color="#000000" noshade>
-    <h2>Weiteren Termin hinzufügen:</h2><br>
+    <h2>Weiteren Termin hinzufÃ¼gen:</h2><br>
 </TMPL_IF>
 
 <TMPL_IF Error>
@@ -47,7 +47,7 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 </TMPL_IF>
 
 
-<form action="webeve.pl" method="POST">
+<form action="index.pl" method="POST">
 <input type="hidden" name="mode" value="add">
 <table align="center">
 <tr>
@@ -82,10 +82,10 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td colspan="2">
 <TMPL_IF Public>
 <input type="radio" name="Public" value="0"> Intern<br>
-<input type="radio" name="Public" value="1" checked> Öffentlich
+<input type="radio" name="Public" value="1" checked> Ã–ffentlich
 <TMPL_ELSE>
 <input type="radio" name="Public" value="0"checked> Intern<br>
-<input type="radio" name="Public" value="1"> Öffentlich
+<input type="radio" name="Public" value="1"> Ã–ffentlich
 </TMPL_IF>
 </td>
 <td>
@@ -102,15 +102,15 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td rowspan="2" class="smallfont">
 <b>Beispiele:</b><br>
 3-10-02 =&gt; 3.Oktober 2002<br>
-3-10- =&gt; Nächster 3. Oktober<br>
+3-10- =&gt; NÃ¤chster 3. Oktober<br>
 10-02 =&gt; Oktober 2002<br>
-10 =&gt; Nächster Oktober
+10 =&gt; NÃ¤chster Oktober
 </td>
 <td>&nbsp;</td>
 </tr>
 <tr>
 <td><input type="text" name="Date" value="<TMPL_VAR Date>" size="8" maxlength="10"></td>
-<td><input type="Checkbox" name="IncDate" value="1" <TMPL_IF IncDate>checked</TMPL_IF>>Weiterzählen</td>
+<td><input type="Checkbox" name="IncDate" value="1" <TMPL_IF IncDate>checked</TMPL_IF>>WeiterzÃ¤hlen</td>
 </tr>
 
 <tr>
@@ -160,7 +160,7 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td colspan="2">
 <textarea name="Description" rows="6" cols="43" wrap="virtual"><TMPL_VAR Description></textarea>
 <span class="smallfont">
-<br><b>Hinweise:</b><br>HTML ist nicht mehr erlaubt.</span>
+<br><b>Hinweise:</b><br>HTML ist nicht erlaubt.</span>
 </td>
 <td valign="top"><input type="Checkbox" name="KeepDesc" value="1" <TMPL_IF KeepDesc>checked</TMPL_IF>>Beibehalten</td>
 </tr>
