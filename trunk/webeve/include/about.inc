@@ -23,7 +23,7 @@ Webeve.
 <h2>Wie kann man Webeve nutzen?</h2>
 Sofern Du in der Vorstandschaft eines oberfränkischen Vereins bist oder Du
 Terminverwalter eines solchen bist, kannst Du einfach per
-Email an <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>, unter Angabe des Vereinsnamens, Deine
+Email an <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a> unter Angabe des Vereinsnamens Deine
 Zugangsdaten anfordern.</p>
 
 <p>
@@ -35,7 +35,7 @@ trotzdem. ;)
 
 <p>
 <h2>Technisches:</h2>
-Webeve besteht aus einigen Perl-Scripten und speichert seine Daten in einer
-MySQL Datenbank. Den Quellcode werde ich füher oder später veröffentlichen in
-der Hoffnung einige aktive Mitentwickler zu finden.
+Webeve besteht aus einigen Perl-Scripten die ihre Daten in einer
+MySQL Datenbank speichern. Den Quellcode werde ich füher oder später, in
+der Hoffnung einige aktive Mitentwickler zu finden, veröffentlichen.
 </p>

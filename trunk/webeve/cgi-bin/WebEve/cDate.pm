@@ -367,7 +367,7 @@ sub getDateStr
     }
     else
     {
-	return Month_to_Text( $self->{Month} )." ".$self->{Year};
+	return $self->getMonthText()." ".$self->{Year};
     }
 }
 

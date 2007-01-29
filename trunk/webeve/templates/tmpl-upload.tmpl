@@ -1,12 +1,12 @@
 <!-- Last Updated: 2003-08-22 -->
 
 <p>
-Hier kann das Aussehen des Kalenders an die eigenen Wünsche angepasst werden.<br>
-Zum Verändern der Farben sind HTML üblichen <a href="http://selfhtml.teamone.de/html/allgemein/farben.htm#hexadezimal" target="_new">Farbangaben</a> erlaubt. Für das Hintergrundbild ist die vollständige URL des Bildes anzugeben. Die Bilddatei kann nicht heraufgeladen werden, sondern muß auf einer eigenen Homepage liegen.<br>
-Sollten weitere Einstellmöglichkeiten gewünscht werden, dann bitte <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
+Hier kann das Aussehen des Kalenders an die eigenen WÃ¼nsche angepasst werden.<br>
+Zum VerÃ¤ndern der Farben sind HTML Ã¼blichen <a href="http://selfhtml.teamone.de/html/allgemein/farben.htm#hexadezimal" target="_new">Farbangaben</a> erlaubt. FÃ¼r das Hintergrundbild ist die vollstÃ¤ndige URL des Bildes anzugeben. Die Bilddatei kann nicht heraufgeladen werden, sondern muÃŸ auf einer eigenen Homepage liegen.<br>
+Sollten weitere EinstellmÃ¶glichkeiten gewÃ¼nscht werden, dann bitte <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
 </p>
 
-<form action="webeve.pl" method="POST">
+<form action="index.pl" method="POST">
 <input type="hidden" name="OrgID" value="<TMPL_VAR OrgID>">
 <input type="hidden" name="mode" value="config">
 <input type="hidden" name="action" value="save">
@@ -40,7 +40,7 @@ Sollten weitere Einstellmöglichkeiten gewünscht werden, dann bitte <a href="mail
 
 <p>
 <b>Hinweis:</b><br>
-Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an dieser Stelle nichts. Soll das eigene Template verändert werden, dann bitte einfach <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
+Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken VerÃ¤nderungen an dieser Stelle nichts. Soll das eigene Template verÃ¤ndert werden, dann bitte einfach <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
 </p>
 
 <!--
@@ -68,7 +68,7 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an
 <form action="tmpl-upload.pl" enctype="multipart/form-data" method="POST">
   <table border="0" cellpadding="3" cellspacing="0" align="center">
   <tr>
-    <td>Template für</td>
+    <td>Template fÃ¼r</td>
     <td>
       <b><TMPL_VAR NAME=OrgName></b>
     </td>
@@ -96,10 +96,10 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an
     <td colspan="2" bgcolor="#ee9c59">
        <h1>Anleitung:</h1>
        <p>Das Aussehen des Terminkalenders kannst Du mit grundlegenden
-    	HTML-Kenntnissen relativ einfach an die eigenen Wünsche anpassen.
-    	Dazu mußt Du nur hier eine Template-Datei (Template = Vorlage)
-    	heraufladen. Ein Template sieht aus wie eine normale HTML-Datei nur, daß
-    	zusätzlich noch die folgenden Tags verwendet werden:
+    	HTML-Kenntnissen relativ einfach an die eigenen WÃ¼nsche anpassen.
+    	Dazu muÃŸt Du nur hier eine Template-Datei (Template = Vorlage)
+    	heraufladen. Ein Template sieht aus wie eine normale HTML-Datei nur, daÃŸ
+    	zusÃ¤tzlich noch die folgenden Tags verwendet werden:
     	<ul>
     	<li>&lt;TMPL_VAR Vereinsname&gt;<br>
             Wird in der Anzeige durch den im Kalender hinterlegten Vereinsnamen ersetzt</li>
@@ -107,8 +107,8 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an
             Wird in der Anzeige durch die Vereinsnummer (siehe die Liste unten) ersetzt.</li>
     	<li>&lt;TMPL_VAR Terminliste&gt;<br>
             Wird in der Anzeige durch die Liste der Termine ersetzt</li>
-        <li>Durch folgendes Konstrukt kann man eine Fallunterscheidung für die interne und
-            öffentliche Terminansicht erreichen:<br>
+        <li>Durch folgendes Konstrukt kann man eine Fallunterscheidung fÃ¼r die interne und
+            Ã¶ffentliche Terminansicht erreichen:<br>
             &lt;TMPL_IF Intern&gt;<br>
                 Nur in interner Ansicht sichtbar<br>
             &lt;TMPL_ELSE&gt;<br>
@@ -117,7 +117,7 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an
         </ul>
        </p>
 
-       <p>Die Gestaltung der Terminliste erfolgt über Style-Sheets in diesem Template.
+       <p>Die Gestaltung der Terminliste erfolgt Ã¼ber Style-Sheets in diesem Template.
 
         In der Termintabelle sind die folgenden Klassen definiert:
         <ul>
@@ -131,20 +131,20 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen an
         </p>
 
        <p>Hier gibt es ein funktionierendes <a href="http://www.bnbt.de/~tr1138/bvg/kalender-example.tmpl">
-	Beispieltemplate</a> zum herunterladen, das nach eigenen Wünschen
+	Beispieltemplate</a> zum herunterladen, das nach eigenen WÃ¼nschen
 	gestaltet werden kann. (Auf den Link rechtsklicken und "Speichern unter
-	..." auswählen)</p>
+	..." auswÃ¤hlen)</p>
 	<hr noshade size="1" color="#000000">
 
-       <p>Um alle öffentlichen Termine mit Deinem eigenen Template anzuzeigen, mußt Du
+       <p>Um alle Ã¶ffentlichen Termine mit Deinem eigenen Template anzuzeigen, muÃŸt Du
 	auf diese URL verlinken:<br>
 	<b>http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=<font color="#ff0000">X</font></b><br>
-	Für die für Deinen Verein als nichtöffentlich markierten Termine verwende diese URL:<br>
+	FÃ¼r die fÃ¼r Deinen Verein als nichtÃ¶ffentlich markierten Termine verwende diese URL:<br>
 	<b>http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=<font color="#ff0000">X</font>&Intern=Intern</b><br>
 	wobei <font color="#ff0000"><b>X</b></font> durch folgende Zahl zu ersetzen ist:<br>
 	<ul>
           <TMPL_LOOP NAME=Orgs>
-	    <li>für <TMPL_VAR NAME=OrgName>: <TMPL_VAR NAME=OrgID></li>
+	    <li>fÃ¼r <TMPL_VAR NAME=OrgName>: <TMPL_VAR NAME=OrgID></li>
           </TMPL_LOOP>
 	</ul>
        </p>

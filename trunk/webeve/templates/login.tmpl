@@ -2,12 +2,6 @@
 <p class="error">Passwort oder Username ist falsch!</p>
 </TMPL_IF>
 
-<TMPL_IF NoCookies>
-<p class="error">Bei Deinem Browser sind Cookies deaktiviert!<br>
-Um Dich hier einloggen zu können müssen Cookies aktiviert sein.<br>
-<a href="../cookies.html">Hilfe</a> zum Thema &quot;Cookies&quot;</p>
-</TMPL_IF>
-
 <TMPL_IF User>
 <p class="warn">Du bist bereits als &quot;<TMPL_VAR NAME=User>&quot; eingeloggt.</p>
 </TMPL_IF>
@@ -27,14 +21,6 @@ Du kannst entweder ...
 <TMPL_IF WrongPasswd>
 Probiers nochmal und achte auf eine evtl. aktive FESTSTELLTASTE!
 </TMPL_IF>
-
-<TMPL_UNLESS User>
-<TMPL_UNLESS WrongPasswd>
-<TMPL_UNLESS NoCookies>
-<b>Der Browser muß Cookies akzeptieren damit der Login funktioniert!</b>
-</TMPL_UNLESS>
-</TMPL_UNLESS>
-</TMPL_UNLESS>
 
 </td></tr>
 </table>

@@ -1,4 +1,4 @@
-<form action="webeve.pl" method="POST">
+<form action="index.pl" method="POST">
 <input type="hidden" name="mode" value="delete">
 <table align="center">
  <colgroup>
@@ -37,7 +37,7 @@
  <table>
   <tr>
   <td width="20">&nbsp;</td>
-  <td><a href="webeve.pl?mode=edit&EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
+  <td><a href="index.pl?mode=edit&EntryID=<TMPL_VAR NAME=EntryID>">Bearbeiten</a></td>
   </tr>
   <tr>
   <td><input type="checkbox" name="EntryID" value="<TMPL_VAR NAME=EntryID>"<TMPL_IF NAME=IsOver> checked</TMPL_IF>></td>
