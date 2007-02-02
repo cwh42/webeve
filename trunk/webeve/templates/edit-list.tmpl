@@ -1,15 +1,39 @@
+<script type="text/javascript">
+<!--
+function toggleall(allbox, boxes)
+{
+    for(var i = 0; i <= boxes.length; i++)
+    {
+        boxes[i].checked = allbox.checked;
+    }
+}
+
+function toggleallbox(allbox, boxes)
+{
+    var checked = true;
+
+    for(var i = 0; i < boxes.length; i++)
+    {
+        if(!boxes[i].checked)
+        {
+            checked = false;
+            break;
+        }
+    }
+
+    allbox.checked = checked;
+}
+-->
+</script>
+
 <form action="index.pl" method="POST">
 <input type="hidden" name="mode" value="delete">
-<table align="center">
+<table width="100%">
  <colgroup>
    <col width="150">
    <col>
    <col width="150">
  </colgroup>
-
-<TR>
-<th colspan="3">Existierende Termine:</th>
-</TR>
 
 <TR>
 <TD colspan="3" align="right">
@@ -71,9 +95,10 @@
 <td>
 Nur Termine folgender Vereine anzeigen:
 <ul style="list-style-type:none;">
+<li><input type="checkbox" name="showall" onclick="javascript:toggleall(this, this.form.ShowOrg)"><b>Alle</b></li>
 <TMPL_LOOP NAME=Orgs>
 <li>
-<input type="checkbox" name="ShowOrg" value="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=selected> checked</TMPL_IF>>
+<input onclick="javascript:toggleallbox(this.form.showall, this.form.ShowOrg)" type="checkbox" name="ShowOrg" value="<TMPL_VAR NAME=OrgID>"<TMPL_IF NAME=selected> checked</TMPL_IF>>
 <TMPL_VAR NAME=OrgName></li>
 </TMPL_LOOP>
 </ul>
