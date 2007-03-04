@@ -6,39 +6,47 @@
     <link rel="stylesheet" type="text/css" href="../default.css"/>
   </head>
   <body>
-    <h1>Webeve</h1>
-
-    <ul id="Navigation">
+    <h1><img src="../webeve.png" alt="Webeve"/>
+      <span style="position:relative;bottom:0.4em;left:0.5em;">Der EventKalender für Oberfranken</span>
+    </h1>
+    <div id="Navigation">
       <tmpl_loop menu>
 	<tmpl_if Current>
-	  <li class="current"><tmpl_var escape=html Title>
+	  <span class="current"><tmpl_var escape=html Title></span>
         <tmpl_else>
-	  <li><a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+	  <tmpl_if FileName>
+	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+	  <tmpl_else>
+    	    <h1><tmpl_var escape=html Title></h1>
+	  </tmpl_if>
 	</tmpl_if>
 	<tmpl_if SubLevel>
-	    <ul>
 	      <tmpl_loop SubLevel>
-		<tmpl_if Current>
-		  <li class="current"><tmpl_var escape=html Title></li>
-		<tmpl_else>
-		    <li><a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a></li>
-		</tmpl_if>
+        	<tmpl_if Current>
+        	  <span class="current"><tmpl_var escape=html Title></span>
+                <tmpl_else>
+        	  <tmpl_if FileName>
+        	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+        	  <tmpl_else>
+            	    <h1><tmpl_var escape=html Title></h1>
+        	  </tmpl_if>
+        	</tmpl_if>
 	      </tmpl_loop>
-	    </ul>
 	</tmpl_if>
-      </li>
       </tmpl_loop>
 
       <tmpl_if UserName>
-        <li>
-          <tmpl_var UserName><br/>
+        <h1>Eingeloggt</h1>
+        <div>
+          <tmpl_var UserName> (<a href="?mode=logout">Abmelden</a>)<br/>
           <tmpl_var FullName><br/>
           <tmpl_if isAdmin>Administrator<br/></tmpl_if>
-        </li>
+        </div>
       <tmpl_else>
-        <li>	
+        <h1>Einloggen</h1>
+        <div>	
   	  <form id="Login" method="post">
-  	    <div><span>Login:</span>
+  	    <div><span>Benutzer:</span>
   	    <span><input type="text" name="User" value="" /></span></div>
   	    <div><span>Password:</span>
   	    <span><input type="password" name="Password" value="" /></span></div>
@@ -50,9 +58,9 @@
               document.write("Login benötigt Cookies!");
             }
           </script>
-        </li>
+        </div>
       </tmpl_if>
-    </ul>
+    </div>
 	  
     <div id="Content">
       <tmpl_var content>

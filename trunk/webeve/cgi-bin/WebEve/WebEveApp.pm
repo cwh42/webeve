@@ -47,18 +47,22 @@ sub setup
 		      'orgadd' => 'OrgAdd',
 		      'orgedit' => 'OrgEdit' );
 
-    my @Menu = ( { UserLevel => 0, Title => 'Startseite', RunMode => 'index' },
-                 { UserLevel => 0, Title => 'Über Webeve', RunMode => 'about' },
-                 { UserLevel => 1, 'Title' => 'Termine verwalten', RunMode => 'list',
-		   'SubLevel' => [ { UserLevel => 1, 'Title' => 'Neuer Termin', RunMode => 'add' } ] },
-		 { UserLevel => 1, 'Title' => 'Einstellungen', RunMode => 'config' },
-		 { UserLevel => 2, 'Title' => 'Benutzer', RunMode => 'userlist',
-		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Benutzer', RunMode => 'useradd' } ] },
-		 { UserLevel => 2, 'Title' => 'Vereine', RunMode => 'orglist',
-		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Verein', RunMode => 'orgadd' } ] },
-                 { UserLevel => 0, Title => 'Impressum & Disclaimer', RunMode => 'contact' },
-		 { UserLevel => 1, Title => 'Passwort ändern', RunMode => 'passwd' },
-		 { UserLevel => 1, Title => 'Abmelden', RunMode => 'logout' } );
+    my @Menu = ( { UserLevel => 0, Title => 'Webeve',
+		   SubLevel => [ { UserLevel => 0, Title => 'Startseite', RunMode => 'index' },
+				 { UserLevel => 0, Title => 'Über Webeve', RunMode => 'about' },
+				 { UserLevel => 0, Title => 'Impressum & Disclaimer', RunMode => 'contact' } ] },
+                 { UserLevel => 1, 'Title' => 'Termine verwalten',
+		   'SubLevel' => [ { UserLevel => 1, 'Title' => 'Neuer Termin', RunMode => 'add' },
+				   { UserLevel => 1, 'Title' => 'Termine bearbeiten', RunMode => 'list' } ] },
+		 { UserLevel => 2, 'Title' => 'Benutzer verwalten',
+		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Benutzer', RunMode => 'useradd' },
+				   { UserLevel => 2, 'Title' => 'Benutzer bearbeiten', RunMode => 'userlist' } ] },
+		 { UserLevel => 2, 'Title' => 'Vereine verwalten',
+		   'SubLevel' => [ { UserLevel => 2, 'Title' => 'Neuer Verein', RunMode => 'orgadd' },
+				   { UserLevel => 2, 'Title' => 'Vereine bearbeiten', RunMode => 'orglist' } ] },
+		 { UserLevel => 1, 'Title' => 'Einstellungen',
+		   SubLevel => [ { UserLevel => 1, 'Title' => 'Kalenderansicht', RunMode => 'config' },
+				 { UserLevel => 1, Title => 'Passwort ändern', RunMode => 'passwd' } ] } );
     
     $self->{ALL_MENU_ENTRIES} = \@Menu;
 }
@@ -279,7 +283,10 @@ sub _NavMenuCleanup(;$)
 		$Entry->{'Current'} = 1;
 	    }
 
-	    $Entry->{'FileName'} = "$FileName?mode=$Runmode" unless( $Entry->{'FileName'} );
+	    if( $Runmode || $Entry->{'FileName'} )
+	    {
+		$Entry->{'FileName'} = "$FileName?mode=$Runmode" unless( $Entry->{'FileName'} );
+	    }
 
 	    push( @Result, $Entry );
 	}
