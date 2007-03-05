@@ -91,6 +91,7 @@ sub CalendarHTML
 	    if( $DateObj->getDate->getMonth != $LastMonth || $DateObj->getDate->getYear != $LastYear )
 	    {
 		my $TextMonth = $DateObj->getDate->getMonthText;
+		$TextMonth =~ s/(\W)/'&#'.ord($1).';'/ge;
 		push( @OtherDates, { 'Header' => "$TextMonth ".$DateObj->getDate->getYear } );
 		
 		$LastMonth = $DateObj->getDate->getMonth;

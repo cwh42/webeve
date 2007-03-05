@@ -12,7 +12,7 @@
     <div id="Navigation">
       <tmpl_loop menu>
 	<tmpl_if Current>
-	  <span class="current"><tmpl_var escape=html Title></span>
+	  <span class="current"><tmpl_var escape=html Title> &raquo;</span>
         <tmpl_else>
 	  <tmpl_if FileName>
 	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
@@ -23,7 +23,7 @@
 	<tmpl_if SubLevel>
 	      <tmpl_loop SubLevel>
         	<tmpl_if Current>
-        	  <span class="current"><tmpl_var escape=html Title></span>
+        	  <span class="current"><tmpl_var escape=html Title> &raquo;</span>
                 <tmpl_else>
         	  <tmpl_if FileName>
         	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
