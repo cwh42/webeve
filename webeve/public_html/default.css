@@ -115,6 +115,7 @@ div#Content p {
 
 table.seitenumschalter {
  padding:6px;
+ margin:auto auto;
 }
 
 table.seitenumschalter a {
@@ -123,6 +124,7 @@ table.seitenumschalter a {
 
 table.termintabelle {
   font-size:1.0em;
+  margin:auto auto;
 }
 
 table.termintabelle .datum {
@@ -150,7 +152,9 @@ table.termintabelle .trenner {
 }
 
 table.termintabelle .linkespalte {
+  width:8em;
 }
 
 table.termintabelle .rechtespalte {
+  width:25em;
 }

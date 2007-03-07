@@ -13,7 +13,7 @@
     <div id="Navigation">
       <tmpl_loop menu>
 	<tmpl_if Current>
-	  <span class="current"><tmpl_var escape=html Title> &raquo;</span>
+	  <span class="current">&raquo; <tmpl_var escape=html Title></span>
         <tmpl_else>
 	  <tmpl_if FileName>
 	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
@@ -24,7 +24,7 @@
 	<tmpl_if SubLevel>
 	      <tmpl_loop SubLevel>
         	<tmpl_if Current>
-        	  <span class="current"><tmpl_var escape=html Title> &raquo;</span>
+        	  <span class="current">&raquo; <tmpl_var escape=html Title></span>
                 <tmpl_else>
         	  <tmpl_if FileName>
         	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
@@ -46,7 +46,7 @@
       <tmpl_else>
         <h1>Einloggen</h1>
         <div>	
-  	  <form id="Login" method="post">
+  	  <form id="Login" action="." method="post">
   	    <div><span>Benutzer:</span>
   	    <span><input type="text" name="User" value="" /></span></div>
   	    <div><span>Password:</span>
