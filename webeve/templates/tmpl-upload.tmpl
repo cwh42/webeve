@@ -6,7 +6,7 @@ Zum Verändern der Farben sind HTML üblichen <a href="http://selfhtml.teamone.d
 Sollten weitere Einstellmöglichkeiten gewünscht werden, dann bitte <a href="mailto:ch@goessenreuth.de">bei mir melden</a>. 
 </p>
 
-<form action="index.pl" method="POST">
+<form action="index.pl" method="post">
 <input type="hidden" name="OrgID" value="<TMPL_VAR OrgID>">
 <input type="hidden" name="mode" value="config">
 <input type="hidden" name="action" value="save">
@@ -65,7 +65,7 @@ Wenn bereits ein eigenes Template heraufgeladen wurde, bewirken Veränderungen a
 <p class="error"><TMPL_VAR Error></p>
 </TMPL_IF>
 
-<form action="tmpl-upload.pl" enctype="multipart/form-data" method="POST">
+<form action="tmpl-upload.pl" enctype="multipart/form-data" method="post">
   <table border="0" cellpadding="3" cellspacing="0" align="center">
   <tr>
     <td>Template für</td>
