@@ -267,8 +267,8 @@ sub _NavMenuCleanup(;$)
 
     foreach my $Entry (@$Entries)
     {
-	my $UserLevel = delete( $Entry->{UserLevel} );
-        my $Runmode = delete( $Entry->{'RunMode'} );
+	my $UserLevel = delete( $Entry->{UserLevel} ) || 0;
+        my $Runmode = delete( $Entry->{'RunMode'} ) || '';
 
 	if( $UserLevel <= $UsersUserLevel )
 	{

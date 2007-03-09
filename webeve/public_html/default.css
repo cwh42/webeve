@@ -23,7 +23,6 @@ div#Navigation {
   font-size: 0.88em;
   float: left; width: 13em;
   margin: 0; padding: 0;
-  border-style: none;
   margin-left:0.5em;
   white-space:nowrap;
 }
@@ -109,6 +108,26 @@ div#Content h2 {
 }
 div#Content p {
   font-size:1em;
+}
+
+div#Footer {
+  clear:both;
+  border-top:3px solid #ffcc00;
+  color:#ffcc00;
+  background-color:#008000;
+  text-align:right;
+  font-size:0.8em;
+  padding:4px;
+}
+
+div#Footer a {
+  color:#ffcc00;
+  text-decoration:none;
+}
+
+div#Footer a:hover,div#Footer a:focus {
+  color:#ffcc00;
+  text-decoration:underline;
 }
 
 /* Kalender */
