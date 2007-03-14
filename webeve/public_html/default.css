@@ -138,7 +138,12 @@ table.seitenumschalter {
 }
 
 table.seitenumschalter a {
-  text-decoration: none;
+  text-decoration:none;
+}
+
+table.seitenumschalter a:hover {
+  text-decoration:none;
+  background-color:#ffcc00;
 }
 
 table.termintabelle {
