@@ -4,7 +4,7 @@
 <h2>Was ist Webeve?</h2>
 Webeve ist ein <b>Web</b>basierter <b>Eve</b>ntkalender für Vereine im Raum
 Oberfranken. Entstanden ist Webeve aus dem internen Web-Terminkalender des
-Burschenvereins Gössenreuth.<br/>
+<a href="http://www.goessenreuth.de/" target="_blank">Burschenvereins Gössenreuth</a>.<br/>
 Webeve baut darauf, daß jeder Veranstalter selbst am meisten Interesse hat
 seine Veranstaltung möglichst weiträumig bekannt zu machen. Daher pflegt jeder
 angemeldete Verein seine Veranstaltungstermine in Webeve selbständig.<br/>

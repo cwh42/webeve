@@ -4,16 +4,15 @@
 <table class="seitenumschalter">
 <tr>
 <td align="center">
-Seite <b><TMPL_VAR CurrentPage></b> von <b><TMPL_VAR PageCount></b><br/>
-<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lt; Vorhergehende</a>&nbsp;</TMPL_IF>
-<TMPL_LOOP Pages>
+<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lsaquo;&ndash;</a>&nbsp;<TMPL_ELSE>&lsaquo;&ndash;</a></TMPL_IF>
+(<TMPL_LOOP Pages>
 <TMPL_IF IsCurrent>
 <b><TMPL_VAR Page></b><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
 <TMPL_ELSE>
 <a href="<TMPL_VAR ESCAPE=HTML PageURL>"><TMPL_VAR Page></a><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
 </TMPL_IF>
-</TMPL_LOOP>
-<TMPL_IF NextPage>&nbsp;<a href="<TMPL_VAR ESCAPE=HTML NextPageURL>">Nächste &gt;</a></TMPL_IF>
+</TMPL_LOOP>)
+<TMPL_IF NextPage><a href="<TMPL_VAR ESCAPE=HTML NextPageURL>">&ndash;&rsaquo;</a><TMPL_ELSE>&ndash;&rsaquo;</TMPL_IF><br/>
 </td>
 </tr>
 </table>
@@ -61,16 +60,15 @@ Seite <b><TMPL_VAR CurrentPage></b> von <b><TMPL_VAR PageCount></b><br/>
 <table class="seitenumschalter">
 <tr>
 <td align="center">
-Seite <b><TMPL_VAR CurrentPage></b> von <b><TMPL_VAR PageCount></b><br/>
-<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lt; Vorhergehende</a>&nbsp;</TMPL_IF>
-<TMPL_LOOP Pages>
+<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lsaquo;&ndash;</a>&nbsp;<TMPL_ELSE>&lsaquo;&ndash;</a></TMPL_IF>
+(<TMPL_LOOP Pages>
 <TMPL_IF IsCurrent>
 <b><TMPL_VAR Page></b><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
 <TMPL_ELSE>
 <a href="<TMPL_VAR ESCAPE=HTML PageURL>"><TMPL_VAR Page></a><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
 </TMPL_IF>
-</TMPL_LOOP>
-<TMPL_IF NextPage>&nbsp;<a href="<TMPL_VAR ESCAPE=HTML NextPageURL>">Nächste &gt;</a></TMPL_IF>
+</TMPL_LOOP>)
+<TMPL_IF NextPage><a href="<TMPL_VAR ESCAPE=HTML NextPageURL>">&ndash;&rsaquo;</a><TMPL_ELSE>&ndash;&rsaquo;</TMPL_IF><br/>
 </td>
 </tr>
 </table>
