@@ -7,16 +7,16 @@
     <link rel="stylesheet" type="text/css" href="../default.css"/>
   </head>
   <body>
-    <h1><img src="../webeve.png" alt="Webeve"/>
+    <h1 id="header"><img src="../webeve.png" alt="Webeve"/>
       <span style="position:relative;bottom:0.4em;left:0.5em;">Der EventKalender für Oberfranken</span>
     </h1>
     <div id="Navigation">
       <tmpl_loop menu>
 	<tmpl_if Current>
-	  <span class="current">&raquo; <tmpl_var escape=html Title></span>
+	  <span class="navitem current">&raquo; <tmpl_var escape=html Title></span>
         <tmpl_else>
 	  <tmpl_if FileName>
-	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+	    <a class="navitem" href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
 	  <tmpl_else>
     	    <h1><tmpl_var escape=html Title></h1>
 	  </tmpl_if>
@@ -24,10 +24,10 @@
 	<tmpl_if SubLevel>
 	      <tmpl_loop SubLevel>
         	<tmpl_if Current>
-        	  <span class="current">&raquo; <tmpl_var escape=html Title></span>
+        	  <span class="navitem current">&raquo; <tmpl_var escape=html Title></span>
                 <tmpl_else>
         	  <tmpl_if FileName>
-        	    <a href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
+        	    <a class="navitem" href="<tmpl_var FileName>"><tmpl_var escape=html Title></a>
         	  <tmpl_else>
             	    <h1><tmpl_var escape=html Title></h1>
         	  </tmpl_if>

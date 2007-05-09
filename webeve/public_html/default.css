@@ -5,7 +5,7 @@ body {
   margin: 0; padding: 0;
 }
 
-body>h1 {
+h1#header {
   font-size: 0.8em;
   font-weight: normal;
   color: #ffcc00;
@@ -30,13 +30,15 @@ div#Navigation {
 div#Navigation h1 {
   border-bottom:1px solid black;
   font-size:100%;
+  margin-top:0.6em;
+  margin-bottom:0.3em;
 }
 
 div#Navigation div {
-  list-style: none;
-  margin: 0; padding: 0.15em;
+  margin: 0;
+  padding: 0.15em;
 }
-div#Navigation>a, div#Navigation>span {
+div#Navigation .navitem {
   display: block;
   padding: 0 0.5em;
   font-weight: normal;
@@ -47,17 +49,17 @@ div#Navigation .current {
   color: #008000;
 }
 
-div#Navigation>a {
+div#Navigation a.navitem {
   text-decoration: none;
   color: #008000;
   background-color: white;
 }
 
-div#Navigation>a:hover, div#Navigation>a:focus {
+div#Navigation a.navitem:hover, div#Navigation a.navitem:focus {
   text-decoration: none;
   background-color: #ffcc00;
 }
-div#Navigation>a:active {
+div#Navigation a.navitem:active {
   text-decoration: none;
   color: white;
   background-color: white;
