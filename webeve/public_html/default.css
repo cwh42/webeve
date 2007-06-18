@@ -66,31 +66,29 @@ div#Navigation a.navitem:active {
 }
 
 form#Login {
-  display: table;
+  margin:0;
+}
+
+form#Login table {
   margin: 0 auto;
 }
 
-form#Login div {
-  display: table-row;
-}
-
-form#Login div span {
-  display: table-cell;
+form#Login table tr td {
   padding:1px;
 }
 
-form#Login div span#submit {
+form#Login tr td#submit {
   text-align:right;
 }
 
-form#Login input[type=text],input[type=password] {
+form#Login input.text{
   width: 6em;
   font-size:1.0em;
   height:1.2em;
   border:1px solid #008000;
 }
 
-form#Login input[type=submit] {
+form#Login input.submit {
   height:1.5em;
 }
 

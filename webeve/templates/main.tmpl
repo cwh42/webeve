@@ -1,6 +1,5 @@
-<?xml version="1.0"  encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Webeve - <tmpl_var title></title>
@@ -47,12 +46,14 @@
         <h1>Einloggen</h1>
         <div>	
   	  <form id="Login" action="index.pl" method="post">
-  	    <div><span>Benutzer:</span>
-  	    <span><input type="text" name="User" value="" /></span></div>
-  	    <div><span>Password:</span>
-  	    <span><input type="password" name="Password" value="" /></span></div>
-  	    <div><span><input type="hidden" name="mode" value="login" /></span>
-  	    <span id="submit"><input type="submit" value="Login" /></span></div>
+	   <table>
+  	    <tr><td>Benutzer:</td>
+  	    <td><input class="text" type="text" name="User" value="" /></td></tr>
+  	    <tr><td>Password:</td>
+  	    <td><input class="text" type="password" name="Password" value="" /></td></tr>
+  	    <tr><td><input type="hidden" name="mode" value="login" /></td>
+  	    <td id="submit"><input class="submit" type="submit" value="Login" /></td></tr>
+	   </table>
   	  </form>
 	  <script type="text/javascript">
             if(navigator.cookieEnabled == false) {
