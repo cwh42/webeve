@@ -1,15 +1,15 @@
 <h1>Impressum &amp; Disclaimer</h1>
 
+<h2>Anbieter:</h2>
 <p>
-  <h2>Anbieter:</h2>
   Christopher Hofmann<br/>
   Walter-Meckauer-Str. 13/B24<br/>
   90478 Nürnberg<br/>
   <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>
 </p>
 
-<p>
 <h2>Haftung für Inhalte</h2>
+<p>
 Die Inhalte meiner Seiten wurden mit größter Sorgfalt erstellt. Für die
 Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann ich jedoch
 keine Gewähr übernehmen.  Als Diensteanbieter bin ich gemäß §6 Abs.1 MDStV
@@ -23,8 +23,9 @@ diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer
 konkreten Rechtsverletzung möglich. Bei bekannt werden von entsprechenden
 Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.
 </p>
-<p>
+
 <h2>Haftung für Links</h2>
+<p>
 Mein Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte
 ich keinen Einfluss habe. Deshalb kann ich für diese fremden Inhalte auch
 keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der
@@ -36,8 +37,9 @@ jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei
 bekannt werden von Rechtsverletzungen werde ich derartige Links umgehend
 entfernen.
 </p>
-<p>
+
 <h2>Urheberrecht</h2>
+<p>
 Die Betreiber der Seiten sind bemüht, stets die Urheberrechte anderer zu
 beachten bzw. auf selbst erstellte sowie lizenzfreie Werke zurückzugreifen.
 Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
@@ -47,8 +49,9 @@ der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
 schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und
 Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch
 gestattet.</p>
-<p>
+
 <h2>Datenschutz</h2>
+<p>
 Soweit auf meinen Seiten personenbezogene Daten
 (beispielsweise Name, Anschrift oder eMail-Adressen) erhoben werden, erfolgt
 dies soweit möglich stets auf freiwilliger Basis. Die Nutzung der Angebote und
