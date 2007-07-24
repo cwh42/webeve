@@ -125,6 +125,12 @@ sub cgiapp_postrun
 
     $self->header_add( -charset => 'UTF-8',
                        -expires => 0 );
+
+    unless( $self->{MainTmpl}->param('TITLE') )
+    {
+        $self->{MainTmpl}->param('TITLE' => $self->_getTitle() )
+    }
+
     $self->{MainTmpl}->param( 'content' => $$out_ref,
                               'UserName' => $user->{UserName},
                               'FullName' => $user->{FullName},
@@ -240,8 +246,53 @@ sub _FillMenu(;$)
     {
 	$self->{'MenuFilled'} = 1;
 	$self->{'RunMode'} = shift;
-	my $data = $self->_NavMenuCleanup();
-	$self->{MainTmpl}->param( 'menu' => $data );
+
+        local *cleanup = sub {
+            my $self = shift;
+
+            my $Entries = shift || $self->{ALL_MENU_ENTRIES};
+            my @Result = ();
+
+            my $FileName = basename( $0 );    
+            my $rm = $self->{'RunMode'} || $self->get_current_runmode();
+
+            my $user = $self->getUser();
+
+            my $UsersUserLevel = 0;
+            $UsersUserLevel = 1 if( %$user );
+            $UsersUserLevel = 2 if( $user->{isAdmin} );
+
+            foreach my $Entry (@$Entries)
+            {
+                my $UserLevel = delete( $Entry->{UserLevel} ) || 0;
+                my $Runmode = delete( $Entry->{'RunMode'} ) || '';
+
+                if( $UserLevel <= $UsersUserLevel )
+                {
+                    if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} ) 
+                    {
+                        my $tmp = $self->_NavMenuCleanup( $Entry->{'SubLevel'} );
+                        $Entry->{'SubLevel'} = $tmp;
+                    }
+
+                    if( $Runmode eq $rm )
+                    {
+                        $Entry->{'Current'} = 1;
+                    }
+
+                    if( $Runmode || $Entry->{'FileName'} )
+                    {
+                        $Entry->{'FileName'} = "$FileName?mode=$Runmode" unless( $Entry->{'FileName'} );
+                    }
+
+                    push( @Result, $Entry );
+                }
+            }
+
+            return \@Result;
+        };
+
+	$self->{MainTmpl}->param( 'menu' => $self->cleanup() );
     }
 
     return 1;
@@ -249,50 +300,30 @@ sub _FillMenu(;$)
 
 # -----------------------------------------------------------------------------
 
-sub _NavMenuCleanup(;$)
+sub _getTitle
 {
     my $self = shift;
+    my $runmode = shift || $self->get_current_runmode();
+    my $title = '';
 
-    my $Entries = shift || $self->{ALL_MENU_ENTRIES};
-    my @Result = ();
+    local *finder = sub {
+        foreach my $entry (@{shift()})
+        {
+            if( $entry->{RunMode} && $entry->{RunMode} eq $runmode )
+            {
+                return $entry->{Title};
+            }
+            elsif( ref($entry->{SubLevel}) eq 'ARRAY' )
+            {
+                my $t = finder($entry->{SubLevel});
+                return $t if( $t );
+            }
+        }
+    };
 
-    my $FileName = basename( $0 );    
-    my $rm = $self->{'RunMode'} || $self->get_current_runmode();
+    $title = finder($self->{ALL_MENU_ENTRIES});
 
-    my $user = $self->getUser();
-
-    my $UsersUserLevel = 0;
-    $UsersUserLevel = 1 if( %$user );
-    $UsersUserLevel = 2 if( $user->{isAdmin} );
-
-    foreach my $Entry (@$Entries)
-    {
-	my $UserLevel = delete( $Entry->{UserLevel} ) || 0;
-        my $Runmode = delete( $Entry->{'RunMode'} ) || '';
-
-	if( $UserLevel <= $UsersUserLevel )
-	{
-	    if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} ) 
-	    {
-		my $tmp = $self->_NavMenuCleanup( $Entry->{'SubLevel'} );
-		$Entry->{'SubLevel'} = $tmp;
-	    }
-
-	    if( $Runmode eq $rm )
-	    {
-		$Entry->{'Current'} = 1;
-	    }
-
-	    if( $Runmode || $Entry->{'FileName'} )
-	    {
-		$Entry->{'FileName'} = "$FileName?mode=$Runmode" unless( $Entry->{'FileName'} );
-	    }
-
-	    push( @Result, $Entry );
-	}
-    }
-
-    return \@Result;
+    return $title;
 }
 
 # -----------------------------------------------------------------------------
@@ -648,7 +679,7 @@ sub Logout()
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Logout' );
+    $self->{'MainTmpl'}->param( 'title' => 'Logout' );
 
     my $SessionID = $self->query->cookie('sessionID');
     $self->getDBH()->do("DELETE FROM Logins WHERE SessionID = '$SessionID'");
@@ -732,7 +763,6 @@ sub EventList
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Übersicht' );
     my $SubTmpl = $self->load_tmpl( 'edit-list.tmpl');
 
     my $query = $self->query();
@@ -791,7 +821,6 @@ sub Add
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Termin' );
     my $SubTmpl = $self->load_tmpl( 'add.tmpl');
 
     my $query = $self->query();
@@ -1077,7 +1106,6 @@ sub Passwd
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Passwort ändern' );
     my $SubTmpl = $self->load_tmpl( 'user-passwd.tmpl');
 
     my $query = $self->query();
@@ -1149,7 +1177,6 @@ sub Config
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Konfiguration' );
     my $SubTmpl;
 
     my $query = $self->query();
@@ -1162,24 +1189,20 @@ sub Config
 	$SubTmpl->param('OrgName' => $self->_OrgName($OrgID));
 	$SubTmpl->param('OrgID' => $OrgID);
 
-	if( $query->param('action') )
-	{
-	    $self->setOrgPref( $OrgID, 'bgcolor', $query->param('bgcolor'));
-	    $self->setOrgPref( $OrgID, 'textcolor', $query->param('textcolor'));
-	    $self->setOrgPref( $OrgID, 'linkcolor', $query->param('linkcolor'));
-	    $self->setOrgPref( $OrgID, 'bgimage', $query->param('bgimage'));
-	    $self->setOrgPref( $OrgID, 'font', $query->param('font'));
-	    $self->setOrgPref( $OrgID, 'tl-bgcolor', $query->param('tl-bgcolor'));
-	    $self->setOrgPref( $OrgID, 'tl-textcolor', $query->param('tl-textcolor'));
-	}
+        my @props = qw(bgcolor bgimage textcolor linkcolor font tl-bgcolor tl-textcolor);
 
-	$SubTmpl->param('bgcolor' => $self->getOrgPref($OrgID, 'bgcolor'));
-	$SubTmpl->param('bgimage' => $self->getOrgPref($OrgID, 'bgimage'));
-	$SubTmpl->param('textcolor' => $self->getOrgPref($OrgID, 'textcolor'));
-	$SubTmpl->param('linkcolor' => $self->getOrgPref($OrgID, 'linkcolor'));
-	$SubTmpl->param('font' => $self->getOrgPref($OrgID, 'font'));
-	$SubTmpl->param('tl-bgcolor' => $self->getOrgPref($OrgID, 'tl-bgcolor'));
-	$SubTmpl->param('tl-textcolor' => $self->getOrgPref($OrgID, 'tl-textcolor'));
+        foreach my $prop ( @props )
+        {
+            if( $query->param('action') )
+            {
+                $self->setOrgPref( $OrgID, $prop, );
+                $SubTmpl->param($prop => $query->param($prop) );
+            }
+            else
+            {
+                $SubTmpl->param($prop => $self->getOrgPref($OrgID, $prop));
+            }
+        }
     }
     else
     {
@@ -1197,7 +1220,6 @@ sub UserList
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Benutzer' );
     my $SubTmpl = $self->load_tmpl('user-list.tmpl');
 
     $SubTmpl->param( 'Users' => $self->_getUserList() );
@@ -1276,7 +1298,6 @@ sub UserAdd
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Benutzer' );
     my $SubTmpl = $self->load_tmpl( 'user-add.tmpl' );
 
     my $query = $self->query();
@@ -1513,7 +1534,6 @@ sub OrgList
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Vereine' );
     my $SubTmpl = $self->load_tmpl('org-list.tmpl');
 
     $SubTmpl->param( 'Orgs' => $self->_getOrgList() );
@@ -1527,7 +1547,6 @@ sub OrgAdd
 {
     my $self = shift;
 
-    $self->{'MainTmpl'}->param( 'TITLE' => 'Neuer Verein' );
     my $SubTmpl = $self->load_tmpl( 'org-add.tmpl' );
 
     my $query = $self->query();
