@@ -2,12 +2,12 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Webeve - <tmpl_var title></title>
+    <title>Webeve<tmpl_if title> - <tmpl_var title></tmpl_if></title>
     <link rel="stylesheet" type="text/css" href="../default.css"/>
   </head>
   <body>
     <h1 id="header"><img src="../webeve.png" alt="Webeve"/>
-      <span style="position:relative;bottom:0.4em;left:0.5em;">Der EventKalender für Oberfranken</span>
+<!--      <span style="position:relative;bottom:0.4em;left:0.5em;">Der EventKalender für Oberfranken</span> -->
     </h1>
     <div id="Navigation">
       <tmpl_loop menu>
