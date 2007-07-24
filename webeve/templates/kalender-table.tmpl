@@ -4,7 +4,7 @@
 <table class="seitenumschalter">
 <tr>
 <td align="center">
-<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lsaquo;&ndash;</a>&nbsp;<TMPL_ELSE>&lsaquo;&ndash;</a></TMPL_IF>
+<TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lsaquo;&ndash;</a>&nbsp;<TMPL_ELSE>&lsaquo;&ndash;</TMPL_IF>
 (<TMPL_LOOP Pages>
 <TMPL_IF IsCurrent>
 <b><TMPL_VAR Page></b><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
