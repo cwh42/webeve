@@ -271,7 +271,7 @@ sub _FillMenu(;$)
                 {
                     if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} ) 
                     {
-                        my $tmp = $self->_NavMenuCleanup( $Entry->{'SubLevel'} );
+                        my $tmp = $self->cleanup( $Entry->{'SubLevel'} );
                         $Entry->{'SubLevel'} = $tmp;
                     }
 
