@@ -44,10 +44,10 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td>
 <TMPL_IF Public>
 <input type="radio" name="Public" value="0"> Intern<br>
-<input type="radio" name="Public" value="1" checked> Öffentlich
+<input type="radio" name="Public" value="1" checked> Ã–ffentlich
 <TMPL_ELSE>
 <input type="radio" name="Public" value="0"checked> Intern<br>
-<input type="radio" name="Public" value="1"> Öffentlich
+<input type="radio" name="Public" value="1"> Ã–ffentlich
 </TMPL_IF>
 </td>
 </tr>
@@ -61,9 +61,9 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td rowspan="2" class="smallfont">
 <b>Beispiele:</b><br>
 3-10-02 =&gt; 3.Oktober 2002<br>
-3-10- =&gt; Nächster 3. Oktober<br>
+3-10- =&gt; NÃ¤chster 3. Oktober<br>
 10-02 =&gt; Oktober 2002<br>
-10 =&gt; Nächster Oktober
+10 =&gt; NÃ¤chster Oktober
 </td>
 <td>&nbsp;</td>
 </tr>
@@ -115,11 +115,7 @@ Bitte Admin via Mail <a href="mailto:ch&#x0040;goessenreuth.de">ch&#x0040;goesse
 <td>
 <textarea name="Description" rows="6" cols="43" wrap="virtual"><TMPL_VAR Description></textarea>
 <span class="smallfont">
-<br><b>Hinweise:</b><br>
-HTML ist erlaubt, aber bitte <b>KEINE</b> Grafiken oder blinkenden Text!<br>
-Wichtige HTML-Tags:<br>
-&lt;b&gt;<b>was hier steht wird fett</b>&lt;/b&gt;<br>
-&lt;br&gt;: damit macht man einen Zeilenum<b>br</b>uch
+<!-- <br><b>Hinweise:</b><br> -->
 </span>
 </td>
 </tr>
