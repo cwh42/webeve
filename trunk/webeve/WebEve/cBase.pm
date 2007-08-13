@@ -7,6 +7,7 @@ use CGI;
 use FileHandle;
 use Date::Calc qw( Today_and_Now );
 use WebEve::Config;
+use WebEve::cMySQL;
 
 #-----------------------------------------------------------------------
 

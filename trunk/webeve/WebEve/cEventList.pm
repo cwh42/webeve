@@ -180,7 +180,7 @@ sub readData
 	$Page -= 1;
 	$Page = 0 if $Page < 0;
 
-	my $Pages = ceil( $Count / $Len );
+	my $Pages = ceil( $Count / $Len ) || 1;
 	$self->{Pages} = $Pages;
 
 	$Page = $Pages - 1 if $Page >= $Pages;
@@ -196,7 +196,7 @@ sub readData
 	       ORDER by d.Date, d.Time
                $limit";
 
-#    print STDERR "\n-------------\n$sql\n----------------\n";
+    #print STDERR "\n-------------\n$sql\n----------------\n";
 
     my $EntryIDs  = $self->getDBH()->selectcol_arrayref($sql);
 
