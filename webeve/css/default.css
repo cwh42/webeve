@@ -5,6 +5,27 @@ body {
   margin: 0; padding: 0;
 }
 
+.error {
+  padding:2px 4px;
+  background-color:red;
+  color:white;
+  font-weight:bold;
+}
+
+.warn {
+  padding:2px 4px;
+  background-color:yellow;
+  color:black;
+  font-weight:bold;
+}
+
+.ok {
+  padding:2px 4px;
+  background-color:green;
+  color:white;
+  font-weight:bold;
+}
+
 h1#header {
   font-size: 0.8em;
   font-weight: normal;

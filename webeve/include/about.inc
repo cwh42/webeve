@@ -7,7 +7,7 @@ Oberfranken. Entstanden ist Webeve aus dem internen Web-Terminkalender des
 <a href="http://www.goessenreuth.de/" target="_blank">Burschenvereins Gössenreuth</a>.<br/>
 Webeve baut darauf, daß jeder Veranstalter selbst am meisten Interesse hat
 seine Veranstaltung möglichst weiträumig bekannt zu machen. Daher pflegt jeder
-angemeldete Verein seine Veranstaltungstermine in Webeve selbständig.<br/>
+angemeldete Verein seine Veranstaltungstermine in Webeve selbst.<br/>
 Die Liste der Veranstaltungen kann von jedem Verein in die eigene Webpräsenz
 eingebunden und an deren Design angepasst werden. Außerdem existiert eine separate
 Ansicht für vereinsinterne Termine.</p>

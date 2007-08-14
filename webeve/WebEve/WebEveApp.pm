@@ -359,7 +359,7 @@ sub sendMail($$$;$$$ )
 {
     my ( $subject, $text, $to, $cc, $bcc, $reply ) = @_;
     my $charset = 'UTF-8';
-    my $MailHeader = { 'From' => 'Christopher Hofmann <ch@goessenreuth.de>',
+    my $MailHeader = { 'From' => 'WebEve Onlinekalender<webmaser@webeve.de>',
                        'To' => $to,
                        'Cc' => $cc,
                        'Bcc' => $bcc,
@@ -1274,7 +1274,7 @@ sub SendPassword
 		      $MailTmpl->output(),
 		      [ $UserData->{eMail} ],
 		      [],
-		      [ 'cwh@suse.de' ] );
+		      [ 'cwh@webeve.de' ] );
 
 
 
