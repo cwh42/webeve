@@ -359,15 +359,18 @@ sub sendMail($$$;$$$ )
 {
     my ( $subject, $text, $to, $cc, $bcc, $reply ) = @_;
     my $charset = 'UTF-8';
-    my $MailHeader = { 'From' => 'WebEve Onlinekalender<webmaser@webeve.de>',
+
+    my $MailHeader = { 'From' => 'WebEve Onlinekalender <webmaster@webeve.de>',
                        'To' => $to,
                        'Cc' => $cc,
                        'Bcc' => $bcc,
 		       'Reply-to' => $reply,
-                       'Content-Type' => "text/plain;\ncharset=\"$charset\"",
+                       'Content-Type' => "text/plain; charset=\"$charset\"",
                        'Subject' => $subject};
 
     my $Mailer = Mail::Mailer->new();
+
+    print STDERR Dumper($MailHeader);
     
     $Mailer->open( $MailHeader );
 
@@ -1269,6 +1272,8 @@ sub SendPassword
 	    $MailTmpl->param( name => $UserData->{FullName},
 			      login => $UserData->{UserName},
 			      password => $NewPass );
+
+            print STDERR "Send mail to: ".$UserData->{eMail}."\n";
 
 	    sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
 		      $MailTmpl->output(),
