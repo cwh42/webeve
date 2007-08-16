@@ -8,7 +8,7 @@ my $dbh = WebEve::cMySQL->connect('default');
 my $sql = "SELECT OrgName, UserName, LastLogin, LoginCount ".
     "FROM Organization INNER JOIN Org_User USING(OrgID) ".
     "INNER JOIN User USING(UserID) ".
-    "WHERE UserName != 'cwh' ".
+#    "WHERE UserName != 'cwh' ".
     "ORDER BY OrgName, LoginCount DESC;";
 
 my $sth = $dbh->prepare($sql);
