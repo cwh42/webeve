@@ -32,13 +32,13 @@ sub main
     my $query = new CGI;
 
     my $Template = $query->param('Ansicht') || ''; 
-    my $Organization = $query->param('Verein') || $query->param('Org') || 0; 
+    my $Org = $query->param('Verein') || $query->param('Org') || 0; 
     my $Intern = $query->param('Intern') || 0; 
-    $Intern = 0 if ! $Organization; 
+    $Intern = 0 if ! $Org; 
 
     # my $Embedded = $query->param('Embed') || '0';
-    my $Url = $Intern ? (getOrgPref($Organization, 'script-url-int'))[0] || '' :
-	(getOrgPref($Organization, 'script-url'))[0] || '';
+    my $Url = $Intern ? (getOrgPref($Org, 'script-url-int'))[0] || '' :
+	(getOrgPref($Org, 'script-url'))[0] || '';
 
     # if( $Url && !$Embedded)
     # {
@@ -46,7 +46,7 @@ sub main
     # 	exit(0);
     # }
      
-    my $tmp = sprintf("custom/template-%02d-simple.tmpl", $Organization);
+    my $tmp = sprintf("custom/template-%02d-simple.tmpl", $Org);
     $MainTmplName = $tmp if( -f "$TemplatePath/$tmp" );
 
     if( lc($Template) eq 'druck')
@@ -57,21 +57,16 @@ sub main
     my $MainTmpl = HTML::Template->new(filename => "$TemplatePath/$MainTmplName",
 				       die_on_bad_params => 0);
 
-    $MainTmpl->param( 'Intern' => $Intern );
-    $MainTmpl->param( 'Vereinsname' => getOrgName($Organization) ) if $Intern;
-    $MainTmpl->param( 'VereinsID' => $Organization ) if $Intern;
-    $MainTmpl->param( 'Terminliste' => CalendarHTML($Url) );
+    my $title = getOrgName($Org) || 'WebEve, der Eventkalender f&uuml;r Oberfranken';
+    my $css = getOrgPref($Org, 'CSS');
+    my $charset = getOrgPref($Org, 'charset') || 'UTF-8';
 
-    $MainTmpl->param('bgcolor' => getOrgPref($Organization, 'bgcolor'));
-    $MainTmpl->param('bgimage' => getOrgPref($Organization, 'bgimage'));
-    $MainTmpl->param('textcolor' => getOrgPref($Organization, 'textcolor'));
-    $MainTmpl->param('linkcolor' => getOrgPref($Organization, 'linkcolor'));
-    $MainTmpl->param('font' => getOrgPref($Organization, 'font'));
-    $MainTmpl->param('tl-bgcolor' => getOrgPref($Organization, 'tl-bgcolor'));
-    $MainTmpl->param('tl-textcolor' => getOrgPref($Organization, 'tl-textcolor'));
+    $MainTmpl->param( 'title' => $title );
+    $MainTmpl->param( 'CSS' => $css );
+    $MainTmpl->param( 'eventlist' => CalendarHTML($Url) );
 
     # Ausgabe
-    print $query->header( -charset => 'UTF-8' );
+    print $query->header( -charset => $charset );
     print $MainTmpl->output;
 }
 
@@ -105,12 +100,16 @@ sub getOrgPref($$)
 sub getOrgName($)
 {
     my ( $OrgID ) = @_;
+    $OrgID = s/[^0-9]//g;
+    return undef unless($OrgID);
 
     my $dbh = WebEve::cMySQL->connect('default');
 
     my $sql = "SELECT o.OrgName
                        FROM Organization o
                        WHERE o.OrgID = $OrgID";
+
+    print STDERR "$sql\n";
 
     my ($OrgName) = $dbh->selectrow_array($sql);
 
