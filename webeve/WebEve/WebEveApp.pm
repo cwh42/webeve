@@ -1198,7 +1198,7 @@ sub Config
         {
             if( $query->param('action') )
             {
-                $self->setOrgPref( $OrgID, $prop, );
+                $self->setOrgPref( $OrgID, $prop, $query->param($prop));
                 $SubTmpl->param($prop => $query->param($prop) );
             }
             else
