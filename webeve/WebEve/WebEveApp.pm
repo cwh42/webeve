@@ -6,10 +6,12 @@ use base qw( CGI::Application WebEve::cBase );
 
 use WebEve::Config;
 use WebEve::View;
+use WebEve::Utils;
 use WebEve::cEventList;
 use WebEve::cEvent;
 use WebEve::cDate;
 use WebEve::cOrg;
+use WebEve::cLog;
 use Mail::Mailer;
 use File::Basename;
 use Socket; # For importing const AF_INET
@@ -34,11 +36,12 @@ sub setup
 		      'login' => 'Login',
 		      'logout' => 'Logout',
 		      'list' => 'EventList',
-		      'add' => 'Add', 
+		      'add' => 'Add',
 		      'delete' => 'Delete',
-		      'edit' => 'Edit', 
+		      'edit' => 'Edit',
 		      'passwd' => 'Passwd',
 		      'config' => 'Config',
+		      'advanced-config' => 'AdvancedConfig',
 		      'userlist' => 'UserList',
 		      'useradd' => 'UserAdd',
 		      'useredit' => 'UserEdit',
@@ -63,7 +66,7 @@ sub setup
 		 { UserLevel => 1, 'Title' => 'Einstellungen',
 		   SubLevel => [ { UserLevel => 1, 'Title' => 'Kalenderansicht', RunMode => 'config' },
 				 { UserLevel => 1, Title => 'Passwort ändern', RunMode => 'passwd' } ] } );
-    
+
     $self->{ALL_MENU_ENTRIES} = \@Menu;
 }
 
@@ -76,16 +79,17 @@ sub cgiapp_init
     $self->tmpl_path( $self->getConfig('TemplatePath') );
 
     my $MainTmpl = $self->param('MainTmpl');
-    $self->{MainTmpl} = $self->load_tmpl( $MainTmpl ? $MainTmpl : 'main.tmpl' );    
+    $self->{MainTmpl} = $self->load_tmpl( $MainTmpl ? $MainTmpl : 'main.tmpl' );
 
     print STDERR $self->dump() if $self->param('debug');
 
-    $self->{'Logfile'} = $self->param('Logfile') || $self->getConfig( 'LogFile' );
+    my $Logfile = $self->param('Logfile') || $self->getConfig( 'LogFile' );
+    $self->{log} = WebEve::cLog->new($Logfile);
 
 #    $self->_getRemoteHost();
 #
 #    if(exists $ENV{MOD_PERL})
-#    { 
+#    {
 #	print STDERR "\n-----------------------------------------\n";
 #	print STDERR "-----------------------------------------\n";
 #	print STDERR " WARNING:\n";
@@ -134,7 +138,9 @@ sub cgiapp_postrun
     $self->{MainTmpl}->param( 'content' => $$out_ref,
                               'UserName' => $user->{UserName},
                               'FullName' => $user->{FullName},
-                              'isAdmin' => $user->{isAdmin} );
+                              'isAdmin' => $user->{isAdmin},
+			      'RightAd' => !$self->_getUserLevel() );
+                              # don't show right ad when an !public page is shown
     $self->_FillMenu();
 
     $$out_ref = $self->{MainTmpl}->output();
@@ -144,7 +150,7 @@ sub teardown
 {
     my $self = shift;
 
-    $self->getDBH()->disconnect;    
+    $self->getDBH()->disconnect;
 }
 
 # -----------------------------------------------------------------------------
@@ -213,7 +219,7 @@ sub _getUserLevel
 	    push( @Entries, @{$Entry->{'SubLevel'}} );
 	}
     }
-    
+
     # If runmode not found in menu definition better assume a very high userlevel
     return 1000;
 }
@@ -227,12 +233,12 @@ sub _MakeSessionID($)
     my $i;
     my $SID = crypt($_[0], 'SI');
     my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890');
-    
+
     for($i = 0; $i < 37; $i++)
     {
 	$SID .= @Chars[rand(@Chars)];
     }
-    
+
     return $SID;
 }
 
@@ -253,7 +259,7 @@ sub _FillMenu(;$)
             my $Entries = shift || $self->{ALL_MENU_ENTRIES};
             my @Result = ();
 
-            my $FileName = basename( $0 );    
+            my $FileName = basename( $0 );
             my $rm = $self->{'RunMode'} || $self->get_current_runmode();
 
             my $user = $self->getUser();
@@ -269,7 +275,7 @@ sub _FillMenu(;$)
 
                 if( $UserLevel <= $UsersUserLevel )
                 {
-                    if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} ) 
+                    if( exists( $Entry->{'SubLevel'} ) && $Entry->{'SubLevel'} )
                     {
                         my $tmp = $self->cleanup( $Entry->{'SubLevel'} );
                         $Entry->{'SubLevel'} = $tmp;
@@ -328,17 +334,25 @@ sub _getTitle
 
 # -----------------------------------------------------------------------------
 
+sub logger
+{
+    my $self = shift;
+    $self->{log}->logger(@_);
+}
+
+# -----------------------------------------------------------------------------
+
 sub mkpasswd()
 {
     my $i;
     my $Passwd = '';
     my @Chars = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-    
+
     for($i = 1; $i <= 8; $i++)
     {
 	$Passwd .= $Chars[int(rand(@Chars))];
     }
-    
+
     return $Passwd;
 }
 
@@ -347,7 +361,7 @@ sub mkpasswd()
 # -----------------------------------------------------------------------------
 # Simple function for sending email messages
 # Parameters:
-# 1. Subject 
+# 1. Subject
 # 2. Message Body
 # 3. Array: To
 # 4. Opt. Array: Cc
@@ -357,7 +371,7 @@ sub mkpasswd()
 
 sub sendMail($$$;$$$ )
 {
-    my ( $subject, $text, $to, $cc, $bcc, $reply ) = @_;
+    my ( $self, $subject, $text, $to, $cc, $bcc, $reply ) = @_;
     my $charset = 'UTF-8';
 
     my $MailHeader = { 'From' => 'WebEve Onlinekalender <webmaster@webeve.de>',
@@ -370,12 +384,12 @@ sub sendMail($$$;$$$ )
 
     my $Mailer = Mail::Mailer->new();
 
-    print STDERR Dumper($MailHeader);
-    
+    print STDERR Dumper($MailHeader) if $self->param('debug');
+
     $Mailer->open( $MailHeader );
 
     print $Mailer $text;
-    
+
     $Mailer->close();
 }
 
@@ -386,13 +400,15 @@ sub _getUsersOrgList
     my $self = shift;
 
     my %Params = @_;
-
-    my $UserID = $Params{'UserID'} ? $Params{'UserID'} : $self->getUser()->{UserID};
+    my $CurrentUser = $self->getUser();
+    my $UserID = $Params{'UserID'} ? $Params{'UserID'} : $CurrentUser->{UserID};
     my @SelOrgID = @{$Params{'Selected'}} if exists( $Params{'Selected'} );
+    my $join_where = #$CurrentUser->{isAdmin} ? '' :
+ 	"RIGHT JOIN Org_User ou USING(OrgID) WHERE ou.UserID = $UserID ";
 
     my $sql = "SELECT o.OrgID, o.OrgName ".
-	"FROM Org_User ou LEFT JOIN Organization o ON ou.OrgID = o.OrgID ".
-	"WHERE ou.UserID = $UserID ".
+	"FROM Organization o ".
+	$join_where.
 	"ORDER BY o.OrgName";
 
     my @Data = ();
@@ -463,9 +479,8 @@ sub getOrgPref($$)
 
     my ($OrgID, $PrefType) = @_;
 
-    my $sql = sprintf("SELECT PrefValue FROM OrgPrefs up ".
-		      "LEFT JOIN OrgPrefTypes pt ON up.PrefType = pt.TypeID ".
-		      "WHERE OrgID = %d AND TypeName = %s",
+    my $sql = sprintf("SELECT PrefValue FROM OrgPrefs ".
+		      "WHERE OrgID = %d AND PrefType = %s",
 		      $OrgID,
 		      $self->getDBH()->quote($PrefType));
 
@@ -488,24 +503,12 @@ sub setOrgPref($$@)
 
     my ( $OrgID, $PrefType, @NewValues ) = @_;
 
-    my $sql = sprintf("SELECT TypeID FROM OrgPrefTypes WHERE TypeName = %s LIMIT 1",
-		      $self->getDBH()->quote($PrefType));
+    my $PrefTypeQuoted = $self->getDBH()->quote($PrefType);
 
-    my $PrefTypeID = $self->getDBH()->selectrow_array($sql);
-
-    unless( $PrefTypeID )
-    {
-	my $sql = sprintf("INSERT INTO OrgPrefTypes (TypeName) VALUES (%s)",
-			  $self->getDBH()->quote($PrefType));
-
-	$self->getDBH()->do($sql);
-
-	$PrefTypeID = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM OrgPrefTypes LIMIT 1");
-    }
-
+    @NewValues = grep {$_ ne ''} @NewValues;
     my @OldValues = $self->getOrgPref($OrgID, $PrefType);
 
-    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@NewValues, \@OldValues, 1);
+    my ($ToAddRef, $ToDeleteRef) = array_diff(\@NewValues, \@OldValues, 1);
 
     my @ToAdd = @$ToAddRef;
     my @ToDelete = @$ToDeleteRef;
@@ -519,14 +522,16 @@ sub setOrgPref($$@)
     if(@ToAdd)
     {
 	my $sql = "INSERT INTO OrgPrefs (OrgID, PrefType, PrefValue) VALUES ";
-	$sql .=  join( ', ', map { "($OrgID, $PrefTypeID, ".$self->getDBH()->quote($_).")" } @ToAdd );
+	$sql .=  join( ', ', map { "($OrgID, $PrefTypeQuoted, ".$self->getDBH()->quote($_).")" } @ToAdd );
+
+	print STDERR "$sql\n" if $self->param('debug');
 
 	$self->getDBH()->do($sql);
     }
 
     if(@ToDelete)
     {
-	my $sql = "DELETE FROM OrgPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeID AND (";
+	my $sql = "DELETE FROM OrgPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeQuoted AND (";
 	$sql .=  join( ' OR ', map { "PrefValue = ".$self->getDBH()->quote($_) } @ToDelete );
 	$sql .= ")";
 
@@ -587,7 +592,7 @@ sub setUserPref($@)
 
     my @OldValues = $self->getUserPref($PrefType);
 
-    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@NewValues, \@OldValues, 1);
+    my ($ToAddRef, $ToDeleteRef) = array_diff(\@NewValues, \@OldValues, 1);
 
     my @ToAdd = @$ToAddRef;
     my @ToDelete = @$ToDeleteRef;
@@ -626,7 +631,7 @@ sub WrongRM
     my $self = shift;
     $self->{MenuItem} = '';
 
-    $self->logger("Tried non-existing runmode: '".shift()."'");    
+    $self->logger("Tried non-existing runmode: '".shift()."'");
 
     $self->_FillMenu('list');
     return $self->EventList();
@@ -656,12 +661,12 @@ sub StaticContent
 
     if( exists($static_cache->{$mode}) && $static_cache->{$mode}->{mtime} == $mtime )
     {
-	print STDERR "Read $filename from cache.\n";
+	print STDERR "Read $filename from cache.\n" if $self->param('debug');
 	$content = $static_cache->{$mode}->{content};
     }
     else
     {
-	print STDERR "Read $filename from filesystem.\n";
+	print STDERR "Read $filename from filesystem.\n" if $self->param('debug');
 	open( IN, "<$filename");
 	while( my $ln = <IN> )
 	{
@@ -691,7 +696,7 @@ sub Logout()
 
     $self->header_type('redirect');
     $self->header_props(-uri=>'index.pl?mode=index');
-    
+
     return '<center>Please wait ...</center>';
 }
 
@@ -808,7 +813,7 @@ sub EventList
 			'Public' => $DateObj->isPublic,
 			'IsOver' => $DateObj->getDate->isOver };
 
-	push( @Dates, $HashRef );	
+	push( @Dates, $HashRef );
     }
 
     $SubTmpl->param('List' => \@Dates);
@@ -846,7 +851,7 @@ sub Add
     if($Action eq 'Save')
     {
 	my $Event = WebEve::cEvent->new();
-	
+
 	$Event->setOrgID($OrgID);
 	$Event->setIsPublic($Public);
 	$Event->setPlace($Place);
@@ -938,7 +943,7 @@ sub Add
 	    $SubTmpl->param('Public' => $Public ? 1 : 0);
 	}
     }
-    
+
     return $SubTmpl->output;
 }
 
@@ -986,7 +991,7 @@ sub Delete
 			    'Org' => $DateObj->getOrg('all'),
 			    'Public' => $DateObj->isPublic };
 
-	    push( @Dates, $HashRef );	
+	    push( @Dates, $HashRef );
 	}
 
 	$SubTmpl->param('List' => \@Dates);
@@ -1099,7 +1104,7 @@ sub Edit
 	$self->_FillMenu('list');
 	$result = $SubTmpl->output();
     }
-    
+
     return $result;
 }
 
@@ -1131,7 +1136,7 @@ sub Passwd
 	    my $sql = sprintf( "SELECT old_password(%s) = User.Password FROM User WHERE User.UserID = %d LIMIT 1",
 			       $self->getDBH()->quote($OldPass),
 			       $UserID );
-	    
+
 	    my $Result = $self->getDBH()->selectrow_array($sql);
 
 	    if( $Result == 1 )
@@ -1143,7 +1148,7 @@ sub Passwd
 			       $self->getDBH()->quote($NewPass1),
 			       $self->getDBH()->quote($OldPass),
 			       $UserID );
-	    
+
 		$self->getDBH()->do($sql);
 
 		$self->logger("Changed password");
@@ -1157,7 +1162,7 @@ sub Passwd
 	}
     }
 
-    return $SubTmpl->output();    
+    return $SubTmpl->output();
 }
 
 # ---------------------------------------------------------
@@ -1184,10 +1189,12 @@ sub Config
 
     my $query = $self->query();
 
-    if( $query->param('OrgID') )
+    my $orglist = $self->_getUsersOrgList();
+    my $OrgID = $query->param('OrgID');
+
+    if( $OrgID )
     {
 	$SubTmpl = $self->load_tmpl( 'tmpl-upload.tmpl' );
-	my $OrgID = $query->param('OrgID');
 
 	$SubTmpl->param('OrgName' => $self->_OrgName($OrgID));
 	$SubTmpl->param('OrgID' => $OrgID);
@@ -1210,11 +1217,51 @@ sub Config
     else
     {
 	$SubTmpl = $self->load_tmpl( 'config.tmpl' );
-	$SubTmpl->param('Orgs' => $self->_getUsersOrgList());
+	$SubTmpl->param('Orgs' => $orglist);
 
     }
 
-    return $SubTmpl->output();    
+    return $SubTmpl->output();
+}
+
+# ---------------------------------------------------------
+
+sub AdvancedConfig
+{
+    my $self = shift;
+    my $query = $self->query();
+    my $OrgID = $query->param('OrgID');
+
+    my $SubTmpl = $self->load_tmpl( 'advanced-config.tmpl' );
+    $SubTmpl->param('OrgID' => $OrgID );
+
+    if( $OrgID )
+    {
+        my @props = ( ['title', $self->_OrgName($OrgID)],
+		      ['css', ''],
+		      ['charset', 'UTF-8'] );
+
+        foreach my $prop ( @props )
+        {
+            if( $query->param('action') eq 'save' )
+            {
+		my $value = $query->param($prop->[0]);
+                $self->setOrgPref( $OrgID, $prop->[0], $value );
+		$value = $prop->[1] if( $value eq '' );
+                $SubTmpl->param( $prop->[0] => $value );
+            }
+            else
+            {
+		my ( $value ) = $self->getOrgPref($OrgID, $prop->[0]);
+		$value = $prop->[1] if( $value eq '' );
+                $SubTmpl->param($prop->[0] => $value);
+            }
+        }
+
+
+    }
+
+    return $SubTmpl->output();
 }
 
 # ---------------------------------------------------------
@@ -1249,7 +1296,7 @@ sub SendPassword
 	my $sql = "SELECT u.UserID, u.FullName, u.UserName, u.eMail ".
 	    "FROM User u ".
 	    "WHERE u.UserID = $UserID";
-	
+
 	my $UserData = $self->getDBH()->selectrow_hashref($sql);
 
 	if( $Confirm )
@@ -1261,25 +1308,25 @@ sub SendPassword
 			   $self->getDBH()->quote($NewPass),
 			   $self->getDBH()->quote($NewPass),
 			   $UserID );
-	    
+
 	    $self->getDBH()->do($sql);
-	    
+
 	    $self->logger("Changed password for UID <$UserID>");
 
 	    # Send Mail with password to new user
 	    my $MailTmpl = $self->load_tmpl( 'mail-new-user.tmpl' );
-	    
+
 	    $MailTmpl->param( name => $UserData->{FullName},
 			      login => $UserData->{UserName},
 			      password => $NewPass );
 
-            print STDERR "Send mail to: ".$UserData->{eMail}."\n";
+            print STDERR "Send mail to: ".$UserData->{eMail}."\n" if $self->param('debug');
 
-	    sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
-		      $MailTmpl->output(),
-		      [ $UserData->{eMail} ],
-		      [],
-		      [ 'cwh@webeve.de' ] );
+	    $self->sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
+			     $MailTmpl->output(),
+			     [ $UserData->{eMail} ],
+			     [],
+			     [ 'cwh@webeve.de' ] );
 
 
 
@@ -1310,7 +1357,7 @@ sub UserAdd
     my $Action = $query->param('Action') || '';
 
     my $LoginName = $query->param('Login') || '';
-    $LoginName = $self->_trim( $LoginName );
+    $LoginName = trim( $LoginName );
 
     my $FullName = $query->param('FullName') || '';
     my $eMail = $query->param('eMail') || '';
@@ -1342,7 +1389,7 @@ sub UserAdd
 	    $Error = 1;
 	    $SubTmpl->param('FullNameError' => 1);
 	}
-	
+
 	if($eMail eq '')
 	{
 	    $Error = 1;
@@ -1377,11 +1424,11 @@ sub UserAdd
 			      login => $LoginName,
 			      password => $Password );
 
-	    sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
-		      $MailTmpl->output(),
-		      [ $eMail ],
-		      [],
-		      [ 'cwh@suse.de' ] );
+	    $self->sendMail( 'Zugangsdaten fuer Terminkalender auf www.goessenreuth.de',
+			     $MailTmpl->output(),
+			     [ $eMail ],
+			     [],
+			     [ 'cwh@suse.de' ] );
 	}
 	else
 	{
@@ -1459,7 +1506,7 @@ sub UserEdit
 		my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
 		my @UserOrgs = map { $_->{OrgID} } @$ArrRef;
 
-		my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Orgs, \@UserOrgs);
+		my ($ToAddRef, $ToDeleteRef) = array_diff(\@Orgs, \@UserOrgs);
 
 		my @ToAdd = @$ToAddRef;
 		my @ToDelete = @$ToDeleteRef;
@@ -1517,10 +1564,10 @@ sub UserEdit
 	    $SubTmpl->param('eMail' => $UserData->{eMail});
 	    $SubTmpl->param('LastLogin' => $UserData->{LastLogin});
 	    $SubTmpl->param('isAdmin' => 'checked') if $UserData->{isAdmin};
-	    
+
 	    my $ArrRef = $self->_getUsersOrgList( 'UserID' => $UserID );
 	    my @UsersOrgs = map { $_->{OrgID} } @$ArrRef;
-	    
+
 	    my $OrgList = $self->_getOrgList(@UsersOrgs);
 	    $SubTmpl->param('Orgs' => $OrgList);
 	}
@@ -1557,12 +1604,12 @@ sub OrgAdd
     my $query = $self->query();
 
     my $Action = $query->param('Action') || '';
-    
+
     my $Name = $query->param('Name') || '';
     my $eMail = $query->param('eMail') || '';
     my $Website = $query->param('Website') || '';
-    my @Users =  $query->param('Users');   
-    
+    my @Users =  $query->param('Users');
+
     if($Action eq 'Save')
     {
 	my $Error = 0;
@@ -1588,7 +1635,7 @@ sub OrgAdd
 	    $self->getDBH()->do("INSERT INTO Organization
                    (OrgName, eMail, Website)
                    VALUES ($NameSQL, $eMailSQL, $WebsiteSQL)");
-	    
+
 	    # Update relations Orgs->Users
 	    my $OrgID = $self->getDBH()->selectrow_array("SELECT LAST_INSERT_ID() FROM Organization LIMIT 1");
 
@@ -1638,7 +1685,7 @@ sub OrgEdit
     my $Name = $query->param('Name') || '';
     my $eMail = $query->param('eMail') || '';
     my $Website = $query->param('Website') || '';
-    my @Users =  $query->param('Users');   
+    my @Users =  $query->param('Users');
 
     if($Action eq 'Save')
     {
@@ -1663,14 +1710,14 @@ sub OrgEdit
 	    $self->getDBH()->do("UPDATE Organization
                                SET eMail = $eMailSQL, Website = $WebsiteSQL
                                WHERE OrgID = $OrgID");
-	    
+
 	    # Update relations Orgs->Users
 	    my $Org = WebEve::cOrg->new( OrgID => $OrgID);
 
 	    my $ArrRef = $Org->getUsers();
 	    my @OrgUsers = map { $_->{UserID} } @$ArrRef;
 
-	    my ($ToAddRef, $ToDeleteRef) = $self->_ArrayDiff(\@Users, \@OrgUsers);
+	    my ($ToAddRef, $ToDeleteRef) = array_diff(\@Users, \@OrgUsers);
 
 	    my @ToAdd = @$ToAddRef;
 	    my @ToDelete = @$ToDeleteRef;

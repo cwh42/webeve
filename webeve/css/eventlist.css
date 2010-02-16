@@ -1,0 +1,66 @@
+table.seitenumschalter {
+  padding:6px;
+  margin:auto auto;
+}
+
+table.seitenumschalter a {
+  text-decoration:none;
+  color:#008000;
+}
+
+table.seitenumschalter a:hover {
+  text-decoration:none;
+  background-color:#ffcc00;
+}
+
+table.termintabelle {
+  margin:auto auto;
+  table-layout:fixed;
+  border-spacing:0;
+  border-collapse:collapse;
+  empty-cells:show;
+  text-align:left; 
+}
+
+table.termintabelle a {
+  color:#008000;
+  text-decoration:none;
+}
+
+table.termintabelle a:hover {
+  text-decoration:underline;
+}
+
+table.termintabelle .linkespalte {
+  width:8em;
+}
+
+table.termintabelle .rechtespalte {
+  width:25em;
+}
+
+table.termintabelle tr td {
+  padding-bottom:1em;
+  vertical-align:top;
+}
+
+table.termintabelle tr.trenner td {
+  padding-top:1em;
+  padding-bottom:0;
+  border-bottom:3px solid #ffcc00;
+  font-weight:bold;
+  font-size:110%;
+  color:#008000;
+}
+
+table.termintabelle .datum {
+  font-weight:bold;
+}
+
+table.termintabelle .zeit,.ort {
+  font-size:70%;
+}
+
+table.termintabelle .verein {
+  font-weight:bold;
+}

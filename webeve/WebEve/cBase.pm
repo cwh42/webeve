@@ -2,27 +2,27 @@
 package WebEve::cBase;
 
 use strict;
-use vars qw( $LogFileHandle );
+#use vars qw( $LogFileHandle );
 use CGI;
-use FileHandle;
-use Date::Calc qw( Today_and_Now );
+#use FileHandle;
+#use Date::Calc qw( Today_and_Now );
 use WebEve::Config;
-use WebEve::cMySQL;
+#use WebEve::cMySQL;
 
 #-----------------------------------------------------------------------
 
-sub BEGIN
-{
-    $LogFileHandle = new FileHandle ">>$LogFile";
-    die("Could not open Logfile <$LogFile>") unless defined( $LogFileHandle );
-}
-
-#-----------------------------------------------------------------------
-
-sub END
-{
-    $LogFileHandle->close if defined( $LogFileHandle );
-}
+#sub BEGIN
+#{
+#    $LogFileHandle = new FileHandle ">>$LogFile";
+#    die("Could not open Logfile <$LogFile>") unless defined( $LogFileHandle );
+#}
+#
+##-----------------------------------------------------------------------
+#
+#sub END
+#{
+#    $LogFileHandle->close if defined( $LogFileHandle );
+#}
 
 #-----------------------------------------------------------------------
 
@@ -41,15 +41,15 @@ sub new
 
 #-----------------------------------------------------------------------
 
-sub logger($)
-{
-    my $self = shift;
-    my ($message) = @_;
-    my $UserName = $self->getUser()->{UserName} || $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_ADDR'};
-
-    printf( $LogFileHandle "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n",
-	    Today_and_Now(), $UserName, $message );
-}
+#sub logger($)
+#{
+#    my $self = shift;
+#    my ($message) = @_;
+#    my $UserName = $self->getUser()->{UserName} || $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_ADDR'};
+#
+#    printf( $LogFileHandle "%4d-%02d-%02d %02d:%02d:%02d %s: %s\n",
+#	    Today_and_Now(), $UserName, $message );
+#}
 
 #-----------------------------------------------------------------------
 
@@ -137,16 +137,16 @@ sub getConfig
 
 #-----------------------------------------------------------------------
 
-sub _trim($)
-{
-    my $self = shift;
-    my ($string) = @_;
-
-    $string =~ s/^\s+//s;
-    $string =~ s/\s+$//s;
-
-    return $string;
-}
+#sub _trim($)
+#{
+#    my $self = shift;
+#    my ($string) = @_;
+#
+#    $string =~ s/^\s+//s;
+#    $string =~ s/\s+$//s;
+#
+#    return $string;
+#}
 
 #-----------------------------------------------------------------------
 # sub ArrayDiff($$)
@@ -159,88 +159,88 @@ sub _trim($)
 #    the second contains all elements only found in B
 #-----------------------------------------------------------------------
 
-sub _ArrayDiff($$;$)
-{
-    my $self = shift;
-    my ($Aref, $Bref, $String) = @_;
-
-    my @A;
-    my @B;
-
-    if($String)
-    {
-	# sort arrays as strings
-	@A = sort { $a cmp $b } @$Aref;
-	@B = sort { $a cmp $b } @$Bref;
-    }
-    else
-    {
-	# sort both arrays numeric ascending
-	@A = sort { $a <=> $b } @$Aref;
-	@B = sort { $a <=> $b } @$Bref;
-    }
-
-    my $ai = 0;
-    my $bi = 0;
-
-    my @Aonly;
-    my @Bonly;
-
-    while(defined($A[$ai]) || defined($B[$bi]))
-    {
-	if(!defined($A[$ai]))	# A has less elements than B
-	{
-	    push(@Bonly, $B[$bi]);
-	    $bi++;
-	}
-	elsif(!defined($B[$bi])) # B has less elements than A
-	{
-	    push(@Aonly, $A[$ai]);
-	    $ai++;
-	}
-	else
-	{
-	    if($String)
-	    {
-		if(($A[$ai] cmp $B[$bi]) == -1)
-		{
-		    push(@Aonly, $A[$ai]);
-		    $ai++;
-		}
-		elsif(($A[$ai] cmp $B[$bi]) == +1)
-		{
-		    push(@Bonly, $B[$bi]);
-		    $bi++;
-		}
-		else
-		{
-		    $ai++;
-		    $bi++;
-		}
-	    }
-	    else
-	    {
-		if($A[$ai] < $B[$bi])
-		{
-		    push(@Aonly, $A[$ai]);
-		    $ai++;
-		}
-		elsif($A[$ai] > $B[$bi])
-		{
-		    push(@Bonly, $B[$bi]);
-		    $bi++;
-		}
-		else
-		{
-		    $ai++;
-		    $bi++;
-		}
-	    }
-	}
-    }
-
-    return \@Aonly, \@Bonly;
-}
+#sub _ArrayDiff($$;$)
+#{
+#    my $self = shift;
+#    my ($Aref, $Bref, $String) = @_;
+#
+#    my @A;
+#    my @B;
+#
+#    if($String)
+#    {
+#	# sort arrays as strings
+#	@A = sort { $a cmp $b } @$Aref;
+#	@B = sort { $a cmp $b } @$Bref;
+#    }
+#    else
+#    {
+#	# sort both arrays numeric ascending
+#	@A = sort { $a <=> $b } @$Aref;
+#	@B = sort { $a <=> $b } @$Bref;
+#    }
+#
+#    my $ai = 0;
+#    my $bi = 0;
+#
+#    my @Aonly;
+#    my @Bonly;
+#
+#    while(defined($A[$ai]) || defined($B[$bi]))
+#    {
+#	if(!defined($A[$ai]))	# A has less elements than B
+#	{
+#	    push(@Bonly, $B[$bi]);
+#	    $bi++;
+#	}
+#	elsif(!defined($B[$bi])) # B has less elements than A
+#	{
+#	    push(@Aonly, $A[$ai]);
+#	    $ai++;
+#	}
+#	else
+#	{
+#	    if($String)
+#	    {
+#		if(($A[$ai] cmp $B[$bi]) == -1)
+#		{
+#		    push(@Aonly, $A[$ai]);
+#		    $ai++;
+#		}
+#		elsif(($A[$ai] cmp $B[$bi]) == +1)
+#		{
+#		    push(@Bonly, $B[$bi]);
+#		    $bi++;
+#		}
+#		else
+#		{
+#		    $ai++;
+#		    $bi++;
+#		}
+#	    }
+#	    else
+#	    {
+#		if($A[$ai] < $B[$bi])
+#		{
+#		    push(@Aonly, $A[$ai]);
+#		    $ai++;
+#		}
+#		elsif($A[$ai] > $B[$bi])
+#		{
+#		    push(@Bonly, $B[$bi]);
+#		    $bi++;
+#		}
+#		else
+#		{
+#		    $ai++;
+#		    $bi++;
+#		}
+#	    }
+#	}
+#    }
+#
+#    return \@Aonly, \@Bonly;
+#}
 
 #-----------------------------------------------------------------------
 

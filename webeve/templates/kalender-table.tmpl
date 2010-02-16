@@ -1,11 +1,12 @@
-<!-- http://www.goessenreuth.de - Der Veranstaltungskalender fuer den Raum Bayreuth, Kulmbach, Hof -->
+<!-- http://www.webeve.de -->
 <TMPL_IF Dates>
-<!-- ++++++++++++++++++ Seitenumschalter +++++++++++++++++++ -->
+<!--  Seitenumschalter -->
+<TMPL_IF Pages>
 <table class="seitenumschalter">
 <tr>
 <td align="center">
 <TMPL_IF PrevPage><a href="<TMPL_VAR ESCAPE=HTML PrevPageURL>">&lsaquo;&ndash;</a>&nbsp;<TMPL_ELSE>&lsaquo;&ndash;</TMPL_IF>
-(<TMPL_LOOP Pages>
+(<TMPL_UNLESS Pages> 1 </TMPL_UNLESS><TMPL_LOOP Pages>
 <TMPL_IF IsCurrent>
 <b><TMPL_VAR Page></b><TMPL_UNLESS __LAST__> | </TMPL_UNLESS>
 <TMPL_ELSE>
@@ -16,7 +17,8 @@
 </td>
 </tr>
 </table>
-<!-- ++++++++++++++++ Seitenumschalter Ende +++++++++++++++++ -->
+</TMPL_IF>
+<!-- Seitenumschalter Ende -->
 
 <table class="termintabelle">
   <colgroup>
@@ -55,7 +57,8 @@
 </TMPL_LOOP>
 </table>
 
-<!-- ++++++++++++++++++ Seitenumschalter +++++++++++++++++++ -->
+<!--  Seitenumschalter  -->
+<TMPL_IF Pages>
 <table class="seitenumschalter">
 <tr>
 <td align="center">
@@ -71,7 +74,8 @@
 </td>
 </tr>
 </table>
-<!-- ++++++++++++++++ Seitenumschalter Ende +++++++++++++++++ -->
+<!-- Seitenumschalter Ende -->
+</TMPL_IF>
 <TMPL_ELSE>
 <table align="center" class="termintabelle">
 <tr><td>
@@ -79,4 +83,4 @@ Keine Termine vorhanden.
 </td></tr>
 </table>
 </TMPL_IF>
-<!-- Ende des Terminkalenders -->
+<!-- end http://www.webeve.de -->

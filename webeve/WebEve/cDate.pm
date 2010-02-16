@@ -6,6 +6,7 @@
 package WebEve::cDate;
 
 use strict;
+use Encode qw(from_to);
 use Date::Calc qw( check_date
 		   Moving_Window
 		   Delta_Days
@@ -278,7 +279,9 @@ sub getMonthText
     my $self = shift;
 
     return undef unless $self->{isValid};
-    return Month_to_Text( $self->{'Month'} );
+    my $month = Month_to_Text( $self->{'Month'} );
+    from_to($month, "latin1", "utf8");
+    return $month;
 }
 
 # --------------------------------------------------------------------------------

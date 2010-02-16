@@ -6,7 +6,9 @@
 package WebEve::cOrg;
 
 use strict;
-use WebEve::cMySQL;
+use base qw(WebEve::cBase);
+#use WebEve::cMySQL;
+use overload '""' => "getName";
 
 # --------------------------------------------------------------------------------
 # The Constructor
@@ -66,6 +68,23 @@ sub _getFromDB
 # Public Methods
 # --------------------------------------------------------------------------------
 
+sub getName
+{
+    my $self = shift;
+    return $self->{OrgName};
+}
+
+sub getEMail
+{
+    my $self = shift;
+    return $self->{eMail};
+}
+
+sub getWebsite
+{
+    my $self = shift;
+    return $self->{Website};
+}
 
 sub getUsers
 {
@@ -93,5 +112,74 @@ sub getUsers
     return \@Data;
 }
 
+sub getPref
+{
+    my $self = shift;
+    my $PrefType = shift;
+
+    my $OrgID = $self->{OrgID};
+
+    my $sql = sprintf("SELECT PrefValue FROM OrgPrefs ".
+		      "WHERE OrgID = %d AND PrefType = %s",
+		      $OrgID,
+		      $self->getDBH()->quote($PrefType));
+
+    my $sth = $self->getDBH()->prepare($sql);
+    $sth->execute();
+
+    my @result = ();
+
+    while( my $row = $sth->fetchrow_arrayref() )
+    {
+	push( @result, $row->[0] );
+    }
+
+    return wantarray ? @result : $result[0];
+}
+
+sub setPref
+{
+    my $self = shift;
+    my $PrefType = shift;
+    my @NewValues = @_;
+    my $OrgID = $self->{OrgID};
+
+    my $PrefTypeQuoted = $self->getDBH()->quote($PrefType);
+
+    @NewValues = grep {$_ ne ''} @NewValues;
+    my @OldValues = $self->getOrgPref($OrgID, $PrefType);
+
+    my ($ToAddRef, $ToDeleteRef) = array_diff(\@NewValues, \@OldValues, 1);
+
+    my @ToAdd = @$ToAddRef;
+    my @ToDelete = @$ToDeleteRef;
+
+    #print STDERR "ALL:".join(',', @OldValues)."\n";
+    #print STDERR "SEL:".join(',', @NewValues)."\n";
+
+    #print STDERR "ADD:".join(',', @ToAdd)."\n";
+    #print STDERR "DEL:".join(',', @ToDelete)."\n";
+
+    if(@ToAdd)
+    {
+	my $sql = "INSERT INTO OrgPrefs (OrgID, PrefType, PrefValue) VALUES ";
+	$sql .=  join( ', ', map { "($OrgID, $PrefTypeQuoted, ".$self->getDBH()->quote($_).")" } @ToAdd );
+
+	print STDERR "$sql\n" if $self->param('debug');
+
+	$self->getDBH()->do($sql);
+    }
+
+    if(@ToDelete)
+    {
+	my $sql = "DELETE FROM OrgPrefs WHERE OrgID = $OrgID  AND PrefType = $PrefTypeQuoted AND (";
+	$sql .=  join( ' OR ', map { "PrefValue = ".$self->getDBH()->quote($_) } @ToDelete );
+	$sql .= ")";
+
+	$self->getDBH()->do($sql);
+    }
+
+    return 1;
+}
 
 1;

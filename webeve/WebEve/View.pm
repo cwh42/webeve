@@ -13,8 +13,6 @@ use vars qw(@ISA @EXPORT);
 sub CalendarHTML
 {
     my $Url = shift || '';
-    my $SubTmplName = "kalender-table.tmpl";
-
     my $query = new CGI;
 
     my $Organization = $query->param('Verein') || $query->param('Org') || 0; 
@@ -23,9 +21,7 @@ sub CalendarHTML
 
     my $Page = $query->param('Seite') || '1'; 
 
-    my $tmp = sprintf("custom/template-%02d-advanced.tmpl", $Organization);
-    $SubTmplName = $tmp if( -f "$TemplatePath/$tmp" );
-
+    my $SubTmplName = "kalender-table.tmpl";
     my $SubTmpl = HTML::Template->new(filename => "$TemplatePath/$SubTmplName",
 				      die_on_bad_params => 0,
 				      loop_context_vars => 1);
@@ -66,9 +62,9 @@ sub CalendarHTML
 	my $HashRef = { 'Time' => $DateObj->getTime,
 			'Place' => $DateObj->getPlace,
 			'Title' => $DateObj->getTitle,
-			'Desc' => $DateObj->getDesc }; #,
-#			'eMail' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[1]),
-#			'Website' => $query->escapeHTML($OrgList{ $DateObj->getOrgID }->[2]) };
+			'Desc' => $DateObj->getDesc,
+			'eMail' => $DateObj->getOrg->getEMail(),
+			'Website' => $DateObj->getOrg->getWebsite() };
 
 	$HashRef->{'Org'} = $OrgName unless( $Intern );
 
@@ -91,7 +87,6 @@ sub CalendarHTML
 	    if( $DateObj->getDate->getMonth != $LastMonth || $DateObj->getDate->getYear != $LastYear )
 	    {
 		my $TextMonth = $DateObj->getDate->getMonthText;
-		$TextMonth =~ s/(\W)/'&#'.ord($1).';'/ge;
 		push( @OtherDates, { 'Header' => "$TextMonth ".$DateObj->getDate->getYear } );
 		
 		$LastMonth = $DateObj->getDate->getMonth;
