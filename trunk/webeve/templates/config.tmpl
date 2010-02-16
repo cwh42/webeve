@@ -1,5 +1,8 @@
 <ul>
 <TMPL_LOOP Orgs>
-<li><TMPL_VAR OrgName> [<a href="index.pl?mode=config&OrgID=<TMPL_VAR OrgID>">Konfigurieren</a>]</li>
+<li><TMPL_VAR OrgName><br/>
+ [<a href="index.pl?mode=config&OrgID=<TMPL_VAR OrgID>">einfach</a>]
+ [<a href="index.pl?mode=advanced-config&OrgID=<TMPL_VAR OrgID>">fortgeschritten</a>]
+</li>
 </TMPL_LOOP>
 </ul>

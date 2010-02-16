@@ -11,6 +11,8 @@ use vars qw( $Count $HashRefOrgs );
 use base 'WebEve::cBase';
 
 use WebEve::cDate;
+use WebEve::cOrg;
+use WebEve::cLog;
 
 $Count = 0;
 
@@ -167,6 +169,21 @@ sub _fillOrgCache
 	# HashRefOrgs is a Class-Value
 	$HashRefOrgs = $self->getDBH()->selectall_hashref($sql, 'OrgID');
     }
+}
+
+# -------------------------------------------------------------------------------
+
+sub logger
+{
+    my $self = shift;
+
+    if(ref($self->{log}) ne 'WebEve::cLog')
+    {
+	my $Logfile = $self->getConfig( 'LogFile' );
+	$self->{log} = WebEve::cLog->new($Logfile);
+    }
+
+    $self->{log}->logger(@_);
 }
    
 # -------------------------------------------------------------------------------
@@ -411,12 +428,12 @@ sub getOrg(;$)
     my $self = shift;
     my $Mode = shift || 'clean';
 
-    $self->_fillOrgCache();
+    #$self->_fillOrgCache();
+    return WebEve::cOrg->new(OrgID => $self->{'OrgID'});
+    #my $OrgName = $HashRefOrgs->{ $self->{'OrgID'} }->{'OrgName'};
+    #$OrgName = '' if( $OrgName eq '-unbekannt-' && $Mode eq 'clean');
 
-    my $OrgName = $HashRefOrgs->{ $self->{'OrgID'} }->{'OrgName'};
-    $OrgName = '' if( $OrgName eq '-unbekannt-' && $Mode eq 'clean');
-
-    return $OrgName;
+    #return $OrgName;
 }
 
 # -------------------------------------------------------------------------------

@@ -1,0 +1,26 @@
+<form action="index.pl" method="post">
+<table>
+<tr>
+<td>Title:</td>
+<td><input type="text" name="title" value="<tmpl_var title>"></td>
+</tr>
+<tr>
+<td>Charset:</td>
+<td><input type="text" name="charset" value="<tmpl_var charset>"></td>
+</tr>
+<tr>
+<td colspan="2">CSS:<br>
+  <textarea name="css" cols="80" rows="30"><tmpl_var css></textarea>
+  <input type="hidden" name="OrgID" value="<tmpl_var orgid>">
+  <input type="hidden" name="mode" value="advanced-config">
+  <input type="hidden" name="action" value="save">
+</td>
+</tr>
+<tr>
+<td></td>
+<td align="right">
+  <input type="submit" value="Speichern">
+</td>
+</tr>
+</table>
+</form>
