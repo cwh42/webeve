@@ -1,0 +1,62 @@
+<html>
+
+<head>
+<TMPL_IF Intern>
+<title>Termine der Landjugend Plössen</title>
+<TMPL_ELSE>
+<title>: Alle Termine</title>
+</TMPL_IF>
+<style type="text/css">
+  <!--
+    body              { font-family:Arial;
+                        background-color:#FFFF99; }
+    a                 { color:#000000; }
+
+    /* Formate für die Terminliste */
+    .termintabelle    { padding:3px; }
+    .seitenumschalter { margin-top:10px; }
+
+    .datum            { font-weight:bold; }
+    .zeit             { font-size:8pt; }
+    .ort              { font-size:8pt; }
+    .verein           { font-weight:bold; }
+    .beschreibung     { }
+    
+    .trenner          { background-color:#FFFFDE;
+                        color:#000000;
+                        font-weight:bold; }
+
+    .linkespalte      {}
+    .rechtespalte     {}
+  -->
+  </style>
+</head>
+
+<body>  <TMPL_IF Intern> 
+<p align="center">
+<TMPL_ELSE><font face="Comic Sans MS" size="6">Termine der Landjugend Plössen</font></p>
+<p align="center">&nbsp;</p>
+ <h1 align="center"><a href="http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=29"><font face="Comic Sans MS" size="5">Alle Termine</font></a></h1>
+<center>
+<font face="Comic Sans MS">
+<a href="kalender.pl?Ansicht=Druck">Druckansicht</a> -
+<a href="kalender.pl?Ansicht=wap">WAP-Ansicht</a> </font> </center>
+<p>&nbsp;</p>
+ <h1 align="center"><font face="Comic Sans MS"><LJG Plössen><a href="http://www.bnbt.de/~tr1138/cgi-bin/kalender.pl?Verein=29&amp;Intern=Intern"><font size="5">Interne Termine</font></a></font></h1>
+<center>
+<font face="Comic Sans MS">
+<a href="kalender.pl?Ansicht=Druck&Intern=Intern&Verein=<29>">Druckansicht</a> -
+<a href="kalender.pl?Ansicht=wap&Intern=Intern&Verein=<29>">WAP-Ansicht</a>
+&nbsp;</font>
+</center>
+<p><font face="Comic Sans MS">
+<center>
+&nbsp; </center>
+</TMPL_IF>
+<TMPL_VAR Terminliste>
+<br>
+<center>Dieser Kalender stammt von <a href="http://www.goessenreuth.de">www.goessenreuth.de</a>
+</center>
+</font></p>
+</body>
+</html>
