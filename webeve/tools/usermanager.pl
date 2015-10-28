@@ -221,7 +221,7 @@ sub merge
 
     my @tables = sort { $a cmp $b } keys( %fields );
 
-    my $locksql = "LOCK TABLES ".join(' WRITE, ', @tables)." WRITE, persons WRITE;";
+    my $locksql = "LOCK TABLES ".join(' WRITE, ', @tables)." WRITE, User WRITE;";
     dbdispatcher( $locksql );
 
     foreach my $table ( @tables )
@@ -248,7 +248,7 @@ sub merge
 	}
     }
 
-    my $sql = "DELETE FROM persons WHERE PersonID = $oldid;";
+    my $sql = "DELETE FROM User WHERE UserID = $oldid;";
     dbdispatcher( $sql );
 
     my $unlocksql =  "UNLOCK TABLES;";
@@ -261,7 +261,7 @@ sub dbdispatcher
 
     if( $printonly )
     {
-        print "$sql\n";
+        print STDERR "$sql\n";
     }
     else
     {
