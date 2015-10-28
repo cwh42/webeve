@@ -1,5 +1,5 @@
 body {
-  color: black; background-color: white;
+  color: blue; background-color: #ffffcc;
   font-size: 100.01%;
   font-family: Helvetica,Arial,sans-serif;
   margin: 0; padding: 0;
@@ -58,7 +58,7 @@ div#RightAd {
 
 div#Navigation {
   font-size: 0.88em;
-  float: left; width: 13em;
+  float: right; width: 13em;
   margin: 0; padding: 0;
   margin-left:0.5em;
   white-space:nowrap;
@@ -157,7 +157,6 @@ div#Footer {
   text-align:right;
   font-size:0.8em;
   padding:4px;
-  margin-top:1em;
 }
 
 div#Footer a {

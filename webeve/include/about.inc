@@ -36,6 +36,9 @@ trotzdem. ;)
 <h2>Technisches:</h2>
 <p>
 Webeve besteht aus einigen Perl-Scripten die ihre Daten in einer
-MySQL Datenbank speichern. Den Quellcode werde ich füher oder später, in
-der Hoffnung einige aktive Mitentwickler zu finden, veröffentlichen.
+MySQL Datenbank speichern. Der Quellcode liegt bei <a
+href="http://github.com/cwh42/webeve/">Github</a>.
+Die hier laufende Version entspicht nicht immer dem absolut neuesten Stand im Repository.
+Wer Schreibzugriff möchte wendet sich bitte an <a
+href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>.
 </p>

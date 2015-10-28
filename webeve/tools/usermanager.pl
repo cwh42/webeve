@@ -82,7 +82,7 @@ elsif( lc($action) eq 'findunused' )
 
     print "Find unused accounts:\n";
 
-    my $sql = "SELECT * FROM persons;";
+    my $sql = "SELECT * FROM User;";
 
     my $dbh = WebEve::cMySQL->connect('default');
     my $sth = $dbh->prepare($sql);
@@ -92,12 +92,12 @@ elsif( lc($action) eq 'findunused' )
     
     while( my $user = $sth->fetchrow_hashref() )
     {
-        if( is_deletable( $user->{PersonID}, $showinfo ) )
+        if( is_deletable( $user->{UserID}, $showinfo ) )
         {
-            print $user->{login_name}."\n";
+            print $user->{UserName}."\n";
             $count++;
 
-            merge( $user->{PersonID}, $defaultmerge ) if( $delete eq 'delete' );
+            merge( $user->{UserID}, $defaultmerge ) if( $delete eq 'delete' );
         }
     }
 
@@ -285,7 +285,7 @@ sub org_user_merge
 
     while( my $val = $sth->fetchrow_hashref() )
     {
-	push  @msgids, $val->[0];
+	push  @msgids, $val->{OrgID};
     }
 
     if( @msgids )

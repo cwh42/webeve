@@ -3,8 +3,8 @@
 <h2>Anbieter:</h2>
 <p>
   Christopher Hofmann<br/>
-  Walter-Meckauer-Str. 13/B24<br/>
-  90478 Nürnberg<br/>
+  Johannesgasse 14 E0.1<br/>
+  90402 Nürnberg<br/>
   <a href="mailto:webmaster@webeve.de">webmaster@webeve.de</a>
 </p>
 

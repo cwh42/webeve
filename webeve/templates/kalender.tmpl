@@ -1,60 +1,86 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
+
 <head>
-  <title><tmpl_var title></title>
+<TMPL_IF Intern>
+<title><TMPL_VAR Vereinsname>: Interne Termine</title>
+<TMPL_ELSE>
+<title><TMPL_VAR Vereinsname><TMPL_IF Vereinsname>:</TMPL_IF> Alle Termine</title>
+</TMPL_IF>
   <style type="text/css">
   <!--
-<tmpl_if CSS>
-    <tmpl_var CSS>
-<tmpl_else>
-    @import "css/eventlist.css";
 
-    body {
-      color:black;
-      background-color:white;
-      font-size:100.01%;
-      font-family:Helvetica,Arial,sans-serif;
-      margin:0;
-      padding:0;
+    body       {
+    <TMPL_IF font>font:<TMPL_VAR font>;<TMPL_ELSE>font:Arial;</TMPL_IF>
+    <TMPL_IF bgimage>background-image:url(<TMPL_VAR bgimage>);</TMPL_IF>
+    <TMPL_IF bgcolor>background-color:<TMPL_VAR bgcolor>;<TMPL_ELSE>background-color:#ACD6E6;</TMPL_IF>
+    <TMPL_IF textcolor>color:<TMPL_VAR textcolor>;<TMPL_ELSE>color:#000080;</TMPL_IF>
     }
 
-    h1 {
-      font-size:110%;
-      font-weight:bold;
-      color: #ffcc00;
-      margin:0 0 0.7em;
-      padding:0.3em;
-      text-align:left;
-      background-color:#008000;
-      border-bottom:7px solid #ffcc00;
+    a                 {
+    <TMPL_IF linkcolor>color:<TMPL_VAR linkcolor>;<TMPL_ELSE>color:#000080;</TMPL_IF>
     }
 
-    div#Footer {
-      clear:both;
-      border-top:3px solid #ffcc00;
-      color:#ffcc00;
-      background-color:#008000;
-      text-align:right;
-      font-size:0.8em;
-      padding:4px;
-    }
+    /* Formate für die Terminliste */
+    .termintabelle    { padding:3px; margin:auto;
+    <TMPL_IF font>font:<TMPL_VAR font>;
+       <TMPL_ELSE>font:Arial;</TMPL_IF>
+     }
+    .seitenumschalter { margin-top:10px; margin:auto;
+    <TMPL_IF font>font:<TMPL_VAR font>;
+       <TMPL_ELSE>font:Arial;</TMPL_IF>
+     }
 
-    div#Footer a {
-      color:#ffcc00;
-      text-decoration:none;
-    }
+     td { padding: 3px; }
+
+    .datum            { font-weight:bold; }
+    .zeit             { font-size:70%; }
+    .ort              { font-size:70%; }
+    .verein           { font-weight:bold; }
+    .beschreibung     { }
     
-    div#Footer a:hover,div#Footer a:focus {
-      color:#ffcc00;
-      text-decoration:underline;
-    }
-</tmpl_if>
+    .trenner          { 
+    <TMPL_IF tl-bgcolor>
+                        background-color:<TMPL_VAR tl-bgcolor>;
+    <TMPL_ELSE>
+                        background-color:#FFFFDE;
+    </TMPL_IF>
+    <TMPL_IF tl-textcolor>
+                        color:<TMPL_VAR tl-textcolor>;
+    <TMPL_ELSE>
+                        color:#000000;
+    </TMPL_IF>
+                        font-weight:bold; }
+
+    .linkespalte      {}
+    .rechtespalte     {}
   -->
   </style>
 </head>
+
 <body>
-  <h1><tmpl_var title></h1>
-  <tmpl_var eventlist>
-  <div id="Footer">&copy; 2001&ndash;2007 <a href="http://www.webeve.de" target="_blank">www.webeve.de</a></div>
+
+<TMPL_IF Intern>
+<h1 align="center"><TMPL_VAR Vereinsname>: Interne Termine</h1>
+<!--
+<center>
+<a href="kalender.pl?Ansicht=Druck&Intern=Intern&Verein=<TMPL_VAR VereinsID>">Druckansicht</a> -
+<a href="kalender.pl?Ansicht=wap&Intern=Intern&Verein=<TMPL_VAR VereinsID>">WAP-Ansicht</a>
+</center>
+-->
+<TMPL_ELSE>
+<h1 align="center">Alle Termine</h1>
+<!--
+<center>
+<a href="kalender.pl?Ansicht=Druck">Druckansicht</a> -
+<a href="kalender.pl?Ansicht=wap">WAP-Ansicht</a>
+</center>
+-->
+</TMPL_IF>
+
+<TMPL_VAR Terminliste>
+
+<br>
+<center>Dieser Kalender stammt von <a href="http://www.goessenreuth.de" target="_blank">www.goessenreuth.de</a></center>
 </body>
+
 </html>

@@ -1,6 +1,7 @@
 <!-- http://www.goessenreuth.de - Der Veranstaltungskalender fuer den Raum Bayreuth, Kulmbach, Hof -->
 <TMPL_IF Dates>
 <!-- ++++++++++++++++++ Seitenumschalter +++++++++++++++++++ -->
+<TMPL_IF Pages>
 <table class="seitenumschalter">
 <tr>
 <td align="center">
@@ -16,6 +17,7 @@
 </td>
 </tr>
 </table>
+</TMPL_IF>
 <!-- ++++++++++++++++ Seitenumschalter Ende +++++++++++++++++ -->
 
 <table class="termintabelle">
@@ -56,6 +58,7 @@
 </table>
 
 <!-- ++++++++++++++++++ Seitenumschalter +++++++++++++++++++ -->
+<TMPL_IF Pages>
 <table class="seitenumschalter">
 <tr>
 <td align="center">
@@ -71,6 +74,7 @@
 </td>
 </tr>
 </table>
+</TMPL_IF>
 <!-- ++++++++++++++++ Seitenumschalter Ende +++++++++++++++++ -->
 <TMPL_ELSE>
 <table align="center" class="termintabelle">
